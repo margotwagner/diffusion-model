@@ -1,0 +1,9 @@
+DEFINE_REACTIONS
+{
+  vdcc_pre_c0' <-> vdcc_pre_c1' [>vdcc_pre_k_a1_vm, <vdcc_pre_k_b1_vm]
+  vdcc_pre_c1' <-> vdcc_pre_c2' [>vdcc_pre_k_a2_vm, <vdcc_pre_k_b2_vm]
+  vdcc_pre_c2' <-> vdcc_pre_c3' [>vdcc_pre_k_a3_vm, <vdcc_pre_k_b3_vm]
+  vdcc_pre_c3' <-> vdcc_pre_o' [>vdcc_pre_k_a4_vm, <vdcc_pre_k_b4_vm]
+  vdcc_pre_o' -> vdcc_pre_o' + ca, [vdcc_pre_k_ca_vm] : vdcc_pre_ca_flux
+}
+

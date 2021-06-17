@@ -1,0 +1,33 @@
+DEFINE_MOLECULES
+{
+  glu
+  {
+    DIFFUSION_CONSTANT_3D = d_glu
+  }
+  ca
+  {
+    DIFFUSION_CONSTANT_3D = d_ca
+    CUSTOM_TIME_STEP = 1e-7
+  }
+  vdcc_pre_c0
+  {
+    DIFFUSION_CONSTANT_2D = d_vdcc
+  }
+  vdcc_pre_c1
+  {
+    DIFFUSION_CONSTANT_2D = d_vdcc
+  }
+  vdcc_pre_c2
+  {
+    DIFFUSION_CONSTANT_2D = d_vdcc
+  }
+  vdcc_pre_c3
+  {
+    DIFFUSION_CONSTANT_2D = d_vdcc
+  }
+  vdcc_pre_o
+  {
+    DIFFUSION_CONSTANT_2D = d_vdcc
+  }
+}
+
