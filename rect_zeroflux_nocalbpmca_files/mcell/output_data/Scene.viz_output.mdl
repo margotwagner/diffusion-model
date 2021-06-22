@@ -8,4 +8,13 @@ VIZ_OUTPUT
     ITERATION_NUMBERS {ALL_DATA @ [[0 TO 10000 STEP 10]]}
   }
 }
-
+VIZ_OUTPUT
+{
+  MODE = ASCII
+  FILENAME = "./viz_data_ascii/seed_" & seed & "/Scene"
+  MOLECULES
+  {
+    NAME_LIST {ca vdcc_pre_c0 vdcc_pre_c1 vdcc_pre_c2 vdcc_pre_c3 vdcc_pre_o}
+    ITERATION_NUMBERS {ALL_DATA @ [[0 TO 10000 STEP 10]]}
+  }
+}
