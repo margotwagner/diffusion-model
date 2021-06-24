@@ -15,6 +15,6 @@ VIZ_OUTPUT
   MOLECULES
   {
     NAME_LIST {ca vdcc_pre_c0 vdcc_pre_c1 vdcc_pre_c2 vdcc_pre_c3 vdcc_pre_o}
-    ITERATION_NUMBERS {ALL_DATA @ [[0 TO 10000 STEP 10]]}
+    ITERATION_NUMBERS {ALL_DATA @ [[0 TO 10000 STEP 5]]}
   }
 }

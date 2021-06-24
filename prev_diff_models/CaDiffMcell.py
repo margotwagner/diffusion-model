@@ -65,7 +65,11 @@ def time_hist(dir,iter_num, plot=True):
                     & (loc_data['z'] <= z + rxn_rad)])
 
         #print()
-        print("TOTAL:\t\t", snare_ca_tot)
+        if snare_ca_tot != 0:
+            print("TIME POINT:\t", iter_num)
+            print("TOTAL:\t\t", snare_ca_tot)
+            print()
+            print()
 
         for value in loc_data['r'].values:
             ca_hist.append(value)
@@ -93,7 +97,7 @@ time_pts.sort()
 
 #sample points
 nums = [time_pts[i] for i in range(len(time_pts)) if i%1==0]
-print(nums)
+#print(nums)
 
 #nums = ['0050', '0100', '0500','1000']
 #nums = ['0010']
@@ -101,9 +105,9 @@ print(nums)
 
 data = []
 for num in nums:
-    print()
-    print()
-    print("TIME POINT:\t", num)
+    #print()
+    #print()
+    #print("TIME POINT:\t", num)
     ca_hist = time_hist(mcell_viz_dir, num, plot=False)
     #sns.distplot(ca_hist, label=num, bins=100)
 
