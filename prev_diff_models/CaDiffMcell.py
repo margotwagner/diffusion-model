@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 import glob
 import seaborn as sns
 from scipy import stats
+from math import pi
 
 
 def time_hist(dir,iter_num, plot=True):
@@ -22,7 +23,9 @@ def time_hist(dir,iter_num, plot=True):
     :param plot: if output should be plotted
     :return: ca radial locations
     '''   
-    rxn_rad = 0.001     # reaction radius size
+    rxn_rad = 0.02     # reaction radius size (micron)
+    snare_locs = [(0, 0)] # for only one giant SNARE
+    '''
     snare_locs = [(0, 0),
                   (0.035, 0),
                   (-0.035, 0),
@@ -30,6 +33,7 @@ def time_hist(dir,iter_num, plot=True):
                   (-0.0175, 0.0303),
                   (0.0175, -0.0303),
                   (-0.0175, -0.0303)]      # SNARE (x,y) locations
+    '''
     z = -0.25
 
     ca_hist = []
@@ -49,8 +53,8 @@ def time_hist(dir,iter_num, plot=True):
 
         snare_ca_tot = 0        # number of calcium in SNARE rxn zone
         for x,y in snare_locs:
-            #print()
-            #print("SNARE LOCATION:\t", x,y)
+            print()
+            print("SNARE LOCATION:\t", x,y)
 
             # Ugly method
             for ca_x, ca_y, ca_z in zip(loc_data['x'], loc_data['y'], loc_data['z']):
@@ -67,7 +71,8 @@ def time_hist(dir,iter_num, plot=True):
         #print()
         if snare_ca_tot != 0:
             print("TIME POINT:\t", iter_num)
-            print("TOTAL:\t\t", snare_ca_tot)
+            print("TOTAL NUMBER:\t\t", snare_ca_tot)
+            #print("TOTAL CONC:\t\t", (2*snare_ca_tot*pi*(rxn_rad**3))/3) # CHANGE TO REFLECT VOLUME OF INTEREST
             print()
             print()
 
