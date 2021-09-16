@@ -1,6 +1,0 @@
-INCLUDE_FILE = "Scene.initialization.mdl"
-
-sprintf(seed,"%05g",SEED)
-
-INCLUDE_FILE = "Scene.viz_output.mdl"
-
