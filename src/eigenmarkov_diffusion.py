@@ -52,7 +52,7 @@ class EigenmarkovDiffusion:
             np.array: transition matrix
         """
         # get diffusion rate constant
-        diffusion_rate_constant_k = -self.get_jump_probability()[1]
+        diffusion_rate_constant_k = self.get_jump_probability()[1]
 
         # Define A (transition) matrix
         A = np.zeros(
@@ -60,7 +60,7 @@ class EigenmarkovDiffusion:
         )  # transition probability between grid points
 
         # Transition matrix is given by the ODE dynamics equation (using k-values)
-        vec_diag = np.full(self.n_spatial_locs, (-2 * diffusion_rate_constant_k))
+        vec_diag = np.full(self.n_spatial_locs, (2 * diffusion_rate_constant_k))
         vec_off_diag = np.full(
             (self.n_spatial_locs - 1), diffusion_rate_constant_k
         )  # off-diagonal values
@@ -72,7 +72,7 @@ class EigenmarkovDiffusion:
             + np.diag(vec_off_diag, k=-1)
         )
         A[0, 0] = -diffusion_rate_constant_k
-        A[self.n_spatial_locs - 1, self.n_spatial_locs - 1] = -diffusion_rate_constant_k
+        A[self.n_spatial_locs - 1, self.n_spatial_locs - 1] = diffusion_rate_constant_k
 
         return A
 
