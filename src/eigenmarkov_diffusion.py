@@ -52,7 +52,7 @@ class EigenmarkovDiffusion:
             np.array: transition matrix
         """
         # get diffusion rate constant
-        diffusion_rate_constant_k = self.get_jump_probability()[1]
+        diffusion_rate_constant_k = -self.get_jump_probability()[1]
 
         # Define A (transition) matrix
         A = np.zeros(
