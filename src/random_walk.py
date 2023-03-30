@@ -176,3 +176,15 @@ class RandomWalk:
             " " * left,
             "^Impulse @ {} / {}".format(self.particle_start_loc, self.n_spatial_locs),
         )
+
+    def get_variance(self):
+        """Get the variance of the 1d random walk diffusion process. Definition from https://mathworld.wolfram.com/RandomWalk1-Dimensional.html"""
+
+        jump_probability, _ = self.get_jump_probability()
+
+        return self.n_spatial_locs * (jump_probability**2)
+
+    def get_std(self):
+        """Get the standard deviation of the 1d random walk diffusion process. Definition from https://mathworld.wolfram.com/RandomWalk1-Dimensional.html"""
+
+        return np.sqrt(self.get_variance())
