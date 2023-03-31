@@ -97,7 +97,7 @@ class RandomWalk:
         return particle_locs
 
     def postprocess_run(
-        self, particle_locs: np.ndarray, plot: bool = False
+        self, particle_locs: np.ndarray, plot: bool = False, plot_unnorm: bool = False,
     ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Post-process 1D random-walk diffusion
         (counts, normalized counts, means)
@@ -155,6 +155,30 @@ class RandomWalk:
             plt.xlabel("timepoint", fontsize=14)
             plt.ylabel("normalized count", fontsize=14)
             plt.legend(list(range(self.n_spatial_locs)))
+            plt.show()
+
+        if plot_unnorm:
+            n_plot_columns = 2
+            n_plot_rows = int(np.ceil(self.n_spatial_locs / n_plot_columns))
+            fig, ax = plt.subplots(n_plot_columns, n_plot_rows, figsize=(14, 10))
+
+            m_count = 0
+            for i in range(n_plot_columns):
+                for j in range(n_plot_rows):
+                    #for k in range(n_eigenmode_states):
+                    if m_count < self.n_spatial_locs:
+                        ax[i, j].plot(
+                            list(range(self.n_time_pts)),
+                            unnorm_n_per_loc[m_count, :],
+                        )
+                        ax[i, j].set_title("Node {}".format(m_count))
+                        ax[i, j].set_ylim([0, self.n_particles])
+                        ax[i, j].set_xlim([0, self.n_time_pts])
+
+                    m_count += 1
+                    
+            # fig.suptitle
+            fig.tight_layout()
             plt.show()
 
         return unnorm_n_per_loc, n_per_loc, mean_n_per_loc
