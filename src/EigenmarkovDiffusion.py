@@ -64,7 +64,7 @@ class EigenmarkovDiffusion:
         # Transition matrix is given by the ODE dynamics equation (using k-values)
         vec_diag = np.full(self.n_spatial_locs, (2 * diffusion_rate_constant_k))
         vec_off_diag = np.full(
-            (self.n_spatial_locs - 1), diffusion_rate_constant_k
+            (self.n_spatial_locs - 1), -diffusion_rate_constant_k
         )  # off-diagonal values
 
         # create transition matrix
@@ -73,7 +73,7 @@ class EigenmarkovDiffusion:
             + np.diag(vec_off_diag, k=1)
             + np.diag(vec_off_diag, k=-1)
         )
-        A[0, 0] = -diffusion_rate_constant_k
+        A[0, 0] = diffusion_rate_constant_k
         A[self.n_spatial_locs - 1, self.n_spatial_locs - 1] = diffusion_rate_constant_k
 
         return A
