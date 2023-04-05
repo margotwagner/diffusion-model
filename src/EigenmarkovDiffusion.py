@@ -236,7 +236,7 @@ class EigenmarkovDiffusion:
         )
 
         # new index of starting node location in sorted eigenvalue/vector arrays
-        start_loc_eigenvalue_i = np.where(eval_sort_index == self.particle_start_loc)
+        start_loc_eigenvalue_i = np.where(eval_sort_index == self.particle_start_loc)[0][0] # np.where returns some nested arrays, index out here
 
         # get eigenvector for starting location, all eigenmodes (v_k)
         start_loc_eigenvector = eigenvectors[start_loc_eigenvalue_i, :]
@@ -262,8 +262,8 @@ class EigenmarkovDiffusion:
 
             # Also visualize the weights as an array
             # TODO: why do we need the [0]th
-            all_init_modes = np.concatenate(
-                (n_per_positive_mode[0], n_per_negative_mode[0]), axis=0
+            all_init_modes = np.vstack(
+                (n_per_positive_mode, n_per_negative_mode) #, axis=0
             )
 
             plt.imshow(all_init_modes, interpolation="none")
@@ -284,8 +284,8 @@ class EigenmarkovDiffusion:
             for k in range(len(eigenvectors)):
                 v = eigenvectors[:, k]
 
-                v_qp = n_per_positive_mode[0][0][k] * v
-                v_qm = n_per_negative_mode[0][0][k] * v
+                v_qp = n_per_positive_mode[k] * v
+                v_qm = n_per_negative_mode[k] * v
 
                 ax[k].plot(v_qp, "*-", c="red", alpha=alpha)
                 ax[k].plot(v_qm, "*-", c="blue", alpha=alpha)
