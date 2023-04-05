@@ -1,0 +1,15 @@
+import PlotMultiruns as pm
+
+plotter = pm.PlotMultiRuns(
+    rw_dir="/Users/margotwagner/diffusion-model/data/eme-validation/random-walk/20230118_192600/rw-run-{}.csv",
+    eme_dir="/Users/margotwagner/diffusion-model/data/eme-validation/markov-eme/factorsqrt2/20230330_151651/eme-run-{}.csv",
+    n_runs=100,
+    n_spatial_locs=11,
+    n_time_pts=1000,
+    particle_start_loc=5,
+    n_particles=50,
+    plot_eme=True,
+    plot_rw=False,
+)
+
+plotter.plot_multiruns()

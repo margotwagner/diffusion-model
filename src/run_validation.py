@@ -1,9 +1,9 @@
-import random_walk as rw
-import eigenmarkov_diffusion as emd
+import RandomWalk as rw
+import EigenmarkovDiffusion as emd
 
 
 # TODO: check for latching of param values inside called functions
-def main(
+def run_validation(
     n_particles=50,  # number of molecules
     n_spatial_locs=11,  # define number of grid points along 1D line
     n_time_pts=1000,  # number of time points
@@ -58,8 +58,8 @@ def main(
     )
 
 
-if __name__ == "__main__":
-    main(
+if __name__ == "__run_validation__":
+    run_validation(
         binomial_sampling=False,  # use binomial sampling for eme markov simulation
         print_eigenvalues_and_vectors=True,
         print_eigenmode_init_conditions=True,

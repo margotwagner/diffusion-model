@@ -12,6 +12,7 @@ class EigenmarkovDiffusion:
         n_spatial_locs: int,  # define number of grid points along 1D line,
         n_time_pts: int,  # number of time points
         particle_start_loc: int,  # start position of input impulse molecules
+        scaling_factor: float,  # scaling factor for mode <-> node mapping
         dt: Union[int, float] = 1,  # time step (usec)
         line_length: Union[
             int, float
@@ -22,6 +23,7 @@ class EigenmarkovDiffusion:
         self.dt = dt
         self.n_time_pts = n_time_pts
         self.particle_start_loc = particle_start_loc
+        self.scaling_factor = scaling_factor
         self.line_length = line_length
         self.n_particles = n_particles
         self.diffusion_constant_D = diffusion_constant_D
@@ -377,7 +379,9 @@ class EigenmarkovDiffusion:
         init_cond = self.get_eme_init_conditions(
             print_output=print_init_conditions, plot_output=plot_init_conditions
         )
-        init_cond = np.rint(init_cond)  # round initial conditions to nearest int
+        init_cond = (
+            np.rint(init_cond) / self.scaling_factor
+        )  # round initial conditions to nearest int
 
         # get transition probability
         transition_probability = self.get_eigenmode_transition_probability(
@@ -509,4 +513,4 @@ class EigenmarkovDiffusion:
                 )
             print()
 
-        return node_vals_from_modes
+        return self.scaling_factor * node_vals_from_modes
