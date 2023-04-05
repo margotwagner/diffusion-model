@@ -53,7 +53,7 @@ class PlotMultiRuns(object):
 
     def plot_mean(self, mean, colors):
         for i in range(self.n_spatial_locs):
-            plt.plot(list(range(self.n_time_pts)), mean[i, :], color=colors[i])
+            plt.plot(list(range(self.n_time_pts)), mean[i, :], color=colors[i], label=i)
 
     def plot_std(self, mean, std, colors):
         for i in range(self.n_spatial_locs):
@@ -70,6 +70,7 @@ class PlotMultiRuns(object):
 
         # get list of colors
         colors = plt.cm.tab10_r(np.linspace(0, 1, self.n_spatial_locs))
+        print(self.n_spatial_locs)
 
         if self.plot_rw:
             print("Preparing to plot random walk data...")
@@ -89,13 +90,16 @@ class PlotMultiRuns(object):
 
             # get data
             eme_mean, eme_std, eme_runs = self.get_stats(self.eme_dir)
+            print(eme_runs.shape)
+            print(eme_mean.shape)
+            print(eme_std.shape)
 
             print("Plotting eigenmarkov data...")
             # plot mean
             self.plot_mean(eme_mean, colors)
 
             # plot std
-            self.plot_std(eme_mean, eme_std, colors)
+            # self.plot_std(eme_mean, eme_std, colors)
 
         print("Beautifying plot...")
         plt.title(
@@ -104,5 +108,5 @@ class PlotMultiRuns(object):
         )
         plt.xlabel("timepoint", fontsize=14)
         plt.ylabel("normalized count", fontsize=14)
-        # plt.legend(list(range(n_spatial_locs)))
+        plt.legend()
         plt.show()
