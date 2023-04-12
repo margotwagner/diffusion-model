@@ -58,6 +58,35 @@ class PlotMultiRuns(object):
         for i in range(self.n_spatial_locs):
             plt.plot(list(range(self.n_time_pts)), mean[i, :], color=colors[i], label=i)
 
+    def plot_mean_sep(self, mean, colors, shape, axs, label="test"):
+        loc = 0
+        for i in range(shape[0]):
+            for j in range(shape[1]):
+                if loc < self.n_spatial_locs:
+                    axs[i, j].plot(
+                        list(range(self.n_time_pts)),
+                        mean[loc, :],
+                        color=colors[loc],
+                        label=label,
+                    )
+                    axs[i, j].axhline(color="black", linewidth=0.5, linestyle="--")
+                    axs[i, j].set_title("Node {}".format(loc), fontsize=14)
+                    loc += 1
+
+    def plot_std_sep(self, mean, std, colors, shape, axs):
+        loc = 0
+        for i in range(shape[0]):
+            for j in range(shape[1]):
+                if loc < self.n_spatial_locs:
+                    axs[i, j].fill_between(
+                        list(range(self.n_time_pts)),
+                        mean[loc, :] + std[loc, :],
+                        mean[loc, :] - std[loc, :],
+                        alpha=0.2,
+                        color=colors[i],
+                    )
+                    loc += 1
+
     def plot_std(self, mean, std, colors):
         for i in range(self.n_spatial_locs):
             plt.fill_between(
@@ -108,4 +137,46 @@ class PlotMultiRuns(object):
         plt.xlabel("timepoint", fontsize=14)
         plt.ylabel("normalized count", fontsize=14)
         plt.legend()
+        plt.show()
+
+    def plot_separately(self, shape=(4, 3)):
+        fig, axs = plt.subplots(shape[0], shape[1], figsize=(14, 10))
+
+        # get list of colors
+        colors = plt.cm.tab10_r(np.linspace(0, 1, self.n_spatial_locs))
+
+        if self.plot_rw:
+            print("Preparing to plot random walk data...")
+
+            # get data
+            rw_mean, rw_std, rw_runs = self.get_stats(self.rw_dir)
+
+            print("Plotting random walk data...")
+            # plot mean
+            self.plot_mean_sep(rw_mean, colors, shape, axs)
+
+            # plot std
+            self.plot_std_sep(rw_mean, rw_std, colors, shape, axs)
+
+        if self.plot_eme:
+            print("Preparing to plot eigenmarkov data...")
+
+            # get data
+            eme_mean, eme_std, eme_runs = self.get_stats(self.eme_dir, normalize=True)
+
+            print("Plotting eigenmarkov data...")
+            # plot mean
+            self.plot_mean_sep(eme_mean, colors, shape, axs)
+
+            # plot std
+            self.plot_std_sep(eme_mean, eme_std, colors, shape, axs)
+
+        print("Beautifying plot...")
+        fig.suptitle(
+            "Normalized number of particles in each position over time",
+            fontsize=20,
+        )
+        plt.xlabel("timepoint", fontsize=14)
+        plt.ylabel("normalized count", fontsize=14)
+        plt.tight_layout()
         plt.show()
