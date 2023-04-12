@@ -85,7 +85,7 @@ class PlotMultiRuns(object):
             self.plot_mean(rw_mean, colors)
 
             # plot std
-            # self.plot_std(rw_mean, rw_std, colors)
+            self.plot_std(rw_mean, rw_std, colors)
 
         if self.plot_eme:
             print("Preparing to plot eigenmarkov data...")
@@ -98,7 +98,7 @@ class PlotMultiRuns(object):
             self.plot_mean(eme_mean, colors)
 
             # plot std
-            # self.plot_std(eme_mean, eme_std, colors)
+            self.plot_std(eme_mean, eme_std, colors)
 
         print("Beautifying plot...")
         plt.title(
