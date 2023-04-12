@@ -11,6 +11,7 @@ def main(
     run_type,  # type of simulation to run
     scaling_factor=1.0,
 ):
+    print(scaling_factor)
 
     if run_type == "rw":
         multi_rw = rm.RunMultiruns(
@@ -47,5 +48,5 @@ if __name__ == "__main__":
         n_time_pts=1000,
         particle_start_loc=5,
         run_type="eme",  # type of simulation to run
-        scaling_factor=np.sqrt(2),
+        scaling_factor=np.sqrt(5),
     )

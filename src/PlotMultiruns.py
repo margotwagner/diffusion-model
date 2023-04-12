@@ -40,9 +40,12 @@ class PlotMultiRuns(object):
         # return array of all runs
         return runs
 
-    def get_stats(self, data_dir):
+    def get_stats(self, data_dir, normalize=False):
         # combine runs
         runs = self.combine_runs(data_dir)
+
+        if normalize:
+            runs = runs / self.n_particles
 
         # get mean and std
         mean = np.mean(runs, axis=0)
@@ -70,7 +73,6 @@ class PlotMultiRuns(object):
 
         # get list of colors
         colors = plt.cm.tab10_r(np.linspace(0, 1, self.n_spatial_locs))
-        print(self.n_spatial_locs)
 
         if self.plot_rw:
             print("Preparing to plot random walk data...")
@@ -83,16 +85,13 @@ class PlotMultiRuns(object):
             self.plot_mean(rw_mean, colors)
 
             # plot std
-            self.plot_std(rw_mean, rw_std, colors)
+            # self.plot_std(rw_mean, rw_std, colors)
 
         if self.plot_eme:
             print("Preparing to plot eigenmarkov data...")
 
             # get data
-            eme_mean, eme_std, eme_runs = self.get_stats(self.eme_dir)
-            print(eme_runs.shape)
-            print(eme_mean.shape)
-            print(eme_std.shape)
+            eme_mean, eme_std, eme_runs = self.get_stats(self.eme_dir, normalize=True)
 
             print("Plotting eigenmarkov data...")
             # plot mean
