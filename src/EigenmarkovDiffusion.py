@@ -343,6 +343,7 @@ class EigenmarkovDiffusion:
         plot_eigenmodes=False,
         plot_init_conditions=False,
         plot_simulation=False,
+        truncation_method=None,
     ) -> np.ndarray:
         """Markov simulation for eigenmode analysis to capture calcium diffusion
         over time
@@ -358,6 +359,10 @@ class EigenmarkovDiffusion:
                 probability of transitioning between + and - eigenmode states
             binomial_sampling: whether to use binomial sampling or not      (default: False)
             plot: whether to plot the results or not                        (default: False)
+            truncation_method:
+                (experimental) attempt to address modal variance, set to:
+                - None (default): no truncation method used
+                - 'reflect': guarantees (q+ - q-)>=0 is always satisfied by swapping q+ and q- if (q+ - q-)<0
 
 
         return:
@@ -420,6 +425,20 @@ class EigenmarkovDiffusion:
                     n_per_eigenmode_state[k, i + 1, j] = (
                         n_per_eigenmode_state[k, i, j] - n_change[j] + n_change[1 - j]
                     )
+
+                # truncate if necessary
+                if truncation_method == 'reflect':
+                    if n_spins == 2:
+                        # positive - negative
+                        n_per_eigenmode_init_cond = n_per_eigenmode_state[k, 0, 0] - n_per_eigenmode_state[k, 0, 1]
+                        n_per_eigenmode = n_per_eigenmode_state[k, i+1, 0] - n_per_eigenmode_state[k, i+1, 1]
+                        if n_per_eigenmode * n_per_eigenmode_init_cond < 0: # crossover
+                            # flip the effect of n_change above (undo, and pushback another n_change)
+                            n_per_eigenmode_state[k, i+1, 0] -= 2*(-n_change[0] + n_change[1])
+                            n_per_eigenmode_state[k, i+1, 1] -= 2*(-n_change[1] + n_change[0])
+                    else:
+                        print(f'Truncation method {truncation_method} for n_spins={n_spins} is not implemented.')
+
 
         if plot_simulation:
             n_plot_columns = 2
