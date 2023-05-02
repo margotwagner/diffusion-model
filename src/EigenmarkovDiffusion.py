@@ -236,7 +236,11 @@ class EigenmarkovDiffusion:
         )
 
         # new index of starting node location in sorted eigenvalue/vector arrays
-        start_loc_eigenvalue_i = np.where(eval_sort_index == self.particle_start_loc)[0][0] # np.where returns some nested arrays, index out here
+        start_loc_eigenvalue_i = np.where(eval_sort_index == self.particle_start_loc)[
+            0
+        ][
+            0
+        ]  # np.where returns some nested arrays, index out here
 
         # get eigenvector for starting location, all eigenmodes (v_k)
         start_loc_eigenvector = eigenvectors[start_loc_eigenvalue_i, :]
@@ -263,7 +267,7 @@ class EigenmarkovDiffusion:
             # Also visualize the weights as an array
             # TODO: why do we need the [0]th
             all_init_modes = np.vstack(
-                (n_per_positive_mode, n_per_negative_mode) #, axis=0
+                (n_per_positive_mode, n_per_negative_mode)  # , axis=0
             )
 
             plt.imshow(all_init_modes, interpolation="none")
@@ -345,8 +349,8 @@ class EigenmarkovDiffusion:
         plot_simulation=False,
         truncation_method=None,
     ) -> np.ndarray:
-        """Markov simulation for eigenmode analysis to capture calcium diffusion
-        over time
+        """Markov simulation for eigenmode analysis to capture calcium
+        diffusion over time
 
         params:
             n_eigenmodes:
@@ -357,12 +361,15 @@ class EigenmarkovDiffusion:
                 eigenmode states; [positive vector, negative vector]
             transition_probability:
                 probability of transitioning between + and - eigenmode states
-            binomial_sampling: whether to use binomial sampling or not      (default: False)
-            plot: whether to plot the results or not                        (default: False)
+            binomial_sampling: whether to use binomial sampling or not
+            (default: False)
+            plot: whether to plot the results or not
+            (default: False)
             truncation_method:
                 (experimental) attempt to address modal variance, set to:
                 - None (default): no truncation method used
-                - 'reflect': guarantees (q+ - q-)>=0 is always satisfied by swapping q+ and q- if (q+ - q-)<0
+                - 'reflect': guarantees (q+ - q-)>=0 is always satisfied by
+                swapping q+ and q- if (q+ - q-)<0
 
 
         return:
@@ -398,47 +405,88 @@ class EigenmarkovDiffusion:
 
         # for each time point
         for i in range(self.n_time_pts - 1):
-            # for each eigenmode
-            for k in range(self.n_spatial_locs):
-                # initialize the number of particles that transition
-                # [from + -> -, from - -> +]
-                n_change = [0, 0]
+            # print()
+            # print("Timepoint: ", i)  # TODO: remove
+            # resample until valid
+            is_valid = False
+            # print(is_valid)  # TODO: remove
+            while not is_valid:
 
-                # find number of transitions positive/negative eigenmode state;
-                for j in range(n_spins):
-                    if binomial_sampling:
-                        # sum number of particles that left current state given by binomial sampling
-                        n_change[j] = np.random.binomial(
-                            n_per_eigenmode_state[k, i, j], transition_probability[k]
+                # for each eigenmode
+                for k in range(self.n_spatial_locs):
+                    # initialize the number of particles that transition
+                    # [from + -> -, from - -> +]
+                    n_change = [0, 0]
+
+                    # find number of transitions +/- eigenmode state;
+                    for j in range(n_spins):
+                        if binomial_sampling:
+                            # sum number of particles that left current state
+                            # given by binomial sampling
+                            n_change[j] = np.random.binomial(
+                                n_per_eigenmode_state[k, i, j],
+                                transition_probability[k],
+                            )
+
+                        else:
+                            # sample random numbers equal to number of
+                            # particles in
+                            # current state
+                            r = np.random.random(n_per_eigenmode_state[k, i, j])
+
+                            # sum number of particles that left current state
+                            n_change[j] = sum(r < transition_probability[k])
+
+                    # update next time point
+                    for j in range(n_spins):
+                        n_per_eigenmode_state[k, i + 1, j] = (
+                            n_per_eigenmode_state[k, i, j]
+                            - n_change[j]
+                            + n_change[1 - j]
                         )
 
-                    else:
-                        # sample random numbers equal to number of particles in
-                        # current state
-                        r = np.random.random(n_per_eigenmode_state[k, i, j])
+                    # check if update is valid (no negative particles)
+                    # use all spatial locs and all states (+/-)
+                    is_valid = self.nonegative_check(n_per_eigenmode_state[:, i + 1, :])
 
-                        # sum number of particles that left current state
-                        n_change[j] = sum(r < transition_probability[k])
-
-                # update next time point
-                for j in range(n_spins):
-                    n_per_eigenmode_state[k, i + 1, j] = (
-                        n_per_eigenmode_state[k, i, j] - n_change[j] + n_change[1 - j]
+                    """
+                    # TODO: remove
+                    nodes_vals = self.convert_timepoint_to_spatial_nodes(
+                        n_per_eigenmode_state[:, i + 1, :]
                     )
+                    if not is_valid:
+                        print()
+                        print("ALERT: Invalid update")
+                        print("Number of negatives: ", np.sum(nodes_vals < 0, axis=0))
+                    else:
+                        print()
+                        print("Valid update")
+                        print("Number of negatives: ", np.sum(nodes_vals < 0, axis=0))
+                        """
 
-                # truncate if necessary
-                if truncation_method == 'reflect':
+                if truncation_method == "reflect":
                     if n_spins == 2:
                         # positive - negative
-                        n_per_eigenmode_init_cond = n_per_eigenmode_state[k, 0, 0] - n_per_eigenmode_state[k, 0, 1]
-                        n_per_eigenmode = n_per_eigenmode_state[k, i+1, 0] - n_per_eigenmode_state[k, i+1, 1]
-                        if n_per_eigenmode * n_per_eigenmode_init_cond < 0: # crossover
+                        n_per_eigenmode_init_cond = (
+                            n_per_eigenmode_state[k, 0, 0]
+                            - n_per_eigenmode_state[k, 0, 1]
+                        )
+                        n_per_eigenmode = (
+                            n_per_eigenmode_state[k, i + 1, 0]
+                            - n_per_eigenmode_state[k, i + 1, 1]
+                        )
+                        if n_per_eigenmode * n_per_eigenmode_init_cond < 0:  # crossover
                             # flip the effect of n_change above (undo, and pushback another n_change)
-                            n_per_eigenmode_state[k, i+1, 0] -= 2*(-n_change[0] + n_change[1])
-                            n_per_eigenmode_state[k, i+1, 1] -= 2*(-n_change[1] + n_change[0])
+                            n_per_eigenmode_state[k, i + 1, 0] -= 2 * (
+                                -n_change[0] + n_change[1]
+                            )
+                            n_per_eigenmode_state[k, i + 1, 1] -= 2 * (
+                                -n_change[1] + n_change[0]
+                            )
                     else:
-                        print(f'Truncation method {truncation_method} for n_spins={n_spins} is not implemented.')
-
+                        print(
+                            f"Truncation method {truncation_method} for n_spins={n_spins} is not implemented."
+                        )
 
         if plot_simulation:
             n_plot_columns = 2
@@ -464,6 +512,69 @@ class EigenmarkovDiffusion:
 
         return n_per_eigenmode_state
 
+    def convert_timepoint_to_spatial_nodes(
+        self,
+        n_per_eigenmode_state_timepoint: np.ndarray,
+    ):
+        """Check the number of particles in each node at a given timepoint.
+
+        Args:
+            n_per_eigenmode_state_timepoint: the number of particles in each eigenmode state at a given timepoint; np aray shape (n_modes x n_eigenmode_states)
+
+
+        Returns:
+            np array containing normalized particle counts for each node
+            (n_nodes)
+        """
+
+        _, eigenvectors, _ = self.get_eigenvalues_and_vectors()
+
+        # initialize node values (n_nodes)
+        node_vals_from_modes = np.zeros(self.n_time_pts)
+
+        # positive - negative
+        n_per_eigenmode = (
+            n_per_eigenmode_state_timepoint[:, 0]
+            - n_per_eigenmode_state_timepoint[:, 1]
+        )
+
+        # for each spatial node
+        # NOTE: why is it divided by spatial locations? is this necessary here?
+        for i in range(self.n_spatial_locs):
+            node_vals_from_modes[i] = (
+                np.dot(eigenvectors[i], n_per_eigenmode) / self.n_spatial_locs
+            )
+
+        return node_vals_from_modes
+
+    def nonegative_check(
+        self,
+        n_per_eigenmode_state_timepoint: np.ndarray,
+    ):
+        """Check if update is valid (no negative particles)
+
+        Args:
+            n_per_eigenmode_state_timepoint (np.ndarray): _description_
+
+        Returns:
+            is_valid (bool): whether the update is valid
+        """
+        is_valid = False
+
+        # take sum of eigenmodes and number of particles in each mode
+        node_vals_from_modes = self.convert_timepoint_to_spatial_nodes(
+            n_per_eigenmode_state_timepoint
+        )
+
+        # if negative, flag as invalid and resample (don't use same random
+        # numbers)
+        if np.any(node_vals_from_modes < 0):
+            is_valid = False
+        else:
+            is_valid = True
+
+        return is_valid
+
     def convert_to_spatial_nodes(
         self,
         n_per_eigenmode_state: np.ndarray,
@@ -473,12 +584,7 @@ class EigenmarkovDiffusion:
         representation.
 
         Args:
-            n_per_eigenmode_state: normalize the number of particles in each node;
-            np aray shape (n_modes x n_time x n_eigenmode_states)
-            eigenvectors: eigenvector of node i (vector); v[:,k] is the eigenvector
-            corresponding to the eigenvalue w[k]; (ie evec[:,k] <-> eval[k])
-                eigenvector[e, eigenmode (k)]
-
+            n_per_eigenmode_state: the number of particles in each eigenmode state; np aray shape (n_modes x n_time x n_eigenmode_states)
 
         Returns:
             np array containing normalized particle counts for each node
