@@ -205,13 +205,17 @@ class RandomWalk:
         )
 
     def get_variance(self):
-        """Get the variance of the 1d random walk diffusion process. Definition from https://mathworld.wolfram.com/RandomWalk1-Dimensional.html"""
+        """Get the variance of the 1d random walk diffusion process.
+
+        Definition from https://mathworld.wolfram.com/RandomWalk1-Dimensional.html"""
 
         jump_probability, _ = self.get_jump_probability()
 
         return self.n_particles * (jump_probability**2)
 
     def get_std(self):
-        """Get the standard deviation of the 1d random walk diffusion process. Definition from https://mathworld.wolfram.com/RandomWalk1-Dimensional.html"""
+        """Get the standard deviation of the 1d random walk diffusion process.
+
+        Definition from https://mathworld.wolfram.com/RandomWalk1-Dimensional.html"""
 
         return np.sqrt(self.get_variance())
