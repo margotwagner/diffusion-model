@@ -25,12 +25,14 @@ def run_validation(
         n_time_pts=n_time_pts,
         particle_start_loc=particle_start_loc,
     )
+    print("here")
 
     eigenmarkov = emd.EigenmarkovDiffusion(
         n_particles=n_particles,
         n_spatial_locs=n_spatial_locs,
         n_time_pts=n_time_pts,
         particle_start_loc=particle_start_loc,
+        scaling_factor=2,
     )
 
     # run random walk simulation and plot output
@@ -58,7 +60,7 @@ def run_validation(
     )
 
 
-if __name__ == "__run_validation__":
+if __name__ == "__main__":
     run_validation(
         binomial_sampling=False,  # use binomial sampling for eme markov simulation
         print_eigenvalues_and_vectors=True,
