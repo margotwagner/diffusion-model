@@ -236,7 +236,11 @@ class EigenmarkovDiffusion:
         )
 
         # new index of starting node location in sorted eigenvalue/vector arrays
-        start_loc_eigenvalue_i = np.where(eval_sort_index == self.particle_start_loc)[0][0] # np.where returns some nested arrays, index out here
+        start_loc_eigenvalue_i = np.where(eval_sort_index == self.particle_start_loc)[
+            0
+        ][
+            0
+        ]  # np.where returns some nested arrays, index out here
 
         # get eigenvector for starting location, all eigenmodes (v_k)
         start_loc_eigenvector = eigenvectors[start_loc_eigenvalue_i, :]
@@ -263,7 +267,7 @@ class EigenmarkovDiffusion:
             # Also visualize the weights as an array
             # TODO: why do we need the [0]th
             all_init_modes = np.vstack(
-                (n_per_positive_mode, n_per_negative_mode) #, axis=0
+                (n_per_positive_mode, n_per_negative_mode)  # , axis=0
             )
 
             plt.imshow(all_init_modes, interpolation="none")
@@ -427,18 +431,29 @@ class EigenmarkovDiffusion:
                     )
 
                 # truncate if necessary
-                if truncation_method == 'reflect':
+                if truncation_method == "reflect":
                     if n_spins == 2:
                         # positive - negative
-                        n_per_eigenmode_init_cond = n_per_eigenmode_state[k, 0, 0] - n_per_eigenmode_state[k, 0, 1]
-                        n_per_eigenmode = n_per_eigenmode_state[k, i+1, 0] - n_per_eigenmode_state[k, i+1, 1]
-                        if n_per_eigenmode * n_per_eigenmode_init_cond < 0: # crossover
+                        n_per_eigenmode_init_cond = (
+                            n_per_eigenmode_state[k, 0, 0]
+                            - n_per_eigenmode_state[k, 0, 1]
+                        )
+                        n_per_eigenmode = (
+                            n_per_eigenmode_state[k, i + 1, 0]
+                            - n_per_eigenmode_state[k, i + 1, 1]
+                        )
+                        if n_per_eigenmode * n_per_eigenmode_init_cond < 0:  # crossover
                             # flip the effect of n_change above (undo, and pushback another n_change)
-                            n_per_eigenmode_state[k, i+1, 0] -= 2*(-n_change[0] + n_change[1])
-                            n_per_eigenmode_state[k, i+1, 1] -= 2*(-n_change[1] + n_change[0])
+                            n_per_eigenmode_state[k, i + 1, 0] -= 2 * (
+                                -n_change[0] + n_change[1]
+                            )
+                            n_per_eigenmode_state[k, i + 1, 1] -= 2 * (
+                                -n_change[1] + n_change[0]
+                            )
                     else:
-                        print(f'Truncation method {truncation_method} for n_spins={n_spins} is not implemented.')
-
+                        print(
+                            f"Truncation method {truncation_method} for n_spins={n_spins} is not implemented."
+                        )
 
         if plot_simulation:
             n_plot_columns = 2

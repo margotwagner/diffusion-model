@@ -97,7 +97,10 @@ class RandomWalk:
         return particle_locs
 
     def postprocess_run(
-        self, particle_locs: np.ndarray, plot: bool = False, plot_unnorm: bool = False,
+        self,
+        particle_locs: np.ndarray,
+        plot: bool = False,
+        plot_unnorm: bool = False,
     ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Post-process 1D random-walk diffusion
         (counts, normalized counts, means)
@@ -165,7 +168,7 @@ class RandomWalk:
             m_count = 0
             for i in range(n_plot_columns):
                 for j in range(n_plot_rows):
-                    #for k in range(n_eigenmode_states):
+                    # for k in range(n_eigenmode_states):
                     if m_count < self.n_spatial_locs:
                         ax[i, j].plot(
                             list(range(self.n_time_pts)),
@@ -176,7 +179,7 @@ class RandomWalk:
                         ax[i, j].set_xlim([0, self.n_time_pts])
 
                     m_count += 1
-                    
+
             # fig.suptitle
             fig.tight_layout()
             plt.show()
