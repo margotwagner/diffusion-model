@@ -348,6 +348,7 @@ class EigenmarkovDiffusion:
         plot_init_conditions=False,
         plot_simulation=False,
         truncation_method=None,
+        print_rerolls=False,
     ) -> np.ndarray:
         """Markov simulation for eigenmode analysis to capture calcium
         diffusion over time
@@ -410,6 +411,8 @@ class EigenmarkovDiffusion:
             # resample until valid
             is_valid = False
             # print(is_valid)  # TODO: remove
+
+            n_rerolls = 0
             while not is_valid:
 
                 # for each eigenmode
@@ -437,6 +440,11 @@ class EigenmarkovDiffusion:
                             # sum number of particles that left current state
                             n_change[j] = sum(r < transition_probability[k])
 
+                    n_rerolls += 1
+                    if print_rerolls: # only print for non-zero n_change to minimize scrolling
+                        if sum(n_change)> 0:
+                            print(i, n_rerolls, k, n_change)
+
                     # update next time point
                     for j in range(n_spins):
                         n_per_eigenmode_state[k, i + 1, j] = (
@@ -445,24 +453,24 @@ class EigenmarkovDiffusion:
                             + n_change[1 - j]
                         )
 
-                    # check if update is valid (no negative particles)
-                    # use all spatial locs and all states (+/-)
-                    is_valid = self.nonegative_check(n_per_eigenmode_state[:, i + 1, :])
+                # check if update is valid (no negative particles)
+                # use all spatial locs and all states (+/-)
+                is_valid = self.nonegative_check(n_per_eigenmode_state[:, i + 1, :])
 
+                """
+                # TODO: remove
+                nodes_vals = self.convert_timepoint_to_spatial_nodes(
+                    n_per_eigenmode_state[:, i + 1, :]
+                )
+                if not is_valid:
+                    print()
+                    print("ALERT: Invalid update")
+                    print("Number of negatives: ", np.sum(nodes_vals < 0, axis=0))
+                else:
+                    print()
+                    print("Valid update")
+                    print("Number of negatives: ", np.sum(nodes_vals < 0, axis=0))
                     """
-                    # TODO: remove
-                    nodes_vals = self.convert_timepoint_to_spatial_nodes(
-                        n_per_eigenmode_state[:, i + 1, :]
-                    )
-                    if not is_valid:
-                        print()
-                        print("ALERT: Invalid update")
-                        print("Number of negatives: ", np.sum(nodes_vals < 0, axis=0))
-                    else:
-                        print()
-                        print("Valid update")
-                        print("Number of negatives: ", np.sum(nodes_vals < 0, axis=0))
-                        """
 
                 if truncation_method == "reflect":
                     if n_spins == 2:
