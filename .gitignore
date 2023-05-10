@@ -1,4 +1,7 @@
+*.pyc
+*__pycache__*
 data/blend-files/rect_zeroflux_nocalbpmca_files/*
 data
 .DS_Store
 .ipynb_checkpoints
+.vscode/

@@ -12,6 +12,7 @@ class EigenmarkovDiffusion:
         n_spatial_locs: int,  # define number of grid points along 1D line,
         n_time_pts: int,  # number of time points
         particle_start_loc: int,  # start position of input impulse molecules
+        scaling_factor: float,  # scaling factor for mode <-> node mapping
         dt: Union[int, float] = 1,  # time step (usec)
         line_length: Union[
             int, float
@@ -22,6 +23,7 @@ class EigenmarkovDiffusion:
         self.dt = dt
         self.n_time_pts = n_time_pts
         self.particle_start_loc = particle_start_loc
+        self.scaling_factor = scaling_factor
         self.line_length = line_length
         self.n_particles = n_particles
         self.diffusion_constant_D = diffusion_constant_D
@@ -60,9 +62,9 @@ class EigenmarkovDiffusion:
         )  # transition probability between grid points
 
         # Transition matrix is given by the ODE dynamics equation (using k-values)
-        vec_diag = np.full(self.n_spatial_locs, (-2 * diffusion_rate_constant_k))
+        vec_diag = np.full(self.n_spatial_locs, (2 * diffusion_rate_constant_k))
         vec_off_diag = np.full(
-            (self.n_spatial_locs - 1), diffusion_rate_constant_k
+            (self.n_spatial_locs - 1), -diffusion_rate_constant_k
         )  # off-diagonal values
 
         # create transition matrix
@@ -71,8 +73,8 @@ class EigenmarkovDiffusion:
             + np.diag(vec_off_diag, k=1)
             + np.diag(vec_off_diag, k=-1)
         )
-        A[0, 0] = -diffusion_rate_constant_k
-        A[self.n_spatial_locs - 1, self.n_spatial_locs - 1] = -diffusion_rate_constant_k
+        A[0, 0] = diffusion_rate_constant_k
+        A[self.n_spatial_locs - 1, self.n_spatial_locs - 1] = diffusion_rate_constant_k
 
         return A
 
@@ -234,7 +236,7 @@ class EigenmarkovDiffusion:
         )
 
         # new index of starting node location in sorted eigenvalue/vector arrays
-        start_loc_eigenvalue_i = np.where(eval_sort_index == self.particle_start_loc)
+        start_loc_eigenvalue_i = np.where(eval_sort_index == self.particle_start_loc)[0][0] # np.where returns some nested arrays, index out here
 
         # get eigenvector for starting location, all eigenmodes (v_k)
         start_loc_eigenvector = eigenvectors[start_loc_eigenvalue_i, :]
@@ -260,8 +262,8 @@ class EigenmarkovDiffusion:
 
             # Also visualize the weights as an array
             # TODO: why do we need the [0]th
-            all_init_modes = np.concatenate(
-                (n_per_positive_mode[0], n_per_negative_mode[0]), axis=0
+            all_init_modes = np.vstack(
+                (n_per_positive_mode, n_per_negative_mode) #, axis=0
             )
 
             plt.imshow(all_init_modes, interpolation="none")
@@ -282,8 +284,8 @@ class EigenmarkovDiffusion:
             for k in range(len(eigenvectors)):
                 v = eigenvectors[:, k]
 
-                v_qp = n_per_positive_mode[0][0][k] * v
-                v_qm = n_per_negative_mode[0][0][k] * v
+                v_qp = n_per_positive_mode[k] * v
+                v_qm = n_per_negative_mode[k] * v
 
                 ax[k].plot(v_qp, "*-", c="red", alpha=alpha)
                 ax[k].plot(v_qm, "*-", c="blue", alpha=alpha)
@@ -341,6 +343,7 @@ class EigenmarkovDiffusion:
         plot_eigenmodes=False,
         plot_init_conditions=False,
         plot_simulation=False,
+        truncation_method=None,
     ) -> np.ndarray:
         """Markov simulation for eigenmode analysis to capture calcium diffusion
         over time
@@ -356,6 +359,10 @@ class EigenmarkovDiffusion:
                 probability of transitioning between + and - eigenmode states
             binomial_sampling: whether to use binomial sampling or not      (default: False)
             plot: whether to plot the results or not                        (default: False)
+            truncation_method:
+                (experimental) attempt to address modal variance, set to:
+                - None (default): no truncation method used
+                - 'reflect': guarantees (q+ - q-)>=0 is always satisfied by swapping q+ and q- if (q+ - q-)<0
 
 
         return:
@@ -377,7 +384,9 @@ class EigenmarkovDiffusion:
         init_cond = self.get_eme_init_conditions(
             print_output=print_init_conditions, plot_output=plot_init_conditions
         )
-        init_cond = np.rint(init_cond)  # round initial conditions to nearest int
+        init_cond = (
+            np.rint(init_cond) / self.scaling_factor
+        )  # round initial conditions to nearest int
 
         # get transition probability
         transition_probability = self.get_eigenmode_transition_probability(
@@ -416,6 +425,20 @@ class EigenmarkovDiffusion:
                     n_per_eigenmode_state[k, i + 1, j] = (
                         n_per_eigenmode_state[k, i, j] - n_change[j] + n_change[1 - j]
                     )
+
+                # truncate if necessary
+                if truncation_method == 'reflect':
+                    if n_spins == 2:
+                        # positive - negative
+                        n_per_eigenmode_init_cond = n_per_eigenmode_state[k, 0, 0] - n_per_eigenmode_state[k, 0, 1]
+                        n_per_eigenmode = n_per_eigenmode_state[k, i+1, 0] - n_per_eigenmode_state[k, i+1, 1]
+                        if n_per_eigenmode * n_per_eigenmode_init_cond < 0: # crossover
+                            # flip the effect of n_change above (undo, and pushback another n_change)
+                            n_per_eigenmode_state[k, i+1, 0] -= 2*(-n_change[0] + n_change[1])
+                            n_per_eigenmode_state[k, i+1, 1] -= 2*(-n_change[1] + n_change[0])
+                    else:
+                        print(f'Truncation method {truncation_method} for n_spins={n_spins} is not implemented.')
+
 
         if plot_simulation:
             n_plot_columns = 2
@@ -509,4 +532,4 @@ class EigenmarkovDiffusion:
                 )
             print()
 
-        return node_vals_from_modes
+        return self.scaling_factor * node_vals_from_modes
