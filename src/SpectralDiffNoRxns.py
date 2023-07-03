@@ -48,6 +48,28 @@ class SpectralDiffNoRxns:
         """Return spatial mesh."""
         return np.linspace(0, self.line_length, self.n_spatial_locs)
 
+    def spectral_eqtn(self, x_idx, t_idx):
+        u = (1 / self.line_length) + sum(
+                    [
+                        (
+                            (2 / self.line_length)
+                            * math.cos(m * math.pi * self.spatial_mesh[x_idx] / self.line_length)
+                            * math.cos(
+                                m * math.pi * self.n_particles / self.line_length
+                            )
+                            * math.exp(
+                                -((m * math.pi / self.line_length) ** 2)
+                                * self.diffusion_constant_D
+                                * self.time_mesh[t_idx]
+                            )
+                        )
+                        for m in range(1, self.n_eigenmodes)
+                    ]
+                )
+
+        return u
+
+
     def simulate(self):
         """
         Simulate calcium diffusion using finite differencing with no reactions.
@@ -65,23 +87,7 @@ class SpectralDiffNoRxns:
         # Solve the PDE
         for i in range(0, len(t) - 1):
             for j in range(0, len(x) - 1):
-                u[j, i] = (1 / self.line_length) + sum(
-                    [
-                        (
-                            (2 / self.line_length)
-                            * math.cos(m * math.pi * x[j] / self.line_length)
-                            * math.cos(
-                                m * math.pi * self.n_particles / self.line_length
-                            )
-                            * math.exp(
-                                -((m * math.pi / self.line_length) ** 2)
-                                * self.diffusion_constant_D
-                                * t[i]
-                            )
-                        )
-                        for m in range(1, self.n_eigenmodes)
-                    ]
-                )
+                u[j, i] = self.spectral_eqtn(j, i)
 
         return 2 * u
 
