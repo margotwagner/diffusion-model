@@ -48,42 +48,56 @@ class SpectralDiffNoRxns:
         """Return spatial mesh."""
         return np.linspace(0, self.line_length, self.n_spatial_locs)
 
+    def initial_condition(self):
+        ic = (1 / self.line_length) + (2 / self.line_length) * sum(
+            [
+                math.cos(m * math.pi * self.particle_start_loc / self.line_length)
+                for m in range(1, self.n_eigenmodes)
+            ]
+        )
+
+        return ic
+
+    def spectral_equation(self, x_idx, t_idx):
+        u = ((1 / self.line_length) + (2 / self.line_length) * sum(
+            [
+                (
+                    self.n_particles * 
+                    math.cos(m * math.pi * self.spatial_mesh[x_idx] / self.line_length)
+                    * math.cos(m * math.pi * self.particle_start_loc / self.line_length)
+                    * math.exp(
+                        -((m * math.pi / self.line_length) ** 2)
+                        * self.diffusion_constant_D
+                        * self.time_mesh[t_idx]
+                    )
+                )
+                for m in range(1, self.n_eigenmodes)
+            ]
+        )) 
+        return u
+
     def simulate(self):
         """
         Simulate calcium diffusion using finite differencing with no reactions.
         """
-        # Define mesh
-        x = self.spatial_mesh
-        t = self.time_mesh
 
         # Initialize solution array
-        u = np.zeros((len(x), len(t)))
+        u = np.zeros((len(self.spatial_mesh), len(self.time_mesh)))
 
         # Define initial condition
-        u[self.particle_start_loc, 0] = self.n_particles
+        u[self.particle_start_loc, 0] = self.n_particles  #* self.initial_condition()
+        print(f"Initial condition: {u[self.particle_start_loc, 0]}")
 
         # Solve the PDE
-        for i in range(0, len(t) - 1):
-            for j in range(0, len(x) - 1):
-                u[j, i] = (1 / self.line_length) + sum(
-                    [
-                        (
-                            (2 / self.line_length)
-                            * math.cos(m * math.pi * x[j] / self.line_length)
-                            * math.cos(
-                                m * math.pi * self.n_particles / self.line_length
-                            )
-                            * math.exp(
-                                -((m * math.pi / self.line_length) ** 2)
-                                * self.diffusion_constant_D
-                                * t[i]
-                            )
-                        )
-                        for m in range(1, self.n_eigenmodes)
-                    ]
-                )
+        print("Beginning simulation for spectral diffusion without reactions...")
+        for j in range(0, len(self.time_mesh) - 1):
+            if j % 10 == 0:
+                print(f"Time step {j} of {len(self.time_mesh)}")
+            for i in range(0, len(self.spatial_mesh) - 1):
+                # Calculate the solution at the next time step
+                u[i, j] = self.spectral_equation(x_idx=i, t_idx=j)
 
-        return 2*u
+        return u
 
     def plot(self, u, t):
         fig = plt.figure()
@@ -105,6 +119,6 @@ class SpectralDiffNoRxns:
 
         # Set x and y limits
         plt.xlim(1, 3.5)
-        plt.ylim(0, 0.5)
+        #plt.ylim(0, 0.5)
 
         plt.show()
