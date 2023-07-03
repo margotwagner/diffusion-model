@@ -1,6 +1,6 @@
 """
 
-1D diffusion equation with homogeneous Neumann conditions using Finite Differencing:
+1D diffusion equation with homogeneous Neumann conditions using spectral methods:
 
 simulate solves the wave equation
 
@@ -9,18 +9,20 @@ simulate solves the wave equation
 (0,L) with du/dn=0 on x=0 and x = L.
 """
 
+import math
 import numpy as np
 from typing import Union
 import matplotlib.pyplot as plt
 
 
-class FiniteDiffNoRxns:
+class SpectralDiffNoRxns:
     def __init__(
         self,
         n_particles: int,  # number of molecules
         n_spatial_locs: int,  # define number of grid points along 1D line,
         n_time_pts: int,  # number of time points
         particle_start_loc: int,  # start position of input impulse molecules
+        n_eigenmodes: int,  # number of eigenmodes to use in spectral method
         dt: Union[int, float] = 1,  # time step (usec)
         line_length: Union[
             int, float
@@ -29,6 +31,7 @@ class FiniteDiffNoRxns:
     ):
         self.n_spatial_locs = n_spatial_locs
         self.dt = dt
+        self.n_eigenmodes = n_eigenmodes
         self.n_time_pts = n_time_pts
         self.particle_start_loc = particle_start_loc
         self.line_length = line_length
@@ -52,9 +55,6 @@ class FiniteDiffNoRxns:
         # Define mesh
         x = self.spatial_mesh
         t = self.time_mesh
-        dx = x[1] - x[0]
-        dt = t[1] - t[0]
-        C = self.diffusion_constant_D * (dt / (dx**2))
 
         # Initialize solution array
         u = np.zeros((len(x), len(t)))
@@ -64,35 +64,26 @@ class FiniteDiffNoRxns:
 
         # Solve the PDE
         for i in range(0, len(t) - 1):
-            # solve internal mesh using previous time step
-            for j in range(1, len(x) - 2):
-                u[j, i + 1] = u[j, i] + C * (u[j + 1, i] - 2 * u[j, i] + u[j - 1, i])
+            for j in range(0, len(x) - 1):
+                u[j, i] = (1 / self.line_length) + sum(
+                    [
+                        (
+                            (2 / self.line_length)
+                            * math.cos(m * math.pi * x[j] / self.line_length)
+                            * math.cos(
+                                m * math.pi * self.n_particles / self.line_length
+                            )
+                            * math.exp(
+                                -((m * math.pi / self.line_length) ** 2)
+                                * self.diffusion_constant_D
+                                * t[i]
+                            )
+                        )
+                        for m in range(1, self.n_eigenmodes)
+                    ]
+                )
 
-            # update boundary conditions
-            u[0, i + 1] = u[j, i] + C * (2 * u[j + 1, i] - 2 * u[j, i])
-            u[len(x) - 1, i + 1] = u[j, i] + C * (2 * u[j - 1, i] - 2 * u[j, i])
-
-        return u
-
-    def plot3d(self, u):
-        fig = plt.figure()
-        ax = plt.axes(projection="3d")
-
-        # downsample to be same length
-        spacing = int(len(self.time_mesh) / len(self.spatial_mesh))
-
-        time_3d = self.time_mesh[::spacing]
-        u_3d = u[:, ::spacing]
-
-        # TODO: implement with upsampled mesh instead
-        # space just redo
-        # u just interpolate between points
-
-        ax.contour3D(self.spatial_mesh, time_3d, u_3d, cmap="winter")
-        ax.set_xlabel("x")
-        ax.set_ylabel("t")
-        ax.set_zlabel("u")
-        plt.show()
+        return 2 * u
 
     def plot(self, u, t):
         fig = plt.figure()
@@ -107,14 +98,13 @@ class FiniteDiffNoRxns:
                 )
 
         # Set title and labels for axes
-        plt.title("Finite Difference Calcium Diffusion with No Reactions")
+        plt.title("Spectral Calcium Diffusion with No Reactions")
         plt.xlabel("Distance (um)")
         plt.ylabel("Normalized Calcium count")
         plt.legend()
 
         # Set x and y limits
         plt.xlim(1, 3.5)
-        # plt.ylim(0, 1.1)
         plt.ylim(0, 0.5)
 
         plt.show()
