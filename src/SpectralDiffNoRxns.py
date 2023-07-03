@@ -83,7 +83,7 @@ class SpectralDiffNoRxns:
                     ]
                 )
 
-        return 2*u
+        return 2 * u
 
     def plot(self, u, t):
         fig = plt.figure()

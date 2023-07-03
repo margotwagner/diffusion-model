@@ -130,13 +130,13 @@ def main():
         n_eigenmodes=n_space_pts,
     )
 
-    #fd_u = fd.simulate()
+    # fd_u = fd.simulate()
     sd_u = sd.simulate()
     # ca, calb, ca_calb = fd_rxn.simulate()
 
     # Finite Differencing No Reactions
     # fd.plot(fd_u, [0, 1, 5, 20, 40, 50, 99])
-    #fd.plot(fd_u, [5, 20, 40, 50, 99])
+    # fd.plot(fd_u, [5, 20, 40, 50, 99])
 
     # Spectral Diffusion No Reactions
     # sd.plot(sd_u, [0, 1, 5, 20, 40, 50, 99])
