@@ -52,7 +52,8 @@ class SpectralDiffNoRxns:
         u = (1 / self.line_length) + sum(
             [
                 (
-                    (2 / self.line_length)
+                    (self.n_particles / 25)
+                    * (2 / self.line_length)
                     * math.cos(
                         m * math.pi * self.spatial_mesh[x_idx] / self.line_length
                     )
@@ -89,13 +90,13 @@ class SpectralDiffNoRxns:
         u[self.impulse_idx, 0] = self.n_particles
 
         # Solve the PDE
-        for i in range(0, len(t) - 1):
-            for j in range(0, len(x) - 1):
+        for i in range(0, len(t)):
+            for j in range(0, len(x)):
                 u[j, i] = self.spectral_eqtn(j, i)
 
-        return 2 * u
+        return u
 
-    def plot(self, u, t):
+    def plot(self, u, t, xlim=[1, 3.5], ylim=[0, 1.1]):
         fig = plt.figure()
 
         if type(t) == int:
@@ -114,7 +115,7 @@ class SpectralDiffNoRxns:
         plt.legend()
 
         # Set x and y limits
-        plt.xlim(1, 3.5)
-        plt.ylim(0, 0.5)
+        plt.xlim(xlim[0], xlim[1])
+        plt.ylim(ylim[0], ylim[1])
 
         plt.show()

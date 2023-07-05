@@ -94,7 +94,7 @@ class FiniteDiffNoRxns:
         ax.set_zlabel("u")
         plt.show()
 
-    def plot(self, u, t):
+    def plot(self, u, t, xlim=[1, 3.5], ylim=[0, 1.1]):
         fig = plt.figure()
 
         if type(t) == int:
@@ -113,8 +113,7 @@ class FiniteDiffNoRxns:
         plt.legend()
 
         # Set x and y limits
-        plt.xlim(1, 3.5)
-        # plt.ylim(0, 1.1)
-        plt.ylim(0, 0.5)
+        plt.xlim(xlim[0], xlim[1])
+        plt.ylim(ylim[0], ylim[1])
 
         plt.show()

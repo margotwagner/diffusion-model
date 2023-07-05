@@ -14,7 +14,7 @@ def get_D_ca():
     return D_ca
 
 
-def get_D_ca():
+def get_D_calb():
     """Given initial conditions from Bartol et al. 2015, return them in units compatible with the simulation scheme (um, usec, molec).
 
     Ref: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4595661/
@@ -97,7 +97,7 @@ def main():
     n_calb = get_n_calb()  # number of calbindin particles
     kf = get_kf()  # forward rate constant (molec/um/usec)
     kr = get_kr()  # reverse rate constant (1/usec)
-    n_time_pts = 100  # number of time points
+    n_time_pts = 150  # number of time points
     n_space_pts = 100  # number of spatial points
     ca_init_idx = get_ca_init_idx(n_space_pts)
 
@@ -110,6 +110,7 @@ def main():
     )
 
     # Finite Difference (calbindin reactions)
+    # TODO: add diffusion constants for calbindin
     # https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4595661/
     fd_rxn = FiniteDiffRxns.FiniteDiffRxns(
         n_ca_particles=n_ca,
@@ -123,24 +124,24 @@ def main():
 
     # Spectral Diffusion (no reactions)
     sd = SpectralDiffNoRxns.SpectralDiffNoRxns(
-        n_particles=50,
+        n_particles=n_ca,
         n_spatial_locs=n_space_pts,
-        n_time_pts=100,
+        n_time_pts=n_time_pts,
         impulse_idx=ca_init_idx,
         n_eigenmodes=n_space_pts,
     )
 
-    # fd_u = fd.simulate()
+    #fd_u = fd.simulate()
     sd_u = sd.simulate()
     # ca, calb, ca_calb = fd_rxn.simulate()
 
     # Finite Differencing No Reactions
     # fd.plot(fd_u, [0, 1, 5, 20, 40, 50, 99])
-    # fd.plot(fd_u, [5, 20, 40, 50, 99])
+    #fd.plot(fd_u, [5, 20, 40, 50, 99], ylim=[0, 1])
 
     # Spectral Diffusion No Reactions
     # sd.plot(sd_u, [0, 1, 5, 20, 40, 50, 99])
-    sd.plot(sd_u, [5, 20, 40, 50, 99])
+    sd.plot(sd_u, [5, 20, 40, 50, 99], ylim=[0, 0.5])
 
     # Finite Differencing with Reactions
     # fd_rxn.plot([ca, calb, ca_calb], [0, 1, 2, 3, 4, 5, 10, 20, 40, 50, 99])
