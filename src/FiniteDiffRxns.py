@@ -26,32 +26,31 @@ warnings.simplefilter("error", RuntimeWarning)
 class FiniteDiffRxns:
     def __init__(
         self,
-        n_ca_particles: int,  # number of A molecules
-        n_calb_particles: int,  # number of B molecules
-        n_spatial_locs: int,  # define number of grid points along 1D line,
-        n_time_pts: int,  # number of time points
-        ca_start_loc: int,  # start position of input impulse molecules
+        n_ca: int,  # number of A molecules
+        n_calb: int,  # number of B molecules
+        D_ca: float,  # calcium diffusion coefficient (um^2/usec)
+        D_calb: float,  # calbindin diffusion coefficient (um^2/usec)
         kf: float,  # forward rate constant
         kr: float,  # reverse rate constant
-        D_ca: float = 2.20e-4,  # Calcium diffusion coeff (um^2/usec)
-        D_calb: float = 2.8e-5,  # Calbindin diffusion coeff (um^2/usec)
+        n_spatial_locs: int,  # define number of grid points along 1D line,
+        n_time_pts: int,  # number of time points
+        impulse_idx: int,  # start position of input impulse molecules
         dt: Union[int, float] = 1,  # time step (usec)
         line_length: Union[
             int, float
         ] = 4,  # length of line on which molecule is diffusing (um)
-        diffusion_constant_D: float = 2.20e-4,  # Calcium diffusion coeff (um^2/usec)
     ):
-        self.n_ca_particles = n_ca_particles
-        self.n_calb_particles = n_calb_particles
-        self.n_spatial_locs = n_spatial_locs
-        self.kf = kf
-        self.kr = kr
-        self.dt = dt
-        self.n_time_pts = n_time_pts
-        self.ca_start_loc = ca_start_loc
-        self.line_length = line_length
+        self.n_ca = n_ca
+        self.n_calb = n_calb
         self.D_ca = D_ca
         self.D_calb = D_calb
+        self.kf = kf
+        self.kr = kr
+        self.n_spatial_locs = n_spatial_locs
+        self.n_time_pts = n_time_pts
+        self.impulse_idx = impulse_idx
+        self.dt = dt
+        self.line_length = line_length
 
     @property
     def time_mesh(self):
@@ -81,16 +80,8 @@ class FiniteDiffRxns:
         ca_calb = np.zeros((len(x), len(t)))
 
         # Define initial condition
-        ca[self.ca_start_loc, 0] = self.n_ca_particles
-        calb[:, 0] = int(((self.n_calb_particles - 1)) / self.n_spatial_locs)
-
-        # calb[:, 0] = int(
-        #    (0.32 * (self.n_calb_particles - 1)) / self.n_spatial_locs
-        # )  # HOMO ~0.32 to start
-        # ca_calb[:, 0] = int((0.78 * (self.n_calb_particles - 1)) / self.n_spatial_locs)
-        # no calbindin where calcium starts
-        # calb[self.ca_start_loc, 0] = 0
-        # ca_calb[self.ca_start_loc, 0] = 0
+        ca[self.impulse_idx, 0] = self.n_ca
+        calb[:, 0] = int((self.n_calb) / self.n_spatial_locs)
 
         """
         print("INITIAL CONDITIONS")
@@ -218,9 +209,9 @@ class FiniteDiffRxns:
         labels = ["Ca", "Calb", "Ca-Calb"]
         labels_long = ["Calcium", "Calbindin", "Bound Calcium-Calbindin"]
         total_particles = [
-            self.n_ca_particles,
-            self.n_calb_particles,
-            self.n_calb_particles,
+            self.n_ca,
+            self.n_calb,
+            self.n_calb,
         ]
 
         # plot 3 subplots, 1 for each species

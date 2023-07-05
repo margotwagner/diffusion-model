@@ -101,7 +101,7 @@ def main():
     n_space_pts = 100  # number of spatial points
     ca_init_idx = get_ca_init_idx(n_space_pts)
     dt = 1  # time step (usec)
-    line_length = 4 # um
+    line_length = 4  # um
     D_ca = get_D_ca()  # calcium diffusion coefficient (um^2/usec)
     D_calb = get_D_calb()  # calbindin diffusion coefficient (um^2/usec)
 
@@ -147,11 +147,11 @@ def main():
 
     # Finite Differencing No Reactions
     # fd.plot(fd_u, [0, 1, 5, 20, 40, 50, 99])
-    #fd.plot(fd_u, [5, 20, 40, 50, 99], ylim=[0, 1])
+    # fd.plot(fd_u, [5, 20, 40, 50, 99], ylim=[0, 1])
 
     # Spectral Diffusion No Reactions
     # sd.plot(sd_u, [0, 1, 5, 20, 40, 50, 99])
-    #sd.plot(sd_u, [5, 20, 40, 50, 99], ylim=[0, 0.5])
+    # sd.plot(sd_u, [5, 20, 40, 50, 99], ylim=[0, 0.5])
 
     # Finite Differencing with Reactions
     # fd_rxn.plot([ca, calb, ca_calb], [0, 1, 2, 3, 4, 5, 10, 20, 40, 50, 99])
