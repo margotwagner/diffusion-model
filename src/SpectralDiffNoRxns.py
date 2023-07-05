@@ -21,7 +21,7 @@ class SpectralDiffNoRxns:
         n_particles: int,  # number of molecules
         n_spatial_locs: int,  # define number of grid points along 1D line,
         n_time_pts: int,  # number of time points
-        particle_start_loc: int,  # start position of input impulse molecules
+        impulse_idx: int,  # start position of input impulse molecules
         n_eigenmodes: int,  # number of eigenmodes to use in spectral method
         dt: Union[int, float] = 1,  # time step (usec)
         line_length: Union[
@@ -33,7 +33,7 @@ class SpectralDiffNoRxns:
         self.dt = dt
         self.n_eigenmodes = n_eigenmodes
         self.n_time_pts = n_time_pts
-        self.particle_start_loc = particle_start_loc
+        self.impulse_idx = impulse_idx
         self.line_length = line_length
         self.n_particles = n_particles
         self.diffusion_constant_D = diffusion_constant_D
@@ -50,25 +50,29 @@ class SpectralDiffNoRxns:
 
     def spectral_eqtn(self, x_idx, t_idx):
         u = (1 / self.line_length) + sum(
-                    [
-                        (
-                            (2 / self.line_length)
-                            * math.cos(m * math.pi * self.spatial_mesh[x_idx] / self.line_length)
-                            * math.cos(
-                                m * math.pi * self.n_particles / self.line_length
-                            )
-                            * math.exp(
-                                -((m * math.pi / self.line_length) ** 2)
-                                * self.diffusion_constant_D
-                                * self.time_mesh[t_idx]
-                            )
-                        )
-                        for m in range(1, self.n_eigenmodes)
-                    ]
+            [
+                (
+                    (2 / self.line_length)
+                    * math.cos(
+                        m * math.pi * self.spatial_mesh[x_idx] / self.line_length
+                    )
+                    * math.cos(
+                        m
+                        * math.pi
+                        * self.spatial_mesh[self.impulse_idx]
+                        / self.line_length
+                    )
+                    * math.exp(
+                        -((m * math.pi / self.line_length) ** 2)
+                        * self.diffusion_constant_D
+                        * self.time_mesh[t_idx]
+                    )
                 )
+                for m in range(1, self.n_eigenmodes)
+            ]
+        )
 
         return u
-
 
     def simulate(self):
         """
@@ -82,7 +86,7 @@ class SpectralDiffNoRxns:
         u = np.zeros((len(x), len(t)))
 
         # Define initial condition
-        u[self.particle_start_loc, 0] = self.n_particles
+        u[self.impulse_idx, 0] = self.n_particles
 
         # Solve the PDE
         for i in range(0, len(t) - 1):
