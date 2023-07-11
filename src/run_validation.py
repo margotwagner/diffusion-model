@@ -25,7 +25,6 @@ def run_validation(
         n_time_pts=n_time_pts,
         particle_start_loc=particle_start_loc,
     )
-    print("here")
 
     eigenmarkov = emd.EigenmarkovDiffusion(
         n_particles=n_particles,
@@ -62,14 +61,17 @@ def run_validation(
 
 if __name__ == "__main__":
     run_validation(
+        n_particles=50,  # number of molecules
+        n_spatial_locs=101,  # define number of grid points along 1D line
+        particle_start_loc=58,  # starting position of input impulse for molecules
         binomial_sampling=False,  # use binomial sampling for eme markov simulation
-        print_eigenvalues_and_vectors=True,
-        print_eigenmode_init_conditions=True,
-        print_eigenmode_transition_probability=True,
-        print_eigenmodes_to_spatial_nodes=True,
-        plot_random_walk=True,
-        plot_eigenmodes=True,
-        plot_eigenvectors=True,
-        plot_eigenmode_init_conditions=True,
+        print_eigenvalues_and_vectors=False,
+        print_eigenmode_init_conditions=False,
+        print_eigenmode_transition_probability=False,
+        print_eigenmodes_to_spatial_nodes=False,
+        plot_random_walk=False,
+        plot_eigenmodes=False,
+        plot_eigenvectors=False,
+        plot_eigenmode_init_conditions=False,
         plot_eigenmode_markov_simulation=True,
     )
