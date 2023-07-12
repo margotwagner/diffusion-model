@@ -26,6 +26,12 @@ class PlotMultiRuns(object):
         self.line_length = line_length
         self.plot_rw = plot_rw
         self.plot_eme = plot_eme
+        
+    @property
+    def spatial_mesh(self):
+        """Return spatial mesh."""
+        return np.linspace(0, self.line_length, self.n_spatial_locs)
+    
 
     def combine_runs(self, data_dir):
         # initialize array to store all runs
@@ -53,6 +59,17 @@ class PlotMultiRuns(object):
         # return mean and std
         return mean, std, runs
 
+    def plot_mean_time(self, mean, time, colors):
+        # TODO: add colors
+        if type(time) == int:
+            plt.plot(self.spatial_mesh, mean[:, time], label=f"t = {time}")
+        elif type(time) == list:
+            time.reverse()
+            for i in time:
+                plt.plot(
+                    self.spatial_mesh, mean[:, i], label=f"t = {i}"
+                )
+        
     def plot_mean(self, mean, colors):
         for i in range(self.n_spatial_locs):
             plt.plot(list(range(self.n_time_pts)), mean[i, :], color=colors[i], label=i)
@@ -71,6 +88,26 @@ class PlotMultiRuns(object):
                     axs[i, j].axhline(color="black", linewidth=0.5, linestyle="--")
                     axs[i, j].set_title("Node {}".format(loc), fontsize=14)
                     loc += 1
+                    
+    def plot_std_time(self, mean, std, time, colors):
+        if type(time) == int:
+            plt.fill_between(
+                self.spatial_mesh,
+                mean[:, time] + std[:, time],
+                mean[:, time] - std[:, time],
+                alpha=0.2,
+                #color=colors[time],
+            )
+        elif type(time) == list:
+            time.reverse()
+            for i in time:
+                plt.fill_between(
+                    self.spatial_mesh,
+                    mean[:, i] + std[:, i],
+                    mean[:, i] - std[:, i],
+                    alpha=0.2,
+                    #color=colors[i],
+                )
 
     def plot_std_sep(self, mean, std, colors, shape, axs):
         loc = 0
@@ -95,6 +132,48 @@ class PlotMultiRuns(object):
                 alpha=0.2,
                 color=colors[i],
             )
+    
+    def plot_multiruns_time(self, time):
+        plt.figure(figsize=(14, 10))
+
+        # get list of colors
+        colors = plt.cm.tab10_r(np.linspace(0, 1, len(time)))
+
+        if self.plot_rw:
+            print("Preparing to plot random walk data...")
+
+            # get data
+            rw_mean, rw_std, _ = self.get_stats(self.rw_dir)
+
+            print("Plotting random walk data...")
+            # plot mean
+            self.plot_mean_time(rw_mean, time, colors)
+
+            # plot std
+            self.plot_std_time(rw_mean, rw_std, time, colors)
+
+        if self.plot_eme:
+            print("Preparing to plot eigenmarkov data...")
+
+            # get data
+            eme_mean, eme_std, _ = self.get_stats(self.eme_dir, normalize=True)
+
+            print("Plotting eigenmarkov data...")
+            # plot mean
+            self.plot_mean_time(eme_mean, time, colors)
+
+            # plot std
+            self.plot_std_time(eme_mean, eme_std, time, colors)
+
+        print("Beautifying plot...")
+        plt.title(
+            "Normalized number of particles in each position over time",
+            fontsize=20,
+        )
+        plt.xlabel("timepoint", fontsize=14)
+        plt.ylabel("normalized count", fontsize=14)
+        plt.legend()
+        plt.show()
 
     def plot_multiruns(self):
         plt.figure(figsize=(14, 10))

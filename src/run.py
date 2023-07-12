@@ -1,6 +1,6 @@
-import FiniteDiffNoRxns
-import SpectralDiffNoRxns
-import FiniteDiffRxns
+import models.FiniteDiffNoRxns as FiniteDiffNoRxns
+import models.SpectralDiffNoRxns as SpectralDiffNoRxns
+import models.FiniteDiffRxns as FiniteDiffRxns
 
 
 def get_D_ca():

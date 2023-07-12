@@ -1,5 +1,5 @@
-import RandomWalk as rw
-import EigenmarkovDiffusion as emd
+import models.RandomWalk as rw
+import models.EigenmarkovDiffusion as emd
 import os
 import numpy as np
 
@@ -8,11 +8,11 @@ class RunMultiruns:
     def __init__(
         self,
         scaling_factor,
-        n_runs=1000,
-        n_particles=50,
-        n_spatial_locs=11,
-        n_time_pts=1000,
-        particle_start_loc=5,
+        n_runs,
+        n_particles,
+        n_spatial_locs,
+        n_time_pts,
+        particle_start_loc,
     ):
         self.scaling_factor = scaling_factor
         self.n_runs = n_runs

@@ -1,13 +1,12 @@
-import RandomWalk as rw
-import EigenmarkovDiffusion as emd
+import models.RandomWalk as rw
+import models.EigenmarkovDiffusion as emd
 
 
-# TODO: check for latching of param values inside called functions
 def run_validation(
-    n_particles=50,  # number of molecules
-    n_spatial_locs=11,  # define number of grid points along 1D line
-    n_time_pts=1000,  # number of time points
-    particle_start_loc=5,  # starting position of input impulse for molecules
+    n_particles,  # number of molecules
+    n_spatial_locs,  # define number of grid points along 1D line
+    n_time_pts,  # number of time points
+    particle_start_loc,  # starting position of input impulse for molecules
     binomial_sampling=False,  # use binomial sampling for eme markov simulation
     print_eigenvalues_and_vectors=False,
     print_eigenmode_init_conditions=False,
@@ -64,14 +63,15 @@ if __name__ == "__main__":
         n_particles=50,  # number of molecules
         n_spatial_locs=101,  # define number of grid points along 1D line
         particle_start_loc=58,  # starting position of input impulse for molecules
+        n_time_pts=100,  # number of time points
         binomial_sampling=False,  # use binomial sampling for eme markov simulation
         print_eigenvalues_and_vectors=False,
-        print_eigenmode_init_conditions=False,
+        print_eigenmode_init_conditions=True,
         print_eigenmode_transition_probability=False,
         print_eigenmodes_to_spatial_nodes=False,
         plot_random_walk=False,
         plot_eigenmodes=False,
         plot_eigenvectors=False,
         plot_eigenmode_init_conditions=False,
-        plot_eigenmode_markov_simulation=True,
+        plot_eigenmode_markov_simulation=False,
     )

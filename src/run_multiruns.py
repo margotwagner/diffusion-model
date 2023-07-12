@@ -1,5 +1,4 @@
-import RunMultiruns as rm
-import numpy as np
+import utils.RunMultiruns as rm
 
 
 def main(
@@ -42,11 +41,11 @@ def main(
 
 if __name__ == "__main__":
     main(
-        n_runs=100,
+        n_runs=10,
         n_particles=50,
         n_spatial_locs=101,
-        n_time_pts=1000,
+        n_time_pts=100,
         particle_start_loc=58,
-        run_type="rw",  # type of simulation to run
+        run_type="eme",  # type of simulation to run
         scaling_factor=2,
     )
