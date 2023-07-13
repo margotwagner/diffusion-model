@@ -51,6 +51,7 @@ class FiniteDiffRxns:
         self.impulse_idx = impulse_idx
         self.dt = dt
         self.line_length = line_length
+        # TODO: make variables internal like other simulations.
 
     @property
     def time_mesh(self):
@@ -75,6 +76,7 @@ class FiniteDiffRxns:
         C_calb = self.D_calb * (dt / (dx**2))
 
         # Initialize solution array
+        print("Initializing solution array...")
         ca = np.zeros((len(x), len(t)))
         calb = np.zeros((len(x), len(t)))
         ca_calb = np.zeros((len(x), len(t)))
@@ -92,7 +94,10 @@ class FiniteDiffRxns:
         """
 
         # Solve the PDE
+        print("Beginning simulation...")
         for i in range(0, len(t) - 1):
+            if i % 10 == 0:
+                print("Time step: ", i)
             # solve internal mesh using previous time step
             for j in range(1, len(x) - 2):
                 try:
@@ -195,6 +200,8 @@ class FiniteDiffRxns:
             print("-" * 50, "\n")
             """
 
+        print("Simulation complete!")
+        
         return ca, calb, ca_calb
 
     def plot(self, data, t):

@@ -34,6 +34,7 @@ class FiniteDiffNoRxns:
         self.line_length = line_length
         self.n_particles = n_particles
         self.diffusion_constant_D = diffusion_constant_D
+        self.u = np.zeros((self.n_spatial_locs, self.n_time_pts))
 
     @property
     def time_mesh(self):
@@ -56,25 +57,30 @@ class FiniteDiffNoRxns:
         dt = t[1] - t[0]
         C = self.diffusion_constant_D * (dt / (dx**2))
 
-        # Initialize solution array
-        u = np.zeros((len(x), len(t)))
 
         # Define initial condition
-        u[self.particle_start_loc, 0] = self.n_particles
+        print("Initializing solution array...")
+        self.u[self.particle_start_loc, 0] = self.n_particles
 
         # Solve the PDE
+        print("Beginning simulation...")
         for i in range(0, len(t) - 1):
+            if i % 10 == 0:
+                print("Time step: ", i)
+            # TODO: move to separate function
             # solve internal mesh using previous time step
             for j in range(1, len(x) - 2):
-                u[j, i + 1] = u[j, i] + C * (u[j + 1, i] - 2 * u[j, i] + u[j - 1, i])
+                self.u[j, i + 1] = self.u[j, i] + C * (self.u[j + 1, i] - 2 * self.u[j, i] + self.u[j - 1, i])
 
             # update boundary conditions
-            u[0, i + 1] = u[j, i] + C * (2 * u[j + 1, i] - 2 * u[j, i])
-            u[len(x) - 1, i + 1] = u[j, i] + C * (2 * u[j - 1, i] - 2 * u[j, i])
+            self.u[0, i + 1] = self.u[j, i] + C * (2 * self.u[j + 1, i] - 2 * self.u[j, i])
+            self.u[len(x) - 1, i + 1] = self.u[j, i] + C * (2 * self.u[j - 1, i] - 2 * self.u[j, i])
+        print("Simulation complete!")
 
-        return u
+        return self.u
 
     def plot3d(self, u):
+        print("Plotting...")
         fig = plt.figure()
         ax = plt.axes(projection="3d")
 
@@ -82,7 +88,7 @@ class FiniteDiffNoRxns:
         spacing = int(len(self.time_mesh) / len(self.spatial_mesh))
 
         time_3d = self.time_mesh[::spacing]
-        u_3d = u[:, ::spacing]
+        u_3d = self.u[:, ::spacing]
 
         # TODO: implement with upsampled mesh instead
         # space just redo
@@ -94,16 +100,16 @@ class FiniteDiffNoRxns:
         ax.set_zlabel("u")
         plt.show()
 
-    def plot(self, u, t, xlim=[1, 3.5], ylim=[0, 1.1]):
+    def plot(self, t, xlim=[1, 3.5], ylim=[0, 1.1]):
         fig = plt.figure()
 
         if type(t) == int:
-            plt.plot(self.spatial_mesh, u[:, t] / self.n_particles, label=f"t = {t}")
+            plt.plot(self.spatial_mesh, self.u[:, t] / self.n_particles, label=f"t = {t}")
         elif type(t) == list:
             t.reverse()
             for i in t:
                 plt.plot(
-                    self.spatial_mesh, u[:, i] / self.n_particles, label=f"t = {i}"
+                    self.spatial_mesh, self.u[:, i] / self.n_particles, label=f"t = {i}"
                 )
 
         # Set title and labels for axes
