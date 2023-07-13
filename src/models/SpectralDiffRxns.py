@@ -63,7 +63,7 @@ class SpectralDiffRxns:
         """Return spatial mesh."""
         return np.linspace(0, self.line_length, self.n_spatial_locs)
 
-    def Z(self, i):
+    def Z(self, n):
         """The scaling factor associated with each eigenmodes
 
         NOTE: May need to add (self.n_particles / 25) scaling factor somewhere...
@@ -77,6 +77,24 @@ class SpectralDiffRxns:
 
         else:
             return 2 / self.line_length
+        
+    def cos_n(self, n, x):
+        """Gets the cosine function for the eigenmode and spatial location.
+
+        Args:
+            n (int): eigenmode index
+            x (float): spatial location
+        """
+        return np.cos(n * np.pi * x) / self.line_length
+
+    def get_T_ca_initial_condition(self):
+        """Initial condition for calcium in the temporal component across all eigenmodes."""
+        
+        # TODO: fix -- trying out L 
+        ic = [self.n_ca * self.Z(n) * self.cos_n(n, 5) for n in range(self.n_eigenmodes)]
+        
+        
+        
 
     def alpha(self, i, j, n):
         """Gets the nonlinear reaction interaction term.
