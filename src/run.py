@@ -1,5 +1,6 @@
 import models.FiniteDiffNoRxns as FiniteDiffNoRxns
 import models.SpectralDiffNoRxns as SpectralDiffNoRxns
+import models.SpectralDiffRxns as SpectralDiffRxns
 import models.FiniteDiffRxns as FiniteDiffRxns
 
 
@@ -97,7 +98,7 @@ def main():
     n_calb = get_n_calb()  # number of calbindin particles
     kf = get_kf()  # forward rate constant (molec/um/usec)
     kr = get_kr()  # reverse rate constant (1/usec)
-    n_time_pts = 150  # number of time points
+    n_time_pts = 100  # number of time points
     n_space_pts = 100  # number of spatial points
     ca_init_idx = get_ca_init_idx(n_space_pts)
     dt = 1  # time step (usec)
@@ -117,16 +118,16 @@ def main():
     )
 
     # Finite Difference (calbindin reactions)
-    # TODO: add diffusion constants for calbindin
-    # https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4595661/
     fd_rxn = FiniteDiffRxns.FiniteDiffRxns(
-        n_ca_particles=n_ca,
-        n_calb_particles=n_calb,
-        n_spatial_locs=n_space_pts,
-        n_time_pts=n_time_pts,
-        ca_start_loc=ca_init_idx,
+        n_ca=n_ca,
+        n_calb=n_calb,
+        D_ca=D_ca,
+        D_calb=D_calb,
         kf=kf,
         kr=kr,
+        n_spatial_locs=n_space_pts,
+        n_time_pts=n_time_pts,
+        impulse_idx=ca_init_idx,
     )
 
     # Spectral Diffusion (no reactions)
@@ -140,21 +141,39 @@ def main():
         line_length=line_length,
         diffusion_constant_D=D_ca,
     )
+    
+    # Finite Difference (calbindin reactions)
+    sd_rxn = SpectralDiffRxns.SpectralDiffRxns(
+        n_ca=n_ca,
+        n_calb=n_calb,
+        D_ca=D_ca,
+        D_calb=D_calb,
+        kf=kf,
+        kr=kr,
+        n_spatial_locs=n_space_pts,
+        n_time_pts=n_time_pts,
+        impulse_idx=ca_init_idx,
+        n_eigenmodes=n_space_pts,
+    )
 
-    fd_u = fd.simulate()
-    sd_u = sd.simulate()
-    # ca, calb, ca_calb = fd_rxn.simulate()
+    #fd_u = fd.simulate()
+    #sd_u = sd.simulate()
+    #ca, calb, ca_calb = fd_rxn.simulate()
+    #u = sd_rxn.simulate()
 
     # Finite Differencing No Reactions
-    # fd.plot(fd_u, [0, 1, 5, 20, 40, 50, 99])
-    # fd.plot(fd_u, [5, 20, 40, 50, 99], ylim=[0, 1])
+    # fd.plot([0, 1, 5, 20, 40, 50, 99])
+    #fd.plot([5, 20, 40, 50, 99], ylim=[0, 1])
 
     # Spectral Diffusion No Reactions
     # sd.plot(sd_u, [0, 1, 5, 20, 40, 50, 99])
-    # sd.plot(sd_u, [5, 20, 40, 50, 99], ylim=[0, 0.5])
+    #sd.plot([5, 20, 40, 50, 99], ylim=[0, 0.5])
 
     # Finite Differencing with Reactions
-    # fd_rxn.plot([ca, calb, ca_calb], [0, 1, 2, 3, 4, 5, 10, 20, 40, 50, 99])
+    #fd_rxn.plot([ca, calb, ca_calb], [0, 1, 2, 3, 4, 5, 10, 20, 40, 50, 99])
+    
+    # Spectral Diffusion with Reactions
+    #fd_rxn.plot([0, 1, 2, 3, 4, 5, 10, 20, 40, 50, 99])
 
 
 if __name__ == "__main__":

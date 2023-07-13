@@ -50,7 +50,7 @@ class SpectralDiffRxns:
         self.ca_calb_idx = 2
         self.u = np.zeros((self.n_spatial_locs, self.n_time_pts, 3))
         self.T = np.zeros(
-            (self.n_spatial_locs, self.n_time_pts, self.n_eigenmodes, 3)
+            (self.n_eigenmodes, self.n_time_pts, 3)
         )  # temporal component 3 species
 
     @property
@@ -63,7 +63,7 @@ class SpectralDiffRxns:
         """Return spatial mesh."""
         return np.linspace(0, self.line_length, self.n_spatial_locs)
 
-    def Z(self, n):
+    def Z_n(self, n):
         """The scaling factor associated with each eigenmodes
 
         NOTE: May need to add (self.n_particles / 25) scaling factor somewhere...
@@ -72,29 +72,50 @@ class SpectralDiffRxns:
             i (int): eigenmode index
         """
 
-        if i == 0:
+        if n == 0:
             return 1 / self.line_length
 
         else:
             return 2 / self.line_length
-        
+
     def cos_n(self, n, x):
         """Gets the cosine function for the eigenmode and spatial location.
 
         Args:
             n (int): eigenmode index
-            x (float): spatial location
+            x (float): spatial location (um)
         """
         return np.cos(n * np.pi * x) / self.line_length
 
     def get_T_ca_initial_condition(self):
         """Initial condition for calcium in the temporal component across all eigenmodes."""
-        
-        # TODO: fix -- trying out L 
-        ic = [self.n_ca * self.Z(n) * self.cos_n(n, 5) for n in range(self.n_eigenmodes)]
-        
-        
-        
+
+        ic = [
+            self.n_ca * self.Z_n(n) * self.cos_n(n, self.spatial_mesh[self.impulse_idx])
+            for n in range(self.n_eigenmodes)
+        ]
+
+        return ic
+
+    def get_T_calb_initial_condition(self):
+        """Initial condition for calbindin in the temporal component across all eigenmodes.
+
+        Zeroth eigenmode is the only nonzero mode because calbindin is uniformly distributed.
+        """
+        ic = [0] * self.n_eigenmodes
+
+        ic[0] = self.n_calb * self.Z_n(0)
+
+        return ic
+
+    def get_T_ca_calb_initial_condition(self):
+        """Initial condition for ca-calbindin in the temporal component across all eigenmodes.
+
+        None initially.
+        """
+        ic = [0] * self.n_eigenmodes
+
+        return ic
 
     def alpha(self, i, j, n):
         """Gets the nonlinear reaction interaction term.
@@ -106,7 +127,7 @@ class SpectralDiffRxns:
         """
 
         if n == abs(i + j) or n == abs(i - j):
-            alpha = (self.Z(i) * self.Z(j) * self.Z(n)) * (self.line_length / 4)
+            alpha = (self.Z_n(i) * self.Z_n(j) * self.Z_n(n)) * (self.line_length / 4)
         else:
             alpha = 0
 
@@ -134,52 +155,45 @@ class SpectralDiffRxns:
             for j in range(0, self.n_eigenmodes):
                 coupling += (
                     self.alpha(i, j, eigen_idx)
-                    * self.T[:, t_idx, i, self.ca_idx]
-                    * self.T[:, t_idx, j, self.calb_idx]
+                    * self.T[i, t_idx, self.ca_idx]
+                    * self.T[j, t_idx, self.calb_idx]
                 )
 
         return coupling
 
     def time_eqtn(self, species_idx, t_idx, eigen_idx):
+        """Obtain the temporal component for a given species at a given time point and eigenmode.
+
+        Used to update the temporal component of the solution array using the previous time point.
+
+        Args:
+            species_idx (int): index of the particle species [0, 1, 2]
+            t_idx (int): time point index to use
+            eigen_idx (int): eigenmode index to use
+
+        Returns:
+            _type_: temporal component of the solution array at the next time step.
+        """
+
         sign = -1 if species_idx == self.ca_calb_idx else 1
         D = self.D_ca if species_idx == self.ca_idx else self.D_calb
 
         # just do for calclium for now
-        time = self.T[:, t_idx, eigen_idx, species_idx] + self.dt * (
-            (-sign * self.kf * self.coupling_term(self.T, t_idx, eigen_idx))
-            + (sign * self.kr * self.T[:, t_idx, eigen_idx, self.ca_calb_idx])
-            - (
-                D
-                * self.lambda_value(eigen_idx)
-                * self.T[:, t_idx, eigen_idx, species_idx]
-            )
+        time = self.T[eigen_idx, t_idx, species_idx] + self.dt * (
+            (-sign * self.kf * self.coupling_term(t_idx, eigen_idx))
+            + (sign * self.kr * self.T[eigen_idx, t_idx, self.ca_calb_idx])
+            - (D * self.lambda_value(eigen_idx) * self.T[eigen_idx, t_idx, species_idx])
         )
 
         return time
 
-    def space_eqtn(self, x_idx, eigen_idx):
-        space = math.cos(
-            eigen_idx * math.pi * self.spatial_mesh[x_idx] / self.line_length
-        )
-
-        return space
-
     def update_eqtn(self, x_idx, t_idx, species_idx):
-        # Should there be an IC Cosine in this equation?
-        """math.cos(
-            m
-            * math.pi
-            * self.spatial_mesh[self.impulse_idx]
-            / self.line_length
-        )
-        """
-
-        u = (1 / self.line_length) + sum(
+        u = (self.time_eqtn(species_idx, t_idx, 0) * self.Z_n(0)) + sum(
             [
                 (
-                    (self.n_particles / 25)
-                    * (2 / self.line_length)
-                    * self.space_eqtn(x_idx, m)
+                    (self.n_ca / 25)  # TODO: look into scaling factor (calb?)
+                    * self.Z_n(m)
+                    * self.cos_n(m, self.spatial_mesh[x_idx])
                     * self.time_eqtn(species_idx, t_idx, m)
                 )
                 for m in range(1, self.n_eigenmodes)
@@ -196,42 +210,75 @@ class SpectralDiffRxns:
         x = self.spatial_mesh
         t = self.time_mesh
 
-        # TODO: get ICs for T(t)
+        # Solution arrays initialized with class
 
         # Define initial condition
-        self.u[self.impulse_idx, 0, self.ca_idx] = self.n_particles
+        print("Setting initial conditions...")
+        self.u[self.impulse_idx, 0, self.ca_idx] = self.n_ca
         self.u[:, 0, self.calb_idx] = int((self.n_calb) / self.n_spatial_locs)
+        self.T[:, 0, self.ca_idx] = self.get_T_ca_initial_condition()
+        self.T[:, 0, self.calb_idx] = self.get_T_calb_initial_condition()
+        self.T[:, 0, self.ca_calb_idx] = self.get_T_ca_calb_initial_condition()
 
         # Solve the PDE
+        print("Beginning simulation...")
         for i in range(0, len(t) - 1):
+            if i % 10 == 0:
+                print("Time step: ", i)
             for j in range(0, len(x)):
                 for k in range(0, 3):
-                    self.u[j, i + 1, k] = self.update_eqtn(self.T, j, i, k)
+                    self.u[j, i + 1, k] = self.update_eqtn(j, i, k)
+        print("Simulation complete!")
 
         return self.u
 
     def plot(self, t, xlim=[1, 3.5], ylim=[0, 1.1]):
-        fig = plt.figure()
+        fig, axs = plt.subplots(1, 3, figsize=(15, 5))
 
+        labels = ["Ca", "Calb", "Ca-Calb"]
+        labels_long = ["Calcium", "Calbindin", "Bound Calcium-Calbindin"]
+        total_particles = [
+            self.n_ca,
+            self.n_calb,
+            self.n_calb,
+        ]
+
+        # plot 3 subplots, 1 for each species
         if type(t) == int:
-            plt.plot(
-                self.spatial_mesh, self.u[:, t] / self.n_particles, label=f"t = {t}"
-            )
+            for i in range(3):
+                print(i)
+                axs[i].plot(
+                    self.spatial_mesh,
+                    self.u[:, t, i] / total_particles[i],
+                    label=labels[i],
+                )
+                axs[i].set(xlabel="Distance (um)", ylabel="Normalized Calcium count")
+                axs[i].set_xlim(1, 3.5)
+                axs[i].set_ylim(0, 0.5)
         elif type(t) == list:
             t.reverse()
-            for i in t:
-                plt.plot(
-                    self.spatial_mesh, self.u[:, i] / self.n_particles, label=f"t = {i}"
-                )
+            for j in t:
+                for i in range(3):
+                    axs[i].plot(
+                        self.spatial_mesh,
+                        self.u[:, t, i] / total_particles[i],
+                        label=f"t = {j}",
+                    )
+            for i in range(3):
+                axs[i].set_title(labels_long[i])
+                axs[i].set(xlabel="Distance (um)", ylabel="Normalized particle count")
+                axs[i].set_xlim(1.5, 3)
+                # axs[i].set_ylim(0, 1.1)
 
         # Set title and labels for axes
-        plt.title("Spectral Calcium Diffusion with No Reactions")
+        plt.title("Spectral Calcium Diffusion with Calbindin Buffer")
         plt.xlabel("Distance (um)")
         plt.ylabel("Normalized Calcium count")
         plt.legend()
 
         # Set x and y limits
-        plt.xlim(xlim[0], xlim[1])
-        plt.ylim(ylim[0], ylim[1])
+        # plt.xlim(xlim[0], xlim[1])
+        # plt.ylim(ylim[0], ylim[1])
 
+        plt.tight_layout()
         plt.show()
