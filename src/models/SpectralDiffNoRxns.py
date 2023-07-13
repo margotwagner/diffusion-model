@@ -7,6 +7,13 @@ simulate solves the wave equation
    u_tt = c**2*u_xx + f(x,t) on
 
 (0,L) with du/dn=0 on x=0 and x = L.
+
+NOTE: scaling factor require to match the Finite Difference scheme:
+    - it is a function of the number of particles initially injected into the system
+    - scaling factor is found to empirically be the number of particles / 25
+    - the number of time points and number of space points does not affect the scaling factor
+        - unlikely to be related to concentration conversion given this
+    - could maybe be related to usage of line length vs number of points in scaling factor? (TODO test more)
 """
 
 import math
