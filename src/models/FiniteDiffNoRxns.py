@@ -57,7 +57,6 @@ class FiniteDiffNoRxns:
         dt = t[1] - t[0]
         C = self.diffusion_constant_D * (dt / (dx**2))
 
-
         # Define initial condition
         print("Initializing solution array...")
         self.u[self.particle_start_loc, 0] = self.n_particles
@@ -70,11 +69,17 @@ class FiniteDiffNoRxns:
             # TODO: move to separate function
             # solve internal mesh using previous time step
             for j in range(1, len(x) - 2):
-                self.u[j, i + 1] = self.u[j, i] + C * (self.u[j + 1, i] - 2 * self.u[j, i] + self.u[j - 1, i])
+                self.u[j, i + 1] = self.u[j, i] + C * (
+                    self.u[j + 1, i] - 2 * self.u[j, i] + self.u[j - 1, i]
+                )
 
             # update boundary conditions
-            self.u[0, i + 1] = self.u[j, i] + C * (2 * self.u[j + 1, i] - 2 * self.u[j, i])
-            self.u[len(x) - 1, i + 1] = self.u[j, i] + C * (2 * self.u[j - 1, i] - 2 * self.u[j, i])
+            self.u[0, i + 1] = self.u[j, i] + C * (
+                2 * self.u[j + 1, i] - 2 * self.u[j, i]
+            )
+            self.u[len(x) - 1, i + 1] = self.u[j, i] + C * (
+                2 * self.u[j - 1, i] - 2 * self.u[j, i]
+            )
         print("Simulation complete!")
 
         return self.u
@@ -104,7 +109,9 @@ class FiniteDiffNoRxns:
         fig = plt.figure()
 
         if type(t) == int:
-            plt.plot(self.spatial_mesh, self.u[:, t] / self.n_particles, label=f"t = {t}")
+            plt.plot(
+                self.spatial_mesh, self.u[:, t] / self.n_particles, label=f"t = {t}"
+            )
         elif type(t) == list:
             t.reverse()
             for i in t:

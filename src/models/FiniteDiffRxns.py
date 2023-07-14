@@ -201,7 +201,7 @@ class FiniteDiffRxns:
             """
 
         print("Simulation complete!")
-        
+
         return ca, calb, ca_calb
 
     def plot(self, data, t):

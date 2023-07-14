@@ -13,6 +13,7 @@ import math
 import numpy as np
 from typing import Union
 import matplotlib.pyplot as plt
+from scipy.integrate import solve_ivp
 
 
 class SpectralDiffRxns:
@@ -52,6 +53,7 @@ class SpectralDiffRxns:
         self.T = np.zeros(
             (self.n_eigenmodes, self.n_time_pts, 3)
         )  # temporal component 3 species
+        self.labels = ["Ca", "Calb", "Ca-Calb"]
 
     @property
     def time_mesh(self):
@@ -90,6 +92,7 @@ class SpectralDiffRxns:
     def get_T_ca_initial_condition(self):
         """Initial condition for calcium in the temporal component across all eigenmodes."""
 
+        # TODO: verify if n_ca is needed here
         ic = [
             self.n_ca * self.Z_n(n) * self.cos_n(n, self.spatial_mesh[self.impulse_idx])
             for n in range(self.n_eigenmodes)
@@ -102,6 +105,7 @@ class SpectralDiffRxns:
 
         Zeroth eigenmode is the only nonzero mode because calbindin is uniformly distributed.
         """
+        # TODO: verify if n_calb is needed here
         ic = [0] * self.n_eigenmodes
 
         ic[0] = self.n_calb * self.Z_n(0)
@@ -159,7 +163,7 @@ class SpectralDiffRxns:
                     * self.T[j, t_idx, self.calb_idx]
                 )
 
-        return coupling
+        return 0
 
     def time_eqtn(self, species_idx, t_idx, eigen_idx):
         """Obtain the temporal component for a given species at a given time point and eigenmode.
@@ -178,7 +182,7 @@ class SpectralDiffRxns:
         sign = -1 if species_idx == self.ca_calb_idx else 1
         D = self.D_ca if species_idx == self.ca_idx else self.D_calb
 
-        # just do for calclium for now
+        # NOTE: dt should affect the results here -- need to verify
         time = self.T[eigen_idx, t_idx, species_idx] + self.dt * (
             (-sign * self.kf * self.coupling_term(t_idx, eigen_idx))
             + (sign * self.kr * self.T[eigen_idx, t_idx, self.ca_calb_idx])
@@ -187,18 +191,97 @@ class SpectralDiffRxns:
 
         return time
 
-    def update_eqtn(self, x_idx, t_idx, species_idx):
-        u = (self.time_eqtn(species_idx, t_idx, 0) * self.Z_n(0)) + sum(
+    def dTdt(self, t, T, species_idx, eigen_idx):
+        """
+
+        Arguments:
+        """
+        sign = -1 if species_idx == self.ca_calb_idx else 1
+        D = self.D_ca if species_idx == self.ca_idx else self.D_calb
+
+        dTdt = -(D * self.lambda_value(eigen_idx) * T)
+
+        return dTdt
+
+    def solve_dTdt(self):
+
+        # set ICs
+        self.T[:, 0, self.ca_idx] = self.get_T_ca_initial_condition()
+        self.T[:, 0, self.calb_idx] = self.get_T_calb_initial_condition()
+        self.T[:, 0, self.ca_calb_idx] = self.get_T_ca_calb_initial_condition()
+
+        # solve
+        for species_idx in range(3):
+            for eigen_idx in range(self.n_eigenmodes):
+                sol = solve_ivp(
+                    self.dTdt,
+                    [0, self.n_time_pts],
+                    [self.T[eigen_idx, 0, species_idx]],
+                    t_eval=self.time_mesh,
+                    args=(species_idx, eigen_idx),
+                )
+                self.T[eigen_idx, :, species_idx] = sol.y
+
+        return sol
+
+    def plot_T(self):
+        fig, axs = plt.subplots(2, 3, figsize=(15, 5))
+        labels = ["Ca", "Calb", "Ca-Calb"]
+        labels_long = ["Calcium", "Calbindin", "Bound Calcium-Calbindin"]
+
+        # plot with time on the x-axis
+        for i in range(3):
+            for m in range(self.n_eigenmodes):
+                if m % 1 == 0:
+                    axs[0, i].plot(
+                        self.time_mesh,
+                        self.T[m, :, i],
+                        label=f"m = {m}",
+                    )
+
+        # plot with eigenmodes on the x-axis
+        for i in range(3):
+            for t in range(self.n_time_pts):
+                if m % 1 == 0:
+                    axs[1, i].plot(
+                        [*range(0, self.n_eigenmodes)],
+                        self.T[:, t, i],
+                        label=f"m = {t}",
+                    )
+
+        for i in range(3):
+            axs[0, i].set_title(labels_long[i])
+            axs[0, i].set(xlabel="time (usec)", ylabel="T(t)")
+            axs[1, i].set_title(labels_long[i])
+            axs[1, i].set(xlabel="eigenmodes", ylabel="T(t)")
+
+        plt.tight_layout()
+        # plt.legend()
+        plt.show()
+
+    def update_eqtn(self, x_idx, t_idx, species_idx, verbose=False):
+
+        zeroth_mode = self.time_eqtn(species_idx, t_idx, 0) * self.Z_n(0)
+        mode_sum = sum(
             [
                 (
-                    (self.n_ca / 25)  # TODO: look into scaling factor (calb?)
-                    * self.Z_n(m)
+                    self.Z_n(m)
                     * self.cos_n(m, self.spatial_mesh[x_idx])
                     * self.time_eqtn(species_idx, t_idx, m)
                 )
                 for m in range(1, self.n_eigenmodes)
             ]
         )
+
+        if verbose:
+            print("-" * 35)
+            print("SPACE STEP: ", x_idx)
+            print("\nUPDATES", self.labels[species_idx])
+            print("\nZEROTH MODE", zeroth_mode)
+            print("\nMODE SUM", mode_sum)
+            print("\nTOTAL", zeroth_mode + mode_sum)
+
+        u = zeroth_mode + mode_sum
 
         return u
 
@@ -220,20 +303,30 @@ class SpectralDiffRxns:
         self.T[:, 0, self.calb_idx] = self.get_T_calb_initial_condition()
         self.T[:, 0, self.ca_calb_idx] = self.get_T_ca_calb_initial_condition()
 
+        print("Number of particles\n", self.u[:, 0, :])
+        print("Temporal component\n", self.T[:, 0, :])
+
         # Solve the PDE
         print("Beginning simulation...")
         for i in range(0, len(t) - 1):
-            if i % 10 == 0:
-                print("Time step: ", i)
+            print("~" * 35)
+            print("TIME STEP: ", i + 1)
+            # if i % 5 == 0:
+            #   print("Time step: ", i)
             for j in range(0, len(x)):
                 for k in range(0, 3):
-                    self.u[j, i + 1, k] = self.update_eqtn(j, i, k)
+                    if j == self.impulse_idx:
+                        # NOTE: should there be a self.u[j, i, k] + update here?
+                        self.u[j, i + 1, k] = self.update_eqtn(j, i, k, verbose=True)
+                    else:
+                        self.u[j, i + 1, k] = self.update_eqtn(j, i, k)
+
         print("Simulation complete!")
 
         return self.u
 
     def plot(self, t, xlim=[1, 3.5], ylim=[0, 1.1]):
-        fig, axs = plt.subplots(1, 3, figsize=(15, 5))
+        fig, axs = plt.subplots(2, 3, figsize=(15, 5))
 
         labels = ["Ca", "Calb", "Ca-Calb"]
         labels_long = ["Calcium", "Calbindin", "Bound Calcium-Calbindin"]
@@ -242,11 +335,11 @@ class SpectralDiffRxns:
             self.n_calb,
             self.n_calb,
         ]
-
+        print(self.T.shape)
         # plot 3 subplots, 1 for each species
+        # TODO: fix legend
         if type(t) == int:
             for i in range(3):
-                print(i)
                 axs[i].plot(
                     self.spatial_mesh,
                     self.u[:, t, i] / total_particles[i],
@@ -259,26 +352,36 @@ class SpectralDiffRxns:
             t.reverse()
             for j in t:
                 for i in range(3):
-                    axs[i].plot(
+                    axs[0, i].plot(
                         self.spatial_mesh,
                         self.u[:, t, i] / total_particles[i],
                         label=f"t = {j}",
                     )
+                    axs[1, i].plot(
+                        [*range(0, self.n_eigenmodes)],
+                        self.T[:, t, i],
+                        label=f"t = {j}",
+                    )
+
             for i in range(3):
-                axs[i].set_title(labels_long[i])
-                axs[i].set(xlabel="Distance (um)", ylabel="Normalized particle count")
-                axs[i].set_xlim(1.5, 3)
+                axs[0, i].set_title(labels_long[i])
+                axs[0, i].set(
+                    xlabel="Distance (um)", ylabel="Normalized particle count"
+                )
+                axs[1, i].set_title(labels_long[i])
+                axs[1, i].set(xlabel="Eigenmodes", ylabel="T")
+                # axs[i].set_xlim(1, 3)
                 # axs[i].set_ylim(0, 1.1)
 
         # Set title and labels for axes
-        plt.title("Spectral Calcium Diffusion with Calbindin Buffer")
+        plt.suptitle("Spectral Calcium Diffusion with Calbindin Buffer")
         plt.xlabel("Distance (um)")
         plt.ylabel("Normalized Calcium count")
-        plt.legend()
+        # plt.legend()
 
         # Set x and y limits
         # plt.xlim(xlim[0], xlim[1])
         # plt.ylim(ylim[0], ylim[1])
 
-        plt.tight_layout()
+        # plt.tight_layout()
         plt.show()

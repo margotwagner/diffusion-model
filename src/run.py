@@ -99,7 +99,7 @@ def main():
     kf = get_kf()  # forward rate constant (molec/um/usec)
     kr = get_kr()  # reverse rate constant (1/usec)
     n_time_pts = 100  # number of time points
-    n_space_pts = 100  # number of spatial points
+    n_space_pts = 150  # number of spatial points
     ca_init_idx = get_ca_init_idx(n_space_pts)
     dt = 1  # time step (usec)
     line_length = 4  # um
@@ -141,7 +141,7 @@ def main():
         line_length=line_length,
         diffusion_constant_D=D_ca,
     )
-    
+
     # Finite Difference (calbindin reactions)
     sd_rxn = SpectralDiffRxns.SpectralDiffRxns(
         n_ca=n_ca,
@@ -153,27 +153,30 @@ def main():
         n_spatial_locs=n_space_pts,
         n_time_pts=n_time_pts,
         impulse_idx=ca_init_idx,
-        n_eigenmodes=n_space_pts,
+        n_eigenmodes=150,
     )
 
-    #fd_u = fd.simulate()
-    #sd_u = sd.simulate()
-    #ca, calb, ca_calb = fd_rxn.simulate()
-    #u = sd_rxn.simulate()
+    # fd_u = fd.simulate()
+    # sd_u = sd.simulate()
+    # ca, calb, ca_calb = fd_rxn.simulate()
+    sd_rxn.solve_ode()
+    sd_rxn.plot_T()
 
     # Finite Differencing No Reactions
     # fd.plot([0, 1, 5, 20, 40, 50, 99])
-    #fd.plot([5, 20, 40, 50, 99], ylim=[0, 1])
+    # fd.plot([5, 20, 40, 50, 99], ylim=[0, 1])
 
     # Spectral Diffusion No Reactions
     # sd.plot(sd_u, [0, 1, 5, 20, 40, 50, 99])
-    #sd.plot([5, 20, 40, 50, 99], ylim=[0, 0.5])
+    # sd.plot([5, 20, 40, 50, 99], ylim=[0, 0.5])
 
     # Finite Differencing with Reactions
-    #fd_rxn.plot([ca, calb, ca_calb], [0, 1, 2, 3, 4, 5, 10, 20, 40, 50, 99])
-    
+    # fd_rxn.plot([ca, calb, ca_calb], [0, 1, 2, 3, 4, 5, 10, 20, 40, 50, 99])
+    # fd_rxn.plot([ca, calb, ca_calb],[1, 5, 10, 20, 25, 29])
+    # fd_rxn.plot([ca, calb, ca_calb], [1, 2, 3, 4])
+
     # Spectral Diffusion with Reactions
-    #fd_rxn.plot([0, 1, 2, 3, 4, 5, 10, 20, 40, 50, 99])
+    # sd_rxn.plot([0, 1])
 
 
 if __name__ == "__main__":

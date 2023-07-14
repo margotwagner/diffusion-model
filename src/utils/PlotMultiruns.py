@@ -26,12 +26,11 @@ class PlotMultiRuns(object):
         self.line_length = line_length
         self.plot_rw = plot_rw
         self.plot_eme = plot_eme
-        
+
     @property
     def spatial_mesh(self):
         """Return spatial mesh."""
         return np.linspace(0, self.line_length, self.n_spatial_locs)
-    
 
     def combine_runs(self, data_dir):
         # initialize array to store all runs
@@ -66,10 +65,8 @@ class PlotMultiRuns(object):
         elif type(time) == list:
             time.reverse()
             for i in time:
-                plt.plot(
-                    self.spatial_mesh, mean[:, i], label=f"t = {i}"
-                )
-        
+                plt.plot(self.spatial_mesh, mean[:, i], label=f"t = {i}")
+
     def plot_mean(self, mean, colors):
         for i in range(self.n_spatial_locs):
             plt.plot(list(range(self.n_time_pts)), mean[i, :], color=colors[i], label=i)
@@ -88,7 +85,7 @@ class PlotMultiRuns(object):
                     axs[i, j].axhline(color="black", linewidth=0.5, linestyle="--")
                     axs[i, j].set_title("Node {}".format(loc), fontsize=14)
                     loc += 1
-                    
+
     def plot_std_time(self, mean, std, time, colors):
         if type(time) == int:
             plt.fill_between(
@@ -96,7 +93,7 @@ class PlotMultiRuns(object):
                 mean[:, time] + std[:, time],
                 mean[:, time] - std[:, time],
                 alpha=0.2,
-                #color=colors[time],
+                # color=colors[time],
             )
         elif type(time) == list:
             time.reverse()
@@ -106,7 +103,7 @@ class PlotMultiRuns(object):
                     mean[:, i] + std[:, i],
                     mean[:, i] - std[:, i],
                     alpha=0.2,
-                    #color=colors[i],
+                    # color=colors[i],
                 )
 
     def plot_std_sep(self, mean, std, colors, shape, axs):
@@ -132,7 +129,7 @@ class PlotMultiRuns(object):
                 alpha=0.2,
                 color=colors[i],
             )
-    
+
     def plot_multiruns_time(self, time):
         plt.figure(figsize=(14, 10))
 

@@ -132,7 +132,9 @@ class SpectralDiffNoRxns:
         fig = plt.figure()
 
         if type(t) == int:
-            plt.plot(self.spatial_mesh, self.u[:, t] / self.n_particles, label=f"t = {t}")
+            plt.plot(
+                self.spatial_mesh, self.u[:, t] / self.n_particles, label=f"t = {t}"
+            )
         elif type(t) == list:
             t.reverse()
             for i in t:
