@@ -177,43 +177,6 @@ class SpectralDiffRxns:
 
         return 0
 
-    def time_eqtn(self, species_idx, t_idx, eigen_idx):
-        """Obtain the temporal component for a given species at a given time point and eigenmode.
-
-        Used to update the temporal component of the solution array using the previous time point.
-
-        Args:
-            species_idx (int): index of the particle species [0, 1, 2]
-            t_idx (int): time point index to use
-            eigen_idx (int): eigenmode index to use
-
-        Returns:
-            _type_: temporal component of the solution array at the next time step.
-        """
-
-        sign = -1 if species_idx == self.ca_calb_idx else 1
-        D = self.D_ca if species_idx == self.ca_idx else self.D_calb
-
-        # NOTE: dt should affect the results here -- need to verify
-        time = self.T[eigen_idx, t_idx, species_idx] + self.dt * (
-            (-sign * self.kf * self.coupling_term(t_idx, eigen_idx))
-            + (sign * self.kr * self.T[eigen_idx, t_idx, self.ca_calb_idx])
-            - (D * self.lambda_value(eigen_idx) * self.T[eigen_idx, t_idx, species_idx])
-        )
-
-        return time
-
-    def dTdt_noreact(self, t, T_eqtns, T_idx, species_idx, eigen_idx):
-        """
-
-        Arguments:
-        """
-        D = self.D_ca if species_idx == self.ca_idx else self.D_calb
-
-        dTdt = -(D * self.lambda_value(eigen_idx) * T_eqtns[T_idx])
-
-        return dTdt
-
     def dTdt(self, t, T_eqtns, T_idx, species_idx, eigen_idx):
         """Time derivative of the temporal component of the solution array for
         an individual species and eigenmode combinations.
@@ -254,43 +217,6 @@ class SpectralDiffRxns:
 
         return dTdt_eqtns
 
-    def dTdt_system_noreact(self, t, T_eqtns):
-        dTdt_eqtns = []
-
-        T_idx = 0
-        for species_idx in range(self.n_species):
-            for eigen_idx in range(self.n_eigenmodes):
-                dTdt_eqtns.append(
-                    self.dTdt_noreact(t, T_eqtns, T_idx, species_idx, eigen_idx)
-                )
-                T_idx += 1
-
-        return dTdt_eqtns
-
-    def solve_dTdt_noreact(self):
-        # set ICs
-        self.T[:, 0, self.ca_idx] = self.get_T_ca_initial_condition()
-        self.T[:, 0, self.calb_idx] = self.get_T_calb_initial_condition()
-        self.T[:, 0, self.ca_calb_idx] = self.get_T_ca_calb_initial_condition()
-
-        # solve
-        print("Initializing dTdt solver...")
-        T0 = []
-        for species_idx in range(self.n_species):
-            for eigen_idx in range(self.n_eigenmodes):
-                T0.append(self.T[eigen_idx, 0, species_idx])
-
-        # solve
-        sol = solve_ivp(
-                    self.dTdt_system_noreact,
-                    [0, self.n_time_pts],
-                    T0,
-                    t_eval=self.time_mesh,
-                )
-        for species_idx in range(self.n_species):
-            self.T[:, :, species_idx] = sol.y[species_idx*self.n_eigenmodes:(species_idx+1)*self.n_eigenmodes, :]
-
-        return sol
 
     def solve_dTdt(self):
 
