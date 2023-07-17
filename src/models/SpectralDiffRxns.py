@@ -54,6 +54,7 @@ class SpectralDiffRxns:
             (self.n_eigenmodes, self.n_time_pts, 3)
         )  # temporal component 3 species
         self.labels = ["Ca", "Calb", "Ca-Calb"]
+        self.n_species = len(self.labels)
 
     @property
     def time_mesh(self):
@@ -127,7 +128,7 @@ class SpectralDiffRxns:
         Args:
             i (int): calcium eigenmode index
             j (int): calbindin eigenmode index
-            n (int): ca+calbindin eigenmode index
+            n (int): self eigenmode index
         """
 
         if n == abs(i + j) or n == abs(i - j):
@@ -146,13 +147,14 @@ class SpectralDiffRxns:
 
         return (math.pi**2) * (eigen_idx**2) / (self.line_length**2)
 
-    def coupling_term(self, t_idx, eigen_idx):
+    def coupling_term(self, T_eqtns, eigen_idx):
         """Gets the coupling term for the reaction.
 
         Args:
             T (np.ndarray): temporal solution array
             t_idx (int): time point index
             eigen_idx (int): eigenmode index
+        """
         """
         coupling = 0
         for i in range(0, self.n_eigenmodes):
@@ -161,6 +163,16 @@ class SpectralDiffRxns:
                     self.alpha(i, j, eigen_idx)
                     * self.T[i, t_idx, self.ca_idx]
                     * self.T[j, t_idx, self.calb_idx]
+                )
+        """
+
+        coupling = 0
+        for ca_eigen_idx in range(0, self.n_eigenmodes):
+            for calb_eigen_idx in range(0, self.n_eigenmodes):
+                coupling += (
+                    self.alpha(ca_eigen_idx, calb_eigen_idx, eigen_idx)
+                    * T_eqtns[ca_eigen_idx]
+                    * T_eqtns[self.n_eigenmodes + calb_eigen_idx]
                 )
 
         return 0
@@ -191,17 +203,94 @@ class SpectralDiffRxns:
 
         return time
 
-    def dTdt(self, t, T, species_idx, eigen_idx):
+    def dTdt_noreact(self, t, T_eqtns, T_idx, species_idx, eigen_idx):
         """
 
         Arguments:
         """
+        D = self.D_ca if species_idx == self.ca_idx else self.D_calb
+
+        dTdt = -(D * self.lambda_value(eigen_idx) * T_eqtns[T_idx])
+
+        return dTdt
+
+    def dTdt(self, t, T_eqtns, T_idx, species_idx, eigen_idx):
+        """Time derivative of the temporal component of the solution array for
+        an individual species and eigenmode combinations.
+        """
+
         sign = -1 if species_idx == self.ca_calb_idx else 1
         D = self.D_ca if species_idx == self.ca_idx else self.D_calb
 
-        dTdt = -(D * self.lambda_value(eigen_idx) * T)
+        dTdt = (
+            (-sign * self.kf * self.coupling_term(T_eqtns, eigen_idx))
+            + (sign * self.kr * T_eqtns[(self.ca_calb_idx * self.n_eigenmodes) + eigen_idx])
+            - (D * self.lambda_value(eigen_idx) * T_eqtns[T_idx])
+        )
 
         return dTdt
+
+    def dTdt_system(self, t, T_eqtns):
+        """Right-hand side of the system of ODEs.
+
+        The time derivative of the states T at time t. An N-D vector-valued function f(t,y).
+
+        Args:
+            t (_type_): _description_
+            T_eqtns (nd.array): N-D vector-valued state function y(t)
+
+        Returns:
+            nd.array: differential equations
+        """
+        dTdt_eqtns = []
+
+        T_idx = 0
+        for species_idx in range(self.n_species):
+            for eigen_idx in range(self.n_eigenmodes):
+                dTdt_eqtns.append(
+                    self.dTdt(t, T_eqtns, T_idx, species_idx, eigen_idx)
+                )
+                T_idx += 1
+
+        return dTdt_eqtns
+
+    def dTdt_system_noreact(self, t, T_eqtns):
+        dTdt_eqtns = []
+
+        T_idx = 0
+        for species_idx in range(self.n_species):
+            for eigen_idx in range(self.n_eigenmodes):
+                dTdt_eqtns.append(
+                    self.dTdt_noreact(t, T_eqtns, T_idx, species_idx, eigen_idx)
+                )
+                T_idx += 1
+
+        return dTdt_eqtns
+
+    def solve_dTdt_noreact(self):
+        # set ICs
+        self.T[:, 0, self.ca_idx] = self.get_T_ca_initial_condition()
+        self.T[:, 0, self.calb_idx] = self.get_T_calb_initial_condition()
+        self.T[:, 0, self.ca_calb_idx] = self.get_T_ca_calb_initial_condition()
+
+        # solve
+        print("Initializing dTdt solver...")
+        T0 = []
+        for species_idx in range(self.n_species):
+            for eigen_idx in range(self.n_eigenmodes):
+                T0.append(self.T[eigen_idx, 0, species_idx])
+
+        # solve
+        sol = solve_ivp(
+                    self.dTdt_system_noreact,
+                    [0, self.n_time_pts],
+                    T0,
+                    t_eval=self.time_mesh,
+                )
+        for species_idx in range(self.n_species):
+            self.T[:, :, species_idx] = sol.y[species_idx*self.n_eigenmodes:(species_idx+1)*self.n_eigenmodes, :]
+
+        return sol
 
     def solve_dTdt(self):
 
@@ -211,26 +300,32 @@ class SpectralDiffRxns:
         self.T[:, 0, self.ca_calb_idx] = self.get_T_ca_calb_initial_condition()
 
         # solve
-        for species_idx in range(3):
+        print("Initializing dTdt solver...")
+        T0 = []
+        for species_idx in range(self.n_species):
             for eigen_idx in range(self.n_eigenmodes):
-                sol = solve_ivp(
-                    self.dTdt,
-                    [0, self.n_time_pts],
-                    [self.T[eigen_idx, 0, species_idx]],
-                    t_eval=self.time_mesh,
-                    args=(species_idx, eigen_idx),
-                )
-                self.T[eigen_idx, :, species_idx] = sol.y
+                T0.append(self.T[eigen_idx, 0, species_idx])
+
+        print("Solving dTdt...")
+        sol = solve_ivp(
+            self.dTdt_system,
+            [0, self.n_time_pts],
+            T0,
+            t_eval=self.time_mesh,
+        )
+        for species_idx in range(self.n_species):
+            self.T[:, :, species_idx] = sol.y[species_idx*self.n_eigenmodes:(species_idx+1)*self.n_eigenmodes, :]
 
         return sol
 
     def plot_T(self):
+        print("Plotting T...")
         fig, axs = plt.subplots(2, 3, figsize=(15, 5))
         labels = ["Ca", "Calb", "Ca-Calb"]
         labels_long = ["Calcium", "Calbindin", "Bound Calcium-Calbindin"]
 
         # plot with time on the x-axis
-        for i in range(3):
+        for i in range(self.n_species):
             for m in range(self.n_eigenmodes):
                 if m % 1 == 0:
                     axs[0, i].plot(
@@ -240,7 +335,7 @@ class SpectralDiffRxns:
                     )
 
         # plot with eigenmodes on the x-axis
-        for i in range(3):
+        for i in range(self.n_species):
             for t in range(self.n_time_pts):
                 if m % 1 == 0:
                     axs[1, i].plot(
@@ -254,6 +349,79 @@ class SpectralDiffRxns:
             axs[0, i].set(xlabel="time (usec)", ylabel="T(t)")
             axs[1, i].set_title(labels_long[i])
             axs[1, i].set(xlabel="eigenmodes", ylabel="T(t)")
+
+        plt.tight_layout()
+        # plt.legend()
+        plt.show()
+
+    def solve_u(self):
+        """
+        Solve for u(x,t) using the method of eigenfunction expansion.
+        """
+        # Define mesh
+        x = self.spatial_mesh
+        t = self.time_mesh
+
+        # Define initial condition
+        print("Setting initial conditions...")
+        self.u[self.impulse_idx, 0, self.ca_idx] = self.n_ca
+        self.u[:, 0, self.calb_idx] = int((self.n_calb) / self.n_spatial_locs)
+
+        # Solve the PDE
+        # TODO: make u a function
+        print("Beginning simulation...")
+        for time_idx in range(len(t)):
+            if time_idx % 10 == 0:
+                print(f"t = {time_idx}")
+            for space_idx in range(len(x)):
+                for species_idx in range(self.n_species):
+                    self.u[space_idx, time_idx, species_idx] = self.T[
+                        0, time_idx, species_idx
+                    ] * self.Z_n(0) + sum(
+                        [
+                            (
+                                self.Z_n(eigen_idx)
+                                * self.cos_n(eigen_idx, self.spatial_mesh[space_idx])
+                                * self.cos_n(eigen_idx, self.spatial_mesh[self.impulse_idx])
+                                * self.T[eigen_idx, time_idx, species_idx]
+                            )
+                            for eigen_idx in range(1, self.n_eigenmodes)
+                        ]
+                    )
+        print("Simulation complete!")
+
+        return self.u
+
+    def plot_u(self):
+        fig, axs = plt.subplots(2, 3, figsize=(15, 5))
+        labels = ["Ca", "Calb", "Ca-Calb"]
+        labels_long = ["Calcium", "Calbindin", "Bound Calcium-Calbindin"]
+
+        # plot with time on the x-axis
+        for i in range(self.n_species):
+            for j in range(self.n_spatial_locs):
+                if j % 1 == 0:
+                    axs[0, i].plot(
+                        self.time_mesh,
+                        self.u[j, :, i],
+                        label=f"x = {j}",
+                    )
+
+        # plot with space on the x-axis
+        for i in range(self.n_species):
+            for t in range(self.n_time_pts):
+                if t % 1 == 0:
+                    axs[1, i].plot(
+                        self.spatial_mesh,
+                        self.u[:, t, i],
+                        label=f"m = {t}",
+                    )
+
+        for i in range(3):
+            axs[0, i].set_title(labels_long[i])
+            axs[0, i].set(xlabel="time (usec)", ylabel="u(t)")
+            axs[1, i].set_title(labels_long[i])
+            axs[1, i].set(xlabel="space (um)", ylabel="u(t)")
 
         plt.tight_layout()
         # plt.legend()
