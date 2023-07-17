@@ -224,14 +224,13 @@ class SpectralDiffRxns:
         self.T[:, 0, self.ca_idx] = self.get_T_ca_initial_condition()
         self.T[:, 0, self.calb_idx] = self.get_T_calb_initial_condition()
         self.T[:, 0, self.ca_calb_idx] = self.get_T_ca_calb_initial_condition()
-
-        # solve
         print("Initializing dTdt solver...")
         T0 = []
         for species_idx in range(self.n_species):
             for eigen_idx in range(self.n_eigenmodes):
                 T0.append(self.T[eigen_idx, 0, species_idx])
 
+        # solve dTdt
         print("Solving dTdt...")
         sol = solve_ivp(
             self.dTdt_system,
@@ -308,7 +307,6 @@ class SpectralDiffRxns:
                             (
                                 self.Z_n(eigen_idx)
                                 * self.cos_n(eigen_idx, self.spatial_mesh[space_idx])
-                                * self.cos_n(eigen_idx, self.spatial_mesh[self.impulse_idx])
                                 * self.T[eigen_idx, time_idx, species_idx]
                             )
                             for eigen_idx in range(1, self.n_eigenmodes)
