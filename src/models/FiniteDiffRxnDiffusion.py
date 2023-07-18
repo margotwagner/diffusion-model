@@ -16,14 +16,10 @@ simulate solves the wave equation
 """
 
 import numpy as np
-from typing import Union
 import matplotlib.pyplot as plt
-import warnings
-
-warnings.simplefilter("error", RuntimeWarning)
 
 
-class FiniteDiffusion:
+class FiniteDiffRxnDiffusion:
     def __init__(
         self,
         n_spatial_locs: int,  # define number of grid points along 1D line,
@@ -156,7 +152,6 @@ class FiniteDiffusion:
     def calb_mesh_const(self):
         return self.D_calb * (self.dt / (self.dx**2))
 
-    @property
     def is_stable(self):
         """von Neumann stability analysis for the diffusion equation."""
 
@@ -167,6 +162,8 @@ class FiniteDiffusion:
             print(f"Stability condition satisfied: {self.dt} <= {threshold}")
         else:
             print(f"Stability condition NOT satisfied: {self.dt} > {threshold}")
+            print("Try decreasing the time step or increasing the space step.")
+            print("Exiting...")
 
         return self.dt <= threshold
 
@@ -193,6 +190,12 @@ class FiniteDiffusion:
         """
         Simulate calcium diffusion using finite differencing with no reactions.
         """
+
+        # Check stability
+        stable = self.is_stable()
+
+        if not stable:
+            quit()
 
         # Define initial condition
         print("Initializing solution array...")
@@ -446,44 +449,52 @@ class FiniteDiffusion:
 
         return self.u_rxndiff
 
-    def plot_diffusion(self, t, xlim=[1, 3.5], ylim=[0, 1.1]):
-        fig = plt.figure()
+    def plot_diffusion(self, t):
+        print("Plotting...")
+        fig, axs = plt.subplots(1, 2, figsize=(10, 5), sharey=True)
 
-        if type(t) == int:
-            plt.plot(
+        # plot with space on the x-axis
+        for i in t:
+            axs[0].plot(
                 self.spatial_mesh,
-                self.u_diff[:, t] / self.n_ca,
-                label=f"t = {t}",
+                self.u_diff[:, i] / self.n_ca,
+                label=f"t = {i}",
             )
-        elif type(t) == list:
-            t.reverse()
-            for i in t:
-                plt.plot(
-                    self.spatial_mesh,
-                    self.u_diff[:, i] / self.n_ca,
-                    label=f"t = {i}",
-                )
+        axs[0].set_xlabel("Distance (um)")
+        axs[0].set_ylabel("Normalized Calcium count")
+        axs[0].set_title("Calcium vs Distance")
+        axs[0].set_xlim([1.5, 3])
+        axs[0].legend(title="time steps")
 
-        # Set title and labels for axes
-        plt.title("Finite Difference Calcium Diffusion with No Reactions")
-        plt.xlabel("Distance (um)")
-        plt.ylabel("Normalized Calcium count")
-        plt.legend()
+        # plot with time on the x-axis
+        x_idx = [self.impulse_idx + i for i in range(0, 10)]
+        x_labels = [*range(0, 10)]
+        for i in range(len(x_idx)):
+            axs[1].plot(
+                self.time_mesh,
+                self.u_diff[x_idx[i], :] / self.n_ca,
+                label=f"$\Delta$x = {x_labels[i]}",
+            )
+        axs[1].set_xlabel("Time (usec)")
+        axs[1].set_title("Calcium vs Time")
+        axs[1].legend(title="steps from impulse")
 
-        # Set x and y limits
-        plt.xlim(xlim[0], xlim[1])
-        plt.ylim(ylim[0], ylim[1])
+        fig.suptitle(
+            "Finite Difference Calcium Diffusion with No Reactions", fontsize=18
+        )
 
+        plt.tight_layout()
+        plt.savefig("../figures/finite-diff-norxns.png")
         plt.show()
 
-    def plot_rxn_diffusion(self, t, xlim=[1, 3.5], ylim=[0, 1.1]):
+    def plot_rxn_diffusion(self, t):
         """_summary_
 
         Args:
             data (list): list containing simulation results for each species [ca, calb, ca_calb]
             t (int or list): time point(s) to plot
         """
-        fig, axs = plt.subplots(1, 3, figsize=(15, 5))
+        fig, axs = plt.subplots(2, 3, figsize=(15, 8))
 
         labels_long = ["Calcium", "Calbindin", "Bound Calcium-Calbindin"]
         total_particles = [
@@ -493,35 +504,41 @@ class FiniteDiffusion:
         ]
 
         # plot 3 subplots, 1 for each species
-        if type(t) == int:
+        # plot with space on the x-axis
+        for time_idx in t:
             for i in range(self.n_species):
-                axs[i].plot(
+                axs[0, i].plot(
                     self.spatial_mesh,
-                    self.u_rxndiff[:, t, i] / total_particles[i],
-                    label=self.labels[i],
+                    self.u_rxndiff[:, time_idx, i] / total_particles[i],
+                    label=f"t = {time_idx}",
                 )
-                axs[i].set(xlabel="Distance (um)", ylabel="Normalized Calcium count")
-                axs[i].set_xlim(1, 3.5)
-                axs[i].set_ylim(0, 0.5)
-        elif type(t) == list:
-            t.reverse()
-            for time_idx in t:
-                for i in range(self.n_species):
-                    axs[i].plot(
-                        self.spatial_mesh,
-                        self.u_rxndiff[:, time_idx, i] / total_particles[i],
-                        label=f"t = {time_idx}",
-                    )
-            for i in range(3):
-                axs[i].set_title(labels_long[i])
-                axs[i].set(xlabel="Distance (um)", ylabel="Normalized particle count")
-                # Set x and y limits
-                plt.xlim(xlim[0], xlim[1])
-                plt.ylim(ylim[0], ylim[1])
+                
+        # plot with time on the x-axis
+        x_idx = [self.impulse_idx + i for i in range(0, 10)]
+        x_labels = [*range(0, 10)]
+        for x_i in range(len(x_idx)):
+            for species in range(self.n_species):
+                axs[1, species].plot(
+                    self.time_mesh,
+                    self.u_rxndiff[x_idx[x_i], :, species] / total_particles[species],
+                    label=f"$\Delta$x = {x_labels[x_i]}",
+                )
+                
+        # Add labels
+        for i in range(self.n_species):
+            axs[0, i].set_title(labels_long[i])
+            axs[0, i].set(xlabel="Distance (um)", ylabel="Normalized particle count")
+            axs[0, i].set_xlim(1.5, 3)
+            axs[0, i].legend(title="time steps")
+            axs[1, i].set_xlabel("Time (usec)")
+            axs[1, i].legend(title="steps from impulse")
+        
+        axs[0, 1].set_ylim([0.0066, 0.00666])
+        for i in range(2):
+            axs[i, 1].ticklabel_format(axis="y", style="sci", scilimits=(0, 0))
 
         # Set title and labels for axes
-        fig.suptitle("Finite Difference Calcium Diffusion with Calbindin Buffer")
-        plt.legend()
+        fig.suptitle("Finite Difference Calcium Diffusion with Calbindin Buffer", fontsize=18)
         plt.tight_layout()
-
+        plt.savefig("../figures/finite-diff-rxns.png")
         plt.show()

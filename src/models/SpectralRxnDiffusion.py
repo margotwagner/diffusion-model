@@ -16,45 +16,43 @@ import matplotlib.pyplot as plt
 from scipy.integrate import solve_ivp
 
 
-class SpectralDiffRxns:
+class SpectralRxnDiffusion:
     def __init__(
         self,
-        n_ca: int,  # number of calcium molecules
-        n_calb: int,  # number of calcium molecules
-        D_ca: float,  # calcium diffusion coefficient (um^2/usec)
-        D_calb: float,  # calbindin diffusion coefficient (um^2/usec)
-        kf: float,  # forward rate constant
-        kr: float,  # reverse rate constant
         n_spatial_locs: int,  # define number of grid points along 1D line,
         n_time_pts: int,  # number of time points
         impulse_idx: int,  # start position of input impulse molecules
         n_eigenmodes: int,  # number of eigenmodes to use in spectral method
-        dt: Union[int, float] = 1,  # time step (usec)
-        line_length: Union[
-            int, float
-        ] = 4,  # length of line on which molecule is diffusing (um)
     ):
-        self.n_ca = n_ca
-        self.n_calb = n_calb
-        self.D_ca = D_ca
-        self.D_calb = D_calb
-        self.kf = kf
-        self.kr = kr
         self.n_spatial_locs = n_spatial_locs
         self.n_time_pts = n_time_pts
         self.impulse_idx = impulse_idx
         self.n_eigenmodes = n_eigenmodes
-        self.dt = dt
-        self.line_length = line_length
-        self.ca_idx = 0
-        self.calb_idx = 1
-        self.ca_calb_idx = 2
-        self.u = np.zeros((self.n_spatial_locs, self.n_time_pts, 3))
-        self.T = np.zeros(
-            (self.n_eigenmodes, self.n_time_pts, 3)
-        )  # temporal component 3 species
+        self.dt = 1  # time step (usec)
+        self.line_length = 4  # length of diffusion line (um)
         self.labels = ["Ca", "Calb", "Ca-Calb"]
         self.n_species = len(self.labels)
+        # amount of each species
+        self.u_diff = np.zeros((self.n_spatial_locs, self.n_time_pts))
+        self.u_rxndiff = np.zeros(
+            (self.n_spatial_locs, self.n_time_pts, self.n_species)
+        )
+        # self.u = np.zeros((self.n_spatial_locs, self.n_time_pts, 3))
+        # temporal component
+        self.T_diff = np.zeros((self.n_eigenmodes, self.n_time_pts))
+        self.T_rxndiff = np.zeros((self.n_eigenmodes, self.n_time_pts, self.n_species))
+
+    @property
+    def ca_idx(self):
+        return self.labels.index("Ca")
+
+    @property
+    def calb_idx(self):
+        return self.labels.index("Calb")
+
+    @property
+    def ca_calb_idx(self):
+        return self.labels.index("Ca-Calb")
 
     @property
     def time_mesh(self):
@@ -65,6 +63,90 @@ class SpectralDiffRxns:
     def spatial_mesh(self):
         """Return spatial mesh."""
         return np.linspace(0, self.line_length, self.n_spatial_locs)
+
+    @property
+    def D_ca(self):
+        """Given initial conditions from Bartol et al. 2015, return them in units compatible with the simulation scheme (um, usec, molec).
+
+        Ref: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4595661/
+        """
+        D_ca = 2.2e-6  # calcium diffusion coefficient (cm^2/sec)
+        D_ca = (D_ca * 1e8) / 1e6  # (um^2/usec)
+
+        return D_ca
+
+    @property
+    def D_calb(self):
+        """Given initial conditions from Bartol et al. 2015, return them in units compatible with the simulation scheme (um, usec, molec).
+
+        Ref: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4595661/
+        """
+        D_calb = 0.28e-6  # calbindin diffusion coefficient (cm^2/sec)
+        D_calb = (D_calb * 1e8) / 1e6  # (um^2/usec)
+
+        return D_calb
+
+    @property
+    def kf(self):
+        """forward rate constant
+
+        Returns:
+            _type_: _description_
+        """
+        avogadro = 6.022e23  # 1/mol
+
+        # Volume
+        x = 0.5  # um
+        y = 0.5  # um
+        z = 4  # um
+
+        # Calbindin binding
+        kM0M1 = 17.4e7  # 1/(M*sec)
+        kH0H1 = 2.2e7  # 1/(M*sec)
+
+        kM0M1 = ((kM0M1 * 1e15) / (avogadro * 1e6)) * (x * y)  # (1/um*sec)
+        kH0H1 = ((kH0H1 * 1e15) / (avogadro * 1e6)) * (x * y)  # (1/um*sec)
+
+        return kM0M1
+
+    @property
+    def kr(self):
+        kM1M0 = 35.8  # 1/sec
+        kH1H0 = 2.6  # 1/sec
+
+        kM1M0 = kM1M0 * 1e-6  # (1/usec)
+        kH1H0 = kH1H0 * 1e-6  # (1/usec)
+
+        return kM1M0
+
+    @property
+    def n_calb(self):
+        avogadro = 6.022e23  # 1/mol
+
+        # Volume
+        x = 0.5  # um
+        y = 0.5  # um
+        z = 4  # um
+
+        # Initial concentrations
+        c_calb = 45  # concentration of calbindin (uM)
+
+        n_calb = (c_calb * avogadro / (1e6 * 1e15)) * (x * y * z)  # molecules
+
+        return n_calb
+
+    @property
+    def n_ca(self):
+        # Initial concentrations
+        n_ca = 5275  # number of calcium particles
+
+        return n_ca
+
+    @property
+    def dx(self):
+        # Define mesh
+        dx = self.spatial_mesh[1] - self.spatial_mesh[0]
+        return dx
 
     def Z_n(self, n):
         """The scaling factor associated with each eigenmodes
@@ -88,7 +170,7 @@ class SpectralDiffRxns:
             n (int): eigenmode index
             x (float): spatial location (um)
         """
-        return np.cos(n * np.pi * x) / self.line_length
+        return np.cos(n * np.pi * x / self.line_length)
 
     def get_T_ca_initial_condition(self):
         """Initial condition for calcium in the temporal component across all eigenmodes."""
@@ -175,7 +257,7 @@ class SpectralDiffRxns:
                     * T_eqtns[self.n_eigenmodes + calb_eigen_idx]
                 )
 
-        return 0
+        return coupling
 
     def dTdt(self, t, T_eqtns, T_idx, species_idx, eigen_idx):
         """Time derivative of the temporal component of the solution array for
@@ -187,7 +269,11 @@ class SpectralDiffRxns:
 
         dTdt = (
             (-sign * self.kf * self.coupling_term(T_eqtns, eigen_idx))
-            + (sign * self.kr * T_eqtns[(self.ca_calb_idx * self.n_eigenmodes) + eigen_idx])
+            + (
+                sign
+                * self.kr
+                * T_eqtns[(self.ca_calb_idx * self.n_eigenmodes) + eigen_idx]
+            )
             - (D * self.lambda_value(eigen_idx) * T_eqtns[T_idx])
         )
 
@@ -210,13 +296,10 @@ class SpectralDiffRxns:
         T_idx = 0
         for species_idx in range(self.n_species):
             for eigen_idx in range(self.n_eigenmodes):
-                dTdt_eqtns.append(
-                    self.dTdt(t, T_eqtns, T_idx, species_idx, eigen_idx)
-                )
+                dTdt_eqtns.append(self.dTdt(t, T_eqtns, T_idx, species_idx, eigen_idx))
                 T_idx += 1
 
         return dTdt_eqtns
-
 
     def solve_dTdt(self):
 
@@ -239,7 +322,10 @@ class SpectralDiffRxns:
             t_eval=self.time_mesh,
         )
         for species_idx in range(self.n_species):
-            self.T[:, :, species_idx] = sol.y[species_idx*self.n_eigenmodes:(species_idx+1)*self.n_eigenmodes, :]
+            self.T[:, :, species_idx] = sol.y[
+                species_idx * self.n_eigenmodes : (species_idx + 1) * self.n_eigenmodes,
+                :,
+            ]
 
         return sol
 
