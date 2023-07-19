@@ -20,7 +20,7 @@ def get_ca_init_idx(n_space_pts):
 
 def main():
     n_time_pts = 101  # number of time points
-    n_space_pts = 150  # number of spatial points
+    n_space_pts = 150  # 150  # number of spatial points
     ca_init_idx = get_ca_init_idx(n_space_pts)
 
     # Finite Difference (calbindin reactions)
@@ -39,28 +39,19 @@ def main():
     )
 
     # FINITE DIFFERENCE DIFFUSION
-    fd.simulate_diffusion()
-    fd.plot_diffusion([0, 1, 5, 20, 40, 50, 100])
+    # fd.simulate_diffusion()
+    # fd.plot_diffusion([0, 1, 5, 20, 40, 50, 100])
 
-    #fd.simulate_rxn_diffusion()
-    #fd.plot_rxn_diffusion([0, 1, 5, 20, 40, 50, 100])
+    fd.simulate_rxn_diffusion()
+    #fd.plot_rxn_diffusion([0, 1, 5, 20, 40, 50, 100], orientation="horizontal")
+    fd.plot_rxn_diffusion([0, 1, 5, 20, 40, 50, 100], orientation="vertical")
 
-    # sd_rxn.solve_dTdt()
-    # sd_rxn.solve_u()
-    # sd_rxn.plot_T()
-    # sd_rxn.plot_u()
+    # SPECTRAL DIFFUSION
+    # sd.simulate_diffusion()
+    # sd.plot_diffusion([0, 1, 5, 20, 40, 50, 100])
 
-    # Spectral Diffusion No Reactions
-    # sd.plot(sd_u, [0, 1, 5, 20, 40, 50, 99])
-    # sd.plot([1, 5, 20, 40, 50, 99], ylim=[0, 0.5], xlim=[0, 4])
-
-    # Finite Differencing with Reactions
-    # fd_rxn.plot([ca, calb, ca_calb], [0, 1, 2, 3, 4, 5, 10, 20, 40, 50, 99])
-    # fd_rxn.plot([ca, calb, ca_calb],[1, 5, 10, 20, 25, 29])
-    # fd_rxn.plot([ca, calb, ca_calb], [1, 2, 3, 4])
-
-    # Spectral Diffusion with Reactions
-    # sd_rxn.plot([0, 1])
+    #sd.solve_dTdt(save_dir="../data/spectral-diffusion/08192023/T.npy")
+    #sd.simulate_rxn_diffusion(save_dir="../data/spectral-diffusion/08192023/u.npy")
 
 
 if __name__ == "__main__":
