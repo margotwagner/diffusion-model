@@ -527,19 +527,19 @@ class FiniteDiffRxnDiffusion:
                 )
 
         # plot with time on the x-axis
-        x_idx = [self.impulse_idx + i for i in range(0, 10)]
-        x_labels = [*range(0, 10)]
+        delta_xs = [*range(0, 10)]
+        x_idx = [self.impulse_idx + i for i in delta_xs]
         for x_i in range(len(x_idx)):
             for species in range(self.n_species):
                 if orientation == "horizontal":
                     term_1, term_2 = 1, species
                 else:
                     term_1, term_2 = species, 1
-                
+
                 axs[term_1, term_2].plot(
                     self.time_mesh,
                     self.u_rxndiff[x_idx[x_i], :, species] / total_particles[species],
-                    label=f"$\Delta$x = {x_labels[x_i]}",
+                    label=f"$\Delta$x = {delta_xs[x_i]}",
                 )
 
         # Add labels
@@ -552,44 +552,50 @@ class FiniteDiffRxnDiffusion:
                     term_1, term_2 = j, i
                 if i == 0:
                     axs[term_1, term_2].set_xlim(1.5, 3)
-                axs[term_1, term_2].set(xlabel=xlabs[i], ylabel="Normalized particle count")
+                axs[term_1, term_2].set(
+                    xlabel=xlabs[i], ylabel="Normalized particle count"
+                )
                 axs[term_1, term_2].set_title(labels_long[j])
-                # Convert to scientific notation for calbindin graphs
-                axs[i, self.calb_idx].ticklabel_format(axis="y", style="sci", scilimits=(0, 0))
 
         # Set limits
         if orientation == "horizontal":
             term_1, term_2 = 0, 1
         else:
             term_1, term_2 = 1, 0
-        
+
         axs[term_1, term_2].set_ylim([6.6225e-3, 6.643e-3])
+        axs[term_1, term_2].ticklabel_format(axis="y", style="sci", scilimits=(0, 0))
+        axs[1, 1].ticklabel_format(axis="y", style="sci", scilimits=(0, 0))
 
         # Add legends
         if orientation == "horizontal":
-            axs[0, 2].legend(title="time step", loc="upper right", bbox_to_anchor=(1.4, 1))
+            axs[0, 2].legend(
+                title="time step", loc="upper right", bbox_to_anchor=(1.4, 1)
+            )
             axs[1, 2].legend(
                 title="steps from impulse", loc="upper right", bbox_to_anchor=(1.5, 1)
             )
+        else:
+            axs[0, 0].legend(title="time step", loc="upper left")
+            axs[0, 1].legend(title="steps from impulse", loc="upper right", ncol=2)
 
         # Add letters
-        #letters = ["A", "B", "C", "D", "E", "F"]
-        #ax = axs.flatten()
+        letters = ["A", "B", "C", "D", "E", "F"]
+        ax = axs.flatten()
 
-        #for i in range(6):
-        #    ax[i].annotate(
-        #        letters[i],
-        #        xy=(-0.1, 1.05),
-        #        xycoords="axes fraction",
-        #        fontsize=16,
-        #        weight="bold",
-        #    )
+        for i in range(6):
+            ax[i].annotate(
+                letters[i],
+                xy=(-0.1, 1.05),
+                xycoords="axes fraction",
+                fontsize=16,
+                weight="bold",
+            )
 
         # Set title and save
         fig.suptitle(
             "Finite Difference Calcium Diffusion with Calbindin Buffer", fontsize=18
         )
         plt.tight_layout()
-        plt.savefig(f"../figures/finite-diff-rxns-{orientation}.png")
+        plt.savefig(f"../figures/finite-diff-rxns-{orientation}.png", dpi=500)
         plt.show()
-        

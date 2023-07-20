@@ -289,12 +289,6 @@ class SpectralRxnDiffusion:
 
         ic[0] = self.n_calb * self.Z_n(0)
 
-        """
-        ic[0] = (
-            self.n_calb * 4 / ((self.n_spatial_locs * 1.0038389) / self.line_length)
-        ) * self.Z_n(0)
-        """
-
         return ic
 
     def get_T_ca_calb_initial_condition(self):
@@ -433,65 +427,6 @@ class SpectralRxnDiffusion:
 
         return sol
 
-    def plot_T(self, save_dir):
-        # TODO: move to separate file
-        print("Plotting T...")
-        fig, axs = plt.subplots(2, 3, figsize=(15, 8))
-        labels_long = ["Calcium", "Calbindin", "Bound Calcium-Calbindin"]
-        total_particles = [
-            self.n_ca,
-            self.n_calb,
-            self.n_calb,
-        ]
-
-        # plot with eigenmodes on the x-axis
-        times = [0, 1, 5, 20, 40, 50, 100]
-        for i in range(self.n_species):
-            for t in times:
-                axs[0, i].plot(
-                    [*range(0, self.n_eigenmodes)],
-                    self.T[:, t, i] / total_particles[i],
-                    label=f"t = {t}",
-                )
-
-        # plot with time on the x-axis
-        modes = [0, 1, 2, 3, 4, 5, 10, 15, 19]  # , 40, 50, 100]
-        for i in range(self.n_species):
-            for m in modes:
-                # for m in range(self.n_eigenmodes):
-                if m % 1 == 0:
-                    axs[1, i].plot(
-                        self.time_mesh,
-                        self.T[m, :, i] / total_particles[i],
-                        label=f"m = {m}",
-                    )
-
-        for i in range(3):
-            axs[0, i].set_title(labels_long[i])
-            axs[1, i].set(xlabel="time (usec)", ylabel="T(t)")
-            axs[1, i].set_title(labels_long[i])
-            axs[0, i].set(xlabel="eigenmodes", ylabel="T(t)")
-
-        axs[1, 2].legend(title="eigenmodes", loc="upper right", bbox_to_anchor=(1.4, 1))
-        axs[0, 2].legend(title="time step", loc="upper right", bbox_to_anchor=(1.4, 1))
-
-        # add letter labels for each fig
-        letters = ["A", "B", "C", "D", "E", "F"]
-        ax = axs.flatten()
-        for i in range(6):
-            ax[i].annotate(
-                letters[i],
-                xy=(-0.1, 1.05),
-                xycoords="axes fraction",
-                fontsize=16,
-                weight="bold",
-            )
-
-        fig.suptitle("Spectral Calcium Diffusion with Calbindin Buffer", fontsize=18)
-        plt.tight_layout()
-        plt.savefig(save_dir)
-        plt.show()
-
     def simulate_rxn_diffusion(self, save_dir):
         """
         Solve for u(x,t) using the method of eigenfunction expansion.
@@ -525,76 +460,3 @@ class SpectralRxnDiffusion:
         np.save(save_dir, self.u_rxndiff)
 
         return self.u_rxndiff
-
-    def plot_rxn_diffusion(self, save_dir):
-        # TODO: move to separate file
-        fig, axs = plt.subplots(2, 3, figsize=(15, 8))
-        labels_long = ["Calcium", "Calbindin", "Bound Calcium-Calbindin"]
-        total_particles = [
-            self.n_ca,
-            self.n_calb,
-            self.n_calb,
-        ]
-
-        # plot with space on the x-axis
-        times = [0, 1, 5, 20, 40, 50, 100]
-        for i in range(self.n_species):
-            for t in times:
-                # for t in range(self.n_time_pts):
-                axs[0, i].plot(
-                    self.spatial_mesh,
-                    self.u_rxndiff[:, t, i] / total_particles[i],
-                    label=f"t = {t}",
-                )
-
-        # plot with time on the x-axis
-        x_idx = [self.impulse_idx + i for i in range(0, 10)]
-        x_labels = [*range(0, 10)]
-        for i in range(self.n_species):
-            for j in range(len(x_idx)):
-                # for j in range(self.n_spatial_locs):
-                if j % 1 == 0:
-                    axs[1, i].plot(
-                        self.time_mesh,
-                        self.u_rxndiff[x_idx[j], :, i] / total_particles[i],
-                        label=f"$\Delta$x = {x_labels[j]}",
-                    )
-
-        # Add labels
-        for i in range(self.n_species):
-            axs[0, i].set_title(labels_long[i])
-            axs[0, i].set(xlabel="Distance (um)", ylabel="Normalized particle count")
-            axs[0, i].set_xlim(1.5, 3)
-            axs[1, i].set_title(labels_long[i])
-            axs[1, i].set_xlabel("Time (usec)")
-
-        # Set calbindin limits
-        # axs[0, 1].set_ylim([0.0066, 0.00666])
-
-        # Convert to scientific notation for calbindin graphs
-        for i in range(2):
-            axs[i, 1].ticklabel_format(axis="y", style="sci", scilimits=(0, 0))
-
-        # Add legends
-        axs[0, 2].legend(title="time step", loc="upper right", bbox_to_anchor=(1.4, 1))
-        axs[1, 2].legend(
-            title="steps from impulse", loc="upper right", bbox_to_anchor=(1.5, 1)
-        )
-
-        # add letter labels for each fig
-        letters = ["A", "B", "C", "D", "E", "F"]
-        ax = axs.flatten()
-        for i in range(6):
-            ax[i].annotate(
-                letters[i],
-                xy=(-0.1, 1.05),
-                xycoords="axes fraction",
-                fontsize=16,
-                weight="bold",
-            )
-
-        # Set title and save
-        fig.suptitle("Spectral Calcium Diffusion with Calbindin Buffer", fontsize=18)
-        plt.tight_layout()
-        plt.savefig(save_dir)
-        plt.show()
