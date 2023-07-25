@@ -31,14 +31,6 @@ def main():
         impulse_idx=ca_init_idx,
     )
 
-    # Spectral Method (calbindin reactions)
-    sd = SpectralRxnDiffusion.SpectralRxnDiffusion(
-        n_spatial_locs=n_space_pts,
-        n_time_pts=n_time_pts,
-        impulse_idx=ca_init_idx,
-        n_eigenmodes=n_space_pts,
-    )
-
     # FINITE DIFFERENCE DIFFUSION
     # fd.simulate_diffusion()
     # fd.plot_diffusion([0, 1, 5, 20, 40, 50, 100])
@@ -46,24 +38,6 @@ def main():
     # fd.simulate_rxn_diffusion()
     # fd.plot_rxn_diffusion([0, 1, 5, 20, 40, 50, 100], orientation="horizontal")
     # fd.plot_rxn_diffusion([0, 1, 5, 20, 40, 50, 100], orientation="vertical")
-
-    # SPECTRAL DIFFUSION
-    # sd.simulate_diffusion()
-    # sd.plot_diffusion([0, 1, 5, 20, 40, 50, 100])
-
-    # sd.solve_dTdt(save_dir="../data/spectral-diffusion/08192023/T.npy")
-    # sd.simulate_rxn_diffusion(save_dir="../data/spectral-diffusion/08192023/u.npy")
-
-    #plot_T(load_dir="../data/spectral-diffusion/08192023/T.npy", save_dir="../figures/08192023/", orientation="vertical")
-
-
-    plot_rxn_diffusion(
-        load_dir="../data/spectral-diffusion/08192023/u.npy",
-        save_dir="../figures/08192023/",
-        orientation="horizontal",
-    )
-
-
 
 if __name__ == "__main__":
     main()
