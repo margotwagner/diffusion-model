@@ -1,6 +1,6 @@
 import models.SpectralRxnDiffusion as SpectralRxnDiffusion
 import models.FiniteDiffRxnDiffusion as FiniteDiffRxnDiffusion
-from utils.plot_diffusion import plot_T, plot_rxn_diffusion
+from utils.diffusion_utils import plot_T, plot_rxn_diffusion
 
 
 def get_ca_init_loc():
@@ -38,6 +38,7 @@ def main():
     # fd.simulate_rxn_diffusion()
     # fd.plot_rxn_diffusion([0, 1, 5, 20, 40, 50, 100], orientation="horizontal")
     # fd.plot_rxn_diffusion([0, 1, 5, 20, 40, 50, 100], orientation="vertical")
+
 
 if __name__ == "__main__":
     main()
