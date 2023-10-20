@@ -66,7 +66,7 @@ if __name__ == "__main__":
         n_time_pts=100,  # number of time points
         binomial_sampling=False,  # use binomial sampling for eme markov simulation
         print_eigenvalues_and_vectors=False,
-        print_eigenmode_init_conditions=True,
+        print_eigenmode_init_conditions=False,
         print_eigenmode_transition_probability=False,
         print_eigenmodes_to_spatial_nodes=False,
         plot_random_walk=False,
