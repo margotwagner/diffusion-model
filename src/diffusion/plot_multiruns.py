@@ -1,15 +1,21 @@
+"""Plot saved output from run_multiruns.py -- multiple diffusion simulations of either random walk or EME method.
+
+Usage: python3 ./plot_multiruns.py
+"""
+
+__author__ = ["Margot Wagner"]
+__contact__ = "mwagner@ucsd.edu"
+__date__ = "2023/06/13"
+
+import sys
+sys.path.append("../../src/")
 import utils.PlotMultiruns as pm
 
 plotter = pm.PlotMultiRuns(
-    rw_dir="/Users/margotwagner/diffusion-model/data/eme-validation/random-walk/20230711_190344/rw-run-{}.csv",  # "/Users/margotwagner/diffusion-model/data/eme-validation/random-walk/20230118_192600/rw-run-{}.csv",
-    eme_dir="/Users/margotwagner/diffusion-model/data/eme-validation/markov-eme/20230711_190421/eme-run-{}.csv",  # "/Users/margotwagner/diffusion-model/data/eme-validation/markov-eme/20230405_105433_2/eme-run-{}.csv",
-    n_runs=10,
-    n_spatial_locs=101,
-    n_time_pts=100,  # TODO: make automatic
-    particle_start_loc=58,
-    n_particles=50,
+    eme_dir="/Users/margotwagner/projects/diffusion-model/data/eme-validation/markov-eme/20231020_140513/", #eme-run-{}.csv",
+    rw_dir="/Users/margotwagner/projects/diffusion-model/data/eme-validation/random-walk/20231020_140528/",  # rw-run-{}.csv",
     plot_eme=True,  # TODO: fix LHS entry
-    plot_rw=False,
+    plot_rw=True,
 )
 
 # plotter.plot_multiruns()

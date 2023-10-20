@@ -1,3 +1,14 @@
+"""Run multiple diffusion simulations using either random walk or EME method.
+
+Usage: python3 ./run_multiruns.py
+"""
+
+__author__ = ["Margot Wagner"]
+__contact__ = "mwagner@ucsd.edu"
+__date__ = "2023/06/13"
+
+import sys
+sys.path.append("../../src/")
 import utils.RunMultiruns as rm
 
 
@@ -46,6 +57,6 @@ if __name__ == "__main__":
         n_spatial_locs=101,
         n_time_pts=100,
         particle_start_loc=58,
-        run_type="rw",  # type of simulation to run
+        run_type="eme",  # type of simulation to run
         scaling_factor=2,
     )

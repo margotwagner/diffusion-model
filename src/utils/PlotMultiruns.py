@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import glob
 
 
 class PlotMultiRuns(object):
@@ -7,46 +8,81 @@ class PlotMultiRuns(object):
         self,
         rw_dir,
         eme_dir,
-        n_runs,
-        n_particles,
-        n_spatial_locs,
-        n_time_pts,
-        particle_start_loc,
         plot_rw=True,
         plot_eme=True,
-        line_length=4,
     ):
         self.rw_dir = rw_dir
         self.eme_dir = eme_dir
-        self.n_runs = n_runs
-        self.n_particles = n_particles
-        self.n_spatial_locs = n_spatial_locs
-        self.n_time_pts = n_time_pts
-        self.particle_start_loc = particle_start_loc
-        self.line_length = line_length
         self.plot_rw = plot_rw
         self.plot_eme = plot_eme
+        self.line_length = 4
+        self.n_runs_rw = self.n_runs_rw()
+        self.n_runs_eme = self.n_runs_eme()
+        self.n_spatial_locs = self.n_spatial_locs()
+        self.n_time_pts = self.n_time_pts()
+        self.particle_start_loc = self.particle_start_loc()
+        self.n_particles = self.n_particles()
 
     @property
     def spatial_mesh(self):
         """Return spatial mesh."""
         return np.linspace(0, self.line_length, self.n_spatial_locs)
 
-    def combine_runs(self, data_dir):
+    def n_runs_rw(self):
+        n_runs_rw = len(glob.glob(self.rw_dir + "*"))
+        return n_runs_rw
+
+    def n_runs_eme(self):
+        n_runs_eme = len(glob.glob(self.eme_dir + "*"))
+        return n_runs_eme
+
+    def n_spatial_locs(self):
+        dir = glob.glob(self.rw_dir + "*")[0]
+        run = np.loadtxt(dir, delimiter=",")
+        return run.shape[0]
+
+    def n_time_pts(self):
+        dir = glob.glob(self.rw_dir + "*")[0]
+        run = np.loadtxt(dir, delimiter=",")
+        return run.shape[1]
+
+    def particle_start_loc(self):
+        dir = glob.glob(self.rw_dir + "*")[0]
+        run = np.loadtxt(dir, delimiter=",")
+        start_loc = np.nonzero(run[:, 0])[0][0]
+
+        return start_loc
+
+    def n_particles(self):
+        dir = glob.glob(self.rw_dir + "*")[0]
+        run = np.loadtxt(dir, delimiter=",")
+        n_particles = run[self.particle_start_loc, 0]
+
+        return n_particles
+
+    def combine_runs(self, run_type):
+        if run_type == "eme":
+            data_dir = self.eme_dir
+            n_runs = self.n_runs_eme
+        else:
+            data_dir = self.rw_dir
+            n_runs = self.n_runs_rw
+
         # initialize array to store all runs
-        runs = np.zeros((self.n_runs, self.n_spatial_locs, self.n_time_pts))
+        runs = np.zeros((n_runs, self.n_spatial_locs, self.n_time_pts))
 
         # loop through runs
-        for i in range(self.n_runs):
+        for i in range(n_runs):
             # store run in array
-            runs[i, :, :] = np.loadtxt(data_dir.format(f"{i:03}"), delimiter=",")
+            print(f"{data_dir}{run_type}-run-{i:03}.csv")
+            runs[i, :, :] = np.loadtxt(f"{data_dir}{run_type}-run-{i:03}.csv", delimiter=",")
 
         # return array of all runs
         return runs
 
-    def get_stats(self, data_dir, normalize=False):
+    def get_stats(self, run_type, normalize=False):
         # combine runs
-        runs = self.combine_runs(data_dir)
+        runs = self.combine_runs(run_type)
 
         if normalize:
             runs = runs / self.n_particles
@@ -60,9 +96,9 @@ class PlotMultiRuns(object):
 
     def plot_mean_time(self, mean, time, colors):
         # TODO: add colors
-        if type(time) == int:
+        if isinstance(time, int):
             plt.plot(self.spatial_mesh, mean[:, time], label=f"t = {time}")
-        elif type(time) == list:
+        elif isinstance(time, list):
             time.reverse()
             for i in time:
                 plt.plot(self.spatial_mesh, mean[:, i], label=f"t = {i}")
@@ -140,7 +176,7 @@ class PlotMultiRuns(object):
             print("Preparing to plot random walk data...")
 
             # get data
-            rw_mean, rw_std, _ = self.get_stats(self.rw_dir)
+            rw_mean, rw_std, _ = self.get_stats("rw")
 
             print("Plotting random walk data...")
             # plot mean
@@ -153,7 +189,7 @@ class PlotMultiRuns(object):
             print("Preparing to plot eigenmarkov data...")
 
             # get data
-            eme_mean, eme_std, _ = self.get_stats(self.eme_dir, normalize=True)
+            eme_mean, eme_std, _ = self.get_stats("eme", normalize=True)
 
             print("Plotting eigenmarkov data...")
             # plot mean
@@ -182,7 +218,7 @@ class PlotMultiRuns(object):
             print("Preparing to plot random walk data...")
 
             # get data
-            rw_mean, rw_std, rw_runs = self.get_stats(self.rw_dir)
+            rw_mean, rw_std, rw_runs = self.get_stats("rw")
 
             print("Plotting random walk data...")
             # plot mean
@@ -195,7 +231,7 @@ class PlotMultiRuns(object):
             print("Preparing to plot eigenmarkov data...")
 
             # get data
-            eme_mean, eme_std, eme_runs = self.get_stats(self.eme_dir, normalize=True)
+            eme_mean, eme_std, eme_runs = self.get_stats("eme", normalize=True)
 
             print("Plotting eigenmarkov data...")
             # plot mean
@@ -224,7 +260,7 @@ class PlotMultiRuns(object):
             print("Preparing to plot random walk data...")
 
             # get data
-            rw_mean, rw_std, rw_runs = self.get_stats(self.rw_dir)
+            rw_mean, rw_std, rw_runs = self.get_stats("rw")
 
             print("Plotting random walk data...")
             # plot mean
@@ -237,7 +273,7 @@ class PlotMultiRuns(object):
             print("Preparing to plot eigenmarkov data...")
 
             # get data
-            eme_mean, eme_std, eme_runs = self.get_stats(self.eme_dir, normalize=True)
+            eme_mean, eme_std, eme_runs = self.get_stats("eme", normalize=True)
 
             print("Plotting eigenmarkov data...")
             # plot mean

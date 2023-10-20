@@ -21,7 +21,7 @@ class RunMultiruns:
         self.n_time_pts = n_time_pts
         self.particle_start_loc = particle_start_loc
 
-    def run_rw(self):
+    def run_rw(self, normalize=False):
         random_walk = rw.RandomWalk(
             n_particles=self.n_particles,
             n_spatial_locs=self.n_spatial_locs,
@@ -36,9 +36,12 @@ class RunMultiruns:
             particle_locs, plot=False
         )
 
-        return n_per_loc
+        if normalize:
+            return n_per_loc
+        else:
+            return unnorm_n_per_loc
 
-    def run_eme(self):
+    def run_eme(self, normalize=False):
 
         eigenmarkov = emd.EigenmarkovDiffusion(
             n_particles=self.n_particles,
@@ -55,41 +58,42 @@ class RunMultiruns:
             n_per_eigenmode_state, print_output=False
         )
 
-        return node_vals_from_modes
+        if normalize:
+            return node_vals_from_modes / self.n_particles
+        else:
+            return node_vals_from_modes
 
-    def run_multi_rw(self, make_dir=True):
+    def run_multi_rw(self, normalize=False, make_dir=True):
         if make_dir:
             from datetime import datetime
 
             time_now = datetime.now()  # UNIX time
             time_stamp = time_now.strftime("%Y%m%d_%H%M%S")
 
-            rw_dir = r"../data/eme-validation/random-walk/{}/".format(time_stamp)
+            rw_dir = r"../../data/eme-validation/random-walk/{}/".format(time_stamp)
             os.mkdir(rw_dir)
             print("Made new directory:", rw_dir)
-
-        # TODO: make option to add to existing dir
 
         for i in range(self.n_runs):
             if i % 10 == 0:  # print once every 10 sims
                 print("RUNNING SIMULATION {}".format(i))
 
             # run simulation
-            n_per_loc = self.run_rw()
+            n_per_loc = self.run_rw(normalize)
 
             # save output to csv
             np.savetxt(
                 rw_dir + "/rw-run-{}.csv".format(f"{i:03}"), n_per_loc, delimiter=","
             )
 
-    def run_multi_eme(self, make_dir=True):
+    def run_multi_eme(self, normalize=False, make_dir=True):
         if make_dir:
             from datetime import datetime
 
             time_now = datetime.now()  # UNIX time
             time_stamp = time_now.strftime("%Y%m%d_%H%M%S")
 
-            eme_dir = r"../data/eme-validation/markov-eme/{}/".format(time_stamp)
+            eme_dir = r"../../data/eme-validation/markov-eme/{}/".format(time_stamp)
             os.mkdir(eme_dir)
             print("Made new directory:", eme_dir)
 
@@ -98,7 +102,7 @@ class RunMultiruns:
                 print("RUNNING SIMULATION {}".format(i))
 
             # run simulation
-            node_vals_from_modes = self.run_eme()
+            node_vals_from_modes = self.run_eme(normalize)
 
             # save output to csv
             np.savetxt(
