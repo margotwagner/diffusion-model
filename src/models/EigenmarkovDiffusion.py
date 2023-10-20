@@ -1,3 +1,12 @@
+"""Class for simulating calcium diffusion using stochastic Markov version of eigenmode-based diffusion.
+
+Usage: initialize class with parameters, then run simulation with run_simulation() method. See run_validation.py for example usage.
+"""
+
+__author__ = ["Margot Wagner"]
+__contact__ = "mwagner@ucsd.edu"
+__date__ = "2023/06/13"
+
 import numpy as np
 from typing import Union, Tuple
 from numpy.linalg import eig

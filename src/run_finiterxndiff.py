@@ -1,6 +1,6 @@
 import models.SpectralRxnDiffusion as SpectralRxnDiffusion
 import models.FiniteDiffRxnDiffusion as FiniteDiffRxnDiffusion
-from utils.diffusion_utils import plot_T, plot_rxn_diffusion
+from utils.diffusion_utils import plot_T, plot_rxn_diffusion, plot_calcium
 import numpy as np
 
 
@@ -36,9 +36,9 @@ def main():
     # fd.simulate_diffusion()
     # fd.plot_diffusion([0, 1, 5, 20, 40, 50, 100])
 
-    u_fd = fd.simulate_rxn_diffusion()
-    #np.save("../data/fdm-diffusion/08242023/u.npy", u_fd)
-    #fd.plot_rxn_diffusion([0, 1, 5, 20, 40, 50, 100], orientation="horizontal")
+    fd.simulate_rxn_diffusion()
+    # np.save("../data/fdm-diffusion/08242023/u.npy", u_fd)
+    # fd.plot_rxn_diffusion([0, 1, 5, 20, 40, 50, 100], orientation="horizontal")
     # fd.plot_rxn_diffusion([0, 1, 5, 20, 40, 50, 100], orientation="vertical")
 
 

@@ -22,20 +22,26 @@ def main():
     n_space_pts = 150  # 150  # number of spatial points
     ca_init_idx = get_ca_init_idx(n_space_pts)
 
+    n_eigenmodes = 300
+
     # Spectral Method (calbindin reactions)
     sd = SpectralRxnDiffusion.SpectralRxnDiffusion(
         n_spatial_locs=n_space_pts,
         n_time_pts=n_time_pts,
         impulse_idx=ca_init_idx,
-        n_eigenmodes=75,
+        n_eigenmodes=n_eigenmodes,
     )
 
     # SPECTRAL DIFFUSION
     # sd.simulate_diffusion()
     # sd.plot_diffusion([0, 1, 5, 20, 40, 50, 100])
 
-    sd.solve_dTdt(save_dir="../data/spectral-diffusion/08202023/T.npy")
-    sd.simulate_rxn_diffusion(save_dir="../data/spectral-diffusion/08202023/u.npy")
+    sd.solve_dTdt(
+        save_dir=f"../data/spectral-diffusion/eigenmode-exps/{n_eigenmodes}/T.npy"
+    )
+    sd.simulate_rxn_diffusion(
+        save_dir=f"../data/spectral-diffusion/eigenmode-exps/{n_eigenmodes}/u.npy"
+    )
 
 
 if __name__ == "__main__":
