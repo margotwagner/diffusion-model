@@ -90,7 +90,7 @@ class RunMultiruns:
             time_stamp = time_now.strftime("%Y%m%d_%H%M%S")
 
             eme_dir = r"../data/eme-validation/markov-eme/{}/".format(time_stamp)
-            os.mkdir(eme_dir)
+            os.makedirs(eme_dir)
             print("Made new directory:", eme_dir)
 
         for i in range(self.n_runs):
