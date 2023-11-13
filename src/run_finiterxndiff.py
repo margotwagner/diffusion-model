@@ -36,7 +36,8 @@ def main():
     # fd.simulate_diffusion()
     # fd.plot_diffusion([0, 1, 5, 20, 40, 50, 100])
 
-    fd.simulate_rxn_diffusion()
+    fd.simulate_diffusion()
+    fd.plot_diffusion([0, 1, 5, 20, 40, 50, 100])
     # np.save("../data/fdm-diffusion/08242023/u.npy", u_fd)
     # fd.plot_rxn_diffusion([0, 1, 5, 20, 40, 50, 100], orientation="horizontal")
     # fd.plot_rxn_diffusion([0, 1, 5, 20, 40, 50, 100], orientation="vertical")

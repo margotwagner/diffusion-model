@@ -1,5 +1,5 @@
 import models.SpectralRxnDiffusion as SpectralRxnDiffusion
-
+import numpy as np
 
 def get_ca_init_loc():
     # VDCC
@@ -39,9 +39,13 @@ def main():
     sd.solve_dTdt(
         save_dir=f"../data/spectral-diffusion/eigenmode-exps/{n_eigenmodes}/T.npy"
     )
-    sd.simulate_rxn_diffusion(
-        save_dir=f"../data/spectral-diffusion/eigenmode-exps/{n_eigenmodes}/u.npy"
+    sd.simulate_diffusion(
+        # save_dir=f"../data/spectral-diffusion/eigenmode-exps/{n_eigenmodes}/u.npy"
     )
+
+    T = np.load("../data/spectral-diffusion/eigenmode-exps/300/T.npy")
+
+    sd.plot_diffusion([0, 1, 5, 20, 40, 50, 100])
 
 
 if __name__ == "__main__":
