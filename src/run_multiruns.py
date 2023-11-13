@@ -46,6 +46,7 @@ if __name__ == "__main__":
         n_spatial_locs=101,
         n_time_pts=100,
         particle_start_loc=58,
-        run_type="eme",  # type of simulation to run
-        scaling_factor=2,
+        run_type="rw",  # type of simulation to run
+        # scaling_factor=2,
+        scaling_factor=0.5,
     )

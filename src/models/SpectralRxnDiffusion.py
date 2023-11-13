@@ -19,6 +19,7 @@ NOTE: scaling factor require to match the Finite Difference scheme:
 import math
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 from scipy.integrate import solve_ivp
 
 
@@ -344,16 +345,17 @@ class SpectralRxnDiffusion:
                 )
         """
 
-        coupling = 0
-        for ca_eigen_idx in range(0, self.n_eigenmodes):
-            for calb_eigen_idx in range(0, self.n_eigenmodes):
-                coupling += (
-                    self.alpha(ca_eigen_idx, calb_eigen_idx, eigen_idx)
-                    * T_eqtns[ca_eigen_idx]
-                    * T_eqtns[self.n_eigenmodes + calb_eigen_idx]
-                )
+        # coupling = 0
+        # for ca_eigen_idx in range(0, self.n_eigenmodes):
+        #     for calb_eigen_idx in range(0, self.n_eigenmodes):
+        #         coupling += (
+        #             self.alpha(ca_eigen_idx, calb_eigen_idx, eigen_idx)
+        #             * T_eqtns[ca_eigen_idx]
+        #             * T_eqtns[self.n_eigenmodes + calb_eigen_idx]
+        #         )
 
-        return coupling
+        # return coupling
+        return 0
 
     def dTdt(self, t, T_eqtns, T_idx, species_idx, eigen_idx):
         """Time derivative of the temporal component of the solution array for
@@ -422,7 +424,7 @@ class SpectralRxnDiffusion:
                 species_idx * self.n_eigenmodes : (species_idx + 1) * self.n_eigenmodes,
                 :,
             ]
-
+        os.makedirs(os.path.dirname(save_dir), exist_ok=True)
         np.save(save_dir, self.T)
 
         return sol
