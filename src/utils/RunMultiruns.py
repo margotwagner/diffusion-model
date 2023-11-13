@@ -65,7 +65,7 @@ class RunMultiruns:
             time_stamp = time_now.strftime("%Y%m%d_%H%M%S")
 
             rw_dir = r"../data/eme-validation/random-walk/{}/".format(time_stamp)
-            os.mkdir(rw_dir)
+            os.makedirs(rw_dir)
             print("Made new directory:", rw_dir)
 
         # TODO: make option to add to existing dir

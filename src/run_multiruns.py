@@ -1,6 +1,5 @@
 import utils.RunMultiruns as rm
 
-
 def main(
     n_runs,
     n_particles,
@@ -46,6 +45,6 @@ if __name__ == "__main__":
         n_spatial_locs=101,
         n_time_pts=100,
         particle_start_loc=58,
-        run_type="eme",  # type of simulation to run
+        run_type="rw",  # type of simulation to run
         scaling_factor=2,
     )

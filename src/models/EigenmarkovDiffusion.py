@@ -72,6 +72,7 @@ class EigenmarkovDiffusion:
 
         # Transition matrix is given by the ODE dynamics equation (using k-values)
         vec_diag = np.full(self.n_spatial_locs, (2 * diffusion_rate_constant_k))
+
         vec_off_diag = np.full(
             (self.n_spatial_locs - 1), -diffusion_rate_constant_k
         )  # off-diagonal values
@@ -330,10 +331,9 @@ class EigenmarkovDiffusion:
         Returns:
             np.ndarray: transition probability
         """
-
         eigenvalues, _, _ = self.get_eigenvalues_and_vectors()
-        transition_probability = (eigenvalues / 2) * self.dt
-
+        # transition_probability = (eigenvalues / 2) * self.dt
+        transition_probability = (eigenvalues) * self.dt
         if print_output:
             print("EIGENMODE TRANSITION PROBABILITIES")
             [print(i, end="\t") for i in range(self.n_spatial_locs)]
