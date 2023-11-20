@@ -172,8 +172,9 @@ class PlotMultiRuns(object):
         plt.legend()
         plt.show()
 
-    def plot_multiruns(self):
-        plt.figure(figsize=(14, 10))
+    def plot_multiruns(self, new_fig=True):
+        if new_fig:
+            plt.figure(figsize=(14, 10))
 
         # get list of colors
         colors = plt.cm.tab10_r(np.linspace(0, 1, self.n_spatial_locs))

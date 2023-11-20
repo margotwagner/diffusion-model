@@ -17,6 +17,10 @@ simulate solves the wave equation
 
 import numpy as np
 import matplotlib.pyplot as plt
+from SpectralRxnDiffusion import SpectralRxnDiffusion
+from RandomWalk import RandomWalk
+from utils.PlotMultiruns import PlotMultiRuns
+
 
 
 class FiniteDiffRxnDiffusion:
@@ -449,7 +453,7 @@ class FiniteDiffRxnDiffusion:
 
         return self.u_rxndiff
 
-    def plot_diffusion(self, t):
+    def plot_diffusion(self, t, show=True):
         print("Plotting...")
         fig, axs = plt.subplots(1, 2, figsize=(10, 5), sharey=True)
 
@@ -491,7 +495,18 @@ class FiniteDiffRxnDiffusion:
 
         plt.tight_layout()
         plt.savefig("../figures/finite-diff-norxns.png")
-        plt.show()
+        if show:
+            plt.show()
+
+    def plot_diffusion_vs_spect(self, t, spect: SpectralRxnDiffusion):
+        self.plot_diffusion(t, show=False)
+        spect.plot_diffusion(t)
+
+    def plot_diffusion_vs_rw(self, t, rw: PlotMultiRuns):
+        self.plot_diffusion(t)
+        if rw.plot_rw is False:
+            raise ValueError("PlotMultiRuns object must have plot_rw set to True.")
+        rw.plot_multiruns()
 
     def plot_rxn_diffusion(self, t, orientation="vertical"):
         """_summary_
