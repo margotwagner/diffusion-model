@@ -31,7 +31,7 @@ def main():
         n_time_pts=n_time_pts,
         impulse_idx=ca_init_idx,
     )
-
+    fd.simulate_diffusion()
     n_eigenmodes = 300
 
     # Spectral Method (calbindin reactions)
@@ -53,7 +53,7 @@ def main():
     # fd.simulate_diffusion()
     # fd.plot_diffusion([0, 1, 5, 20, 40, 50, 100])
     t = [0, 1, 5, 20, 40, 50, 100]
-    fd.plot_diffusion_vs_spect(t, sd)
+    fd.plot_finndiff_vs_spect(sd)
 
 
 

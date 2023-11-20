@@ -497,9 +497,47 @@ class FiniteDiffRxnDiffusion:
         if show:
             plt.show()
 
-    def plot_diffusion_vs_spect(self, t, spect: SpectralRxnDiffusion):
-        self.plot_diffusion(t, show=False)
-        spect.plot_diffusion(t, newfig=False)
+    def plot_finndiff_vs_spect(self, spect):
+        print("Plotting...")
+
+        fig, ax = plt.subplots(figsize=(10, 6))
+
+        # plot with time on the x-axis
+
+        # 1. plot finite diff (Want this to be blue, plot on legend)
+        x_idx = [self.impulse_idx + i for i in range(0, 10)]
+        for i in range(len(x_idx)):
+            ax.plot(
+                self.time_mesh,
+                self.u_diff[x_idx[i], :] / self.n_ca,
+                label=f"$\Delta$x = {i}",
+                color='blue'
+            )
+
+        # 2. plot spectral reaction diffusion (want this to be red, plot on legend)
+        for i in range(len(x_idx)):
+            ax.plot(
+                spect.time_mesh,
+                spect.u_diff[x_idx[i], :] / spect.n_ca,
+                label=f"Spectral $\Delta$x = {i}",
+                color='red'
+            )
+
+        ax.set_xlabel("Time (usec)")
+        ax.set_title("Calcium vs Time")
+        ax.legend(title="Steps from impulse")
+        ax.annotate(
+            "B", xy=(0, 1.05), xycoords="axes fraction", fontsize=16, weight="bold"
+        )
+
+        plt.suptitle(
+            "Finite Diff vs. Spectral Diff (No Rxn)", fontsize=18
+        )
+
+        plt.tight_layout()
+        plt.savefig("../figures/findiff-v-specdiff.png")
+        plt.show()
+
 
     def plot_diffusion_vs_rw(self, t, rw: PlotMultiRuns):
         self.plot_diffusion(t, show=False)
