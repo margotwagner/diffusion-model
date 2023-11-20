@@ -332,8 +332,7 @@ class EigenmarkovDiffusion:
             np.ndarray: transition probability
         """
         eigenvalues, _, _ = self.get_eigenvalues_and_vectors()
-        # transition_probability = (eigenvalues / 2) * self.dt
-        transition_probability = (eigenvalues * 1.1) * self.dt
+        transition_probability = (eigenvalues / 2) * self.dt
         if print_output:
             print("EIGENMODE TRANSITION PROBABILITIES")
             [print(i, end="\t") for i in range(self.n_spatial_locs)]

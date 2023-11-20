@@ -186,7 +186,7 @@ class PlotMultiRuns(object):
                 fd.time_mesh,
                 fd.u_diff[x_idx[i], :] / fd.n_ca,
                 label=f"$\Delta$x = {i}",
-                color='red'
+                color='orange'
             )
         
         # 2. plot random walk (Want this to be orange, plot on legend)
@@ -207,6 +207,7 @@ class PlotMultiRuns(object):
             self.plot_std(rw_mean, rw_std, colors)
 
         if self.plot_eme:
+            title_str="Eigenmarkov"
             print("Preparing to plot eigenmarkov data...")
 
             # get data
@@ -218,6 +219,8 @@ class PlotMultiRuns(object):
 
             # plot std
             self.plot_std(eme_mean, eme_std, colors)
+        if self.plot_eme and self.plot_rw:
+            title_str="Eigenmarkov and Random Walk"
         
         print("Beautifying plot...")
         ax.set_xlabel("Time (usec)")
@@ -232,7 +235,7 @@ class PlotMultiRuns(object):
         )
 
         plt.tight_layout()
-        plt.savefig("../figures/findiff-v-specdiff.png")
+        plt.savefig(f"../figures/findiff-v-{title_str}.png")
         plt.show()
 
         
