@@ -42,8 +42,8 @@ def main():
         n_time_pts=100,  # TODO: make automatic
         particle_start_loc=58,
         n_particles=50,
-        plot_eme=True,  # TODO: fix LHS entry
-        plot_rw=False,
+        plot_eme=False,  # TODO: fix LHS entry
+        plot_rw=True,
     )
 
     plotter.plot_rw_eme_vs_finndiff(fd)
