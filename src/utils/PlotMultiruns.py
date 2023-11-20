@@ -172,6 +172,72 @@ class PlotMultiRuns(object):
         plt.legend()
         plt.show()
 
+    def plot_rw_eme_vs_finndiff(self, fd):
+        print("Plotting...")
+
+        fig, ax = plt.subplots(figsize=(10, 6))
+
+        # plot with time on the x-axis
+
+        # 1. plot finite diff (Want this to be blue, plot on legend)
+        x_idx = [fd.impulse_idx + i for i in range(0, 10)]
+        for i in range(len(x_idx)):
+            ax.plot(
+                fd.time_mesh,
+                fd.u_diff[x_idx[i], :] / fd.n_ca,
+                label=f"$\Delta$x = {i}",
+                color='red'
+            )
+        
+        # 2. plot random walk (Want this to be orange, plot on legend)
+                # get list of colors
+        colors = plt.cm.tab10_r(np.linspace(0, 1, self.n_spatial_locs))
+        title_str = "Random Walk"
+        if self.plot_rw:
+            print("Preparing to plot random walk data...")
+
+            # get data
+            rw_mean, rw_std, rw_runs = self.get_stats(self.rw_dir)
+
+            print("Plotting random walk data...")
+            # plot mean
+            self.plot_mean(rw_mean, colors)
+
+            # plot std
+            self.plot_std(rw_mean, rw_std, colors)
+
+        if self.plot_eme:
+            print("Preparing to plot eigenmarkov data...")
+
+            # get data
+            eme_mean, eme_std, eme_runs = self.get_stats(self.eme_dir, normalize=True)
+
+            print("Plotting eigenmarkov data...")
+            # plot mean
+            self.plot_mean(eme_mean, colors)
+
+            # plot std
+            self.plot_std(eme_mean, eme_std, colors)
+        
+        print("Beautifying plot...")
+        ax.set_xlabel("Time (usec)")
+        ax.set_title("Calcium vs Time")
+        ax.legend(title="Steps from impulse")
+        ax.annotate(
+            "B", xy=(0, 1.05), xycoords="axes fraction", fontsize=16, weight="bold"
+        )
+
+        plt.suptitle(
+            f"Finite Diff vs. {title_str}", fontsize=18
+        )
+
+        plt.tight_layout()
+        plt.savefig("../figures/findiff-v-specdiff.png")
+        plt.show()
+
+        
+        
+
     def plot_multiruns(self, new_fig=True):
         if new_fig:
             plt.figure(figsize=(14, 10))
