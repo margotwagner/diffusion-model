@@ -220,10 +220,11 @@ class SpectralRxnDiffusion:
 
         return self.u_diff
 
-    def plot_diffusion(self, t):
+    def plot_diffusion(self, t, newfig=True):
         # TODO: move to separate file
         print("Plotting...")
-        fig, axs = plt.subplots(1, 2, figsize=(10, 5), sharey=True)
+        if newfig:
+            fig, axs = plt.subplots(1, 2, figsize=(10, 5), sharey=True)
 
         # plot with space on the x-axis
         for i in t:

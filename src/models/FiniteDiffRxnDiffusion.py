@@ -500,13 +500,19 @@ class FiniteDiffRxnDiffusion:
 
     def plot_diffusion_vs_spect(self, t, spect: SpectralRxnDiffusion):
         self.plot_diffusion(t, show=False)
-        spect.plot_diffusion(t)
+        spect.plot_diffusion(t, newfig=False)
 
     def plot_diffusion_vs_rw(self, t, rw: PlotMultiRuns):
-        self.plot_diffusion(t)
+        self.plot_diffusion(t, show=False)
         if rw.plot_rw is False:
             raise ValueError("PlotMultiRuns object must have plot_rw set to True.")
-        rw.plot_multiruns()
+        rw.plot_multiruns(new_fig=False)
+
+    def plot_diffusion_vs_eme(self, t, eme: PlotMultiRuns):
+        self.plot_diffusion(t, show=False)
+        if eme.plot_eme is False:
+            raise ValueError("PlotMultiRuns object must have plot_rw set to True.")
+        eme.plot_multiruns(new_fig=False)
 
     def plot_rxn_diffusion(self, t, orientation="vertical"):
         """_summary_
