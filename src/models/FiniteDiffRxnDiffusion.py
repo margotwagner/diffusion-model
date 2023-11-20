@@ -17,8 +17,7 @@ simulate solves the wave equation
 
 import numpy as np
 import matplotlib.pyplot as plt
-from SpectralRxnDiffusion import SpectralRxnDiffusion
-from RandomWalk import RandomWalk
+from models.SpectralRxnDiffusion import SpectralRxnDiffusion
 from utils.PlotMultiruns import PlotMultiRuns
 
 
