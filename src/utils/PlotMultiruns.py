@@ -123,7 +123,7 @@ class PlotMultiRuns(object):
                     loc += 1
 
     def plot_std_time(self, mean, std, time, colors):
-        if type(time) == int:
+        if isinstance(time, int):
             plt.fill_between(
                 self.spatial_mesh,
                 mean[:, time] + std[:, time],
@@ -131,7 +131,7 @@ class PlotMultiRuns(object):
                 alpha=0.2,
                 # color=colors[time],
             )
-        elif type(time) == list:
+        elif isinstance(time, list):
             time.reverse()
             for i in time:
                 plt.fill_between(
@@ -172,19 +172,6 @@ class PlotMultiRuns(object):
         # get list of colors
         colors = plt.cm.tab10_r(np.linspace(0, 1, len(time)))
 
-        if self.plot_rw:
-            print("Preparing to plot random walk data...")
-
-            # get data
-            rw_mean, rw_std, _ = self.get_stats("rw")
-
-            print("Plotting random walk data...")
-            # plot mean
-            self.plot_mean_time(rw_mean, time, colors)
-
-            # plot std
-            self.plot_std_time(rw_mean, rw_std, time, colors)
-
         if self.plot_eme:
             print("Preparing to plot eigenmarkov data...")
 
@@ -194,16 +181,31 @@ class PlotMultiRuns(object):
             print("Plotting eigenmarkov data...")
             # plot mean
             self.plot_mean_time(eme_mean, time, colors)
+            print(time)
 
             # plot std
             self.plot_std_time(eme_mean, eme_std, time, colors)
+
+        if self.plot_rw:
+            print("Preparing to plot random walk data...")
+
+            # get data
+            rw_mean, rw_std, _ = self.get_stats("rw", normalize=True)
+
+            print("Plotting random walk data...")
+            # plot mean
+            self.plot_mean_time(rw_mean, time, colors)
+            print(time)
+
+            # plot std
+            self.plot_std_time(rw_mean, rw_std, time, colors)
 
         print("Beautifying plot...")
         plt.title(
             "Normalized number of particles in each position over time",
             fontsize=20,
         )
-        plt.xlabel("timepoint", fontsize=14)
+        plt.xlabel("distance (um)", fontsize=14)
         plt.ylabel("normalized count", fontsize=14)
         plt.legend()
         plt.show()
@@ -218,7 +220,7 @@ class PlotMultiRuns(object):
             print("Preparing to plot random walk data...")
 
             # get data
-            rw_mean, rw_std, rw_runs = self.get_stats("rw")
+            rw_mean, rw_std, rw_runs = self.get_stats("rw", normalize=True)
 
             print("Plotting random walk data...")
             # plot mean
@@ -247,7 +249,7 @@ class PlotMultiRuns(object):
         )
         plt.xlabel("timepoint", fontsize=14)
         plt.ylabel("normalized count", fontsize=14)
-        plt.legend()
+        #plt.legend()
         plt.show()
 
     def plot_separately(self, shape=(4, 3)):
