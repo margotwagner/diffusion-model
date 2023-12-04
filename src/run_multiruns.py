@@ -41,7 +41,7 @@ def main(
 if __name__ == "__main__":
     main(
         n_runs=10,
-        n_particles=50,
+        n_particles=58,
         n_spatial_locs=101,
         n_time_pts=100,
         particle_start_loc=58,

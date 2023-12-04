@@ -19,7 +19,7 @@ def get_ca_init_idx(n_space_pts):
 
 def main():
     n_time_pts = 101  # number of time points
-    n_space_pts = 150  # 150  # number of spatial points
+    n_space_pts = 101  # 101  # number of spatial points
     ca_init_idx = get_ca_init_idx(n_space_pts)
 
     n_eigenmodes = 300
