@@ -13,6 +13,7 @@ from numpy.linalg import eig
 import matplotlib.pyplot as plt
 import math
 
+FUDGE_FACTOR = 2
 
 class EigenmarkovDiffusion:
     def __init__(
@@ -53,7 +54,7 @@ class EigenmarkovDiffusion:
         dx = self.line_length / self.n_spatial_locs  # distance of one "hop"
         diffusion_rate_constant_k = self.diffusion_constant_D / dx**2  # rate constant
 
-        return diffusion_rate_constant_k * self.dt, diffusion_rate_constant_k
+        return  diffusion_rate_constant_k * self.dt, diffusion_rate_constant_k 
 
     def get_transition_matrix(self) -> np.ndarray:
         """Builds and returns the transition matrix for the 1D random walk case
@@ -343,7 +344,7 @@ class EigenmarkovDiffusion:
             ]
             print()
 
-        return transition_probability
+        return transition_probability 
 
     def run_simulation(
         self,
@@ -409,7 +410,7 @@ class EigenmarkovDiffusion:
             n_per_eigenmode_state[:, 0, j] = init_cond[j]
 
         # for each time point
-        for i in range(self.n_time_pts - 1):
+        for i in range(int(self.n_time_pts) - 1):
             # for each eigenmode
             for k in range(self.n_spatial_locs):
                 # initialize the number of particles that transition

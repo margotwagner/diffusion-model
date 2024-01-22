@@ -184,6 +184,8 @@ class SpectralRxnDiffusion:
         )
 
     def diffusion_spectral_eqtn(self, x_idx, t_idx):
+
+        
         u = self.Z_n(0) + sum(
             [
                 (

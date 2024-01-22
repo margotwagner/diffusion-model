@@ -39,9 +39,7 @@ def main():
     sd.solve_dTdt(
         save_dir=f"../data/spectral-diffusion/eigenmode-exps/{n_eigenmodes}/T.npy"
     )
-    sd.simulate_diffusion(
-        # save_dir=f"../data/spectral-diffusion/eigenmode-exps/{n_eigenmodes}/u.npy"
-    )
+    sd.simulate_diffusion()
 
     T = np.load("../data/spectral-diffusion/eigenmode-exps/300/T.npy")
 
