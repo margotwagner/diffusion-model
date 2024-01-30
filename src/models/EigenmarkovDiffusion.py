@@ -183,6 +183,8 @@ class EigenmarkovDiffusion:
         eigenvectors = e_vec_unsorted[:, eval_sort_index]
 
         # normalize eigenvector values
+
+        # IS THIS THE ISSUE? CHECK!
         eigenvectors = eigenvectors / eigenvectors[0, 0]
 
         if print_output:
@@ -325,6 +327,10 @@ class EigenmarkovDiffusion:
 
     def get_eigenmode_transition_probability(self, print_output=False) -> np.ndarray:
         """Get the probability of transitioning from one eigenmode to another
+
+        transition probability should be equivalent to the 0.5*D*lambda^2*dt from the
+        spectral solution (CHECK decaying exponentials) 
+
 
         Args:
             print_output (bool, optional): Whether to print outputs. Defaults to False.

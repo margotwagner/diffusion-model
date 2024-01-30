@@ -177,28 +177,27 @@ class SpectralRxnDiffusion:
         """
         return np.cos((n * np.pi * x) / self.line_length)
 
-    def diffusion_temporal_eqtn(self, n, t_idx):
+    def diffusion_temporal_eqtn(self, n, t_idx,  ):
 
         return math.exp(
             -((n * math.pi / self.line_length) ** 2) * self.D_ca * self.time_mesh[t_idx]
         )
 
     def diffusion_spectral_eqtn(self, x_idx, t_idx):
+        out = []
 
-        
-        u = self.Z_n(0) + sum(
-            [
-                (
+        for m in range(1, self.n_eigenmodes):
+            out.append(
+                 (
                     (self.n_ca / (self.n_spatial_locs / self.line_length))
                     * self.Z_n(m)
                     * self.cos_n(m, self.spatial_mesh[x_idx])
                     * self.cos_n(m, self.spatial_mesh[self.impulse_idx])
                     * self.diffusion_temporal_eqtn(m, t_idx)
                 )
-                for m in range(1, self.n_eigenmodes)
-            ]
-        )
+            )
 
+        u = self.Z_n(0) + sum(out)
         return u
 
     def simulate_diffusion(self):
