@@ -32,7 +32,7 @@ def main():
         impulse_idx=ca_init_idx,
     )
     fd.simulate_diffusion()
-    n_eigenmodes = 300
+    n_eigenmodes = 100
 
     # Spectral Method (calbindin reactions)
     sd = SpectralRxnDiffusion.SpectralRxnDiffusion(

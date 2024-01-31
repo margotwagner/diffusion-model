@@ -182,6 +182,12 @@ class SpectralRxnDiffusion:
         return math.exp(
             -((n * math.pi / self.line_length) ** 2) * self.D_ca * self.time_mesh[t_idx]
         )
+    
+    def get_eigenmode(self, n, t,  ):
+
+        return np.exp(
+            -((n * math.pi / self.line_length) ** 2) * self.D_ca * t
+        )
 
     def diffusion_spectral_eqtn(self, x_idx, t_idx):
         out = []
