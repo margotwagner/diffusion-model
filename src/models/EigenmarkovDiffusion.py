@@ -13,7 +13,6 @@ from numpy.linalg import eig
 import matplotlib.pyplot as plt
 import math
 
-FUDGE_FACTOR = 2
 
 class EigenmarkovDiffusion:
     def __init__(
@@ -54,7 +53,7 @@ class EigenmarkovDiffusion:
         dx = self.line_length / self.n_spatial_locs  # distance of one "hop"
         diffusion_rate_constant_k = self.diffusion_constant_D / dx**2  # rate constant
 
-        return  diffusion_rate_constant_k * self.dt, diffusion_rate_constant_k 
+        return diffusion_rate_constant_k * self.dt, diffusion_rate_constant_k
 
     def get_transition_matrix(self) -> np.ndarray:
         """Builds and returns the transition matrix for the 1D random walk case
@@ -73,7 +72,6 @@ class EigenmarkovDiffusion:
 
         # Transition matrix is given by the ODE dynamics equation (using k-values)
         vec_diag = np.full(self.n_spatial_locs, (2 * diffusion_rate_constant_k))
-
         vec_off_diag = np.full(
             (self.n_spatial_locs - 1), -diffusion_rate_constant_k
         )  # off-diagonal values
@@ -183,8 +181,6 @@ class EigenmarkovDiffusion:
         eigenvectors = e_vec_unsorted[:, eval_sort_index]
 
         # normalize eigenvector values
-
-        # IS THIS THE ISSUE? CHECK!
         eigenvectors = eigenvectors / eigenvectors[0, 0]
 
         if print_output:
@@ -328,18 +324,16 @@ class EigenmarkovDiffusion:
     def get_eigenmode_transition_probability(self, print_output=False) -> np.ndarray:
         """Get the probability of transitioning from one eigenmode to another
 
-        transition probability should be equivalent to the 0.5*D*lambda^2*dt from the
-        spectral solution (CHECK decaying exponentials) 
-
-
         Args:
             print_output (bool, optional): Whether to print outputs. Defaults to False.
 
         Returns:
             np.ndarray: transition probability
         """
+
         eigenvalues, _, _ = self.get_eigenvalues_and_vectors()
         transition_probability = (eigenvalues / 2) * self.dt
+
         if print_output:
             print("EIGENMODE TRANSITION PROBABILITIES")
             [print(i, end="\t") for i in range(self.n_spatial_locs)]
@@ -350,7 +344,7 @@ class EigenmarkovDiffusion:
             ]
             print()
 
-        return transition_probability 
+        return transition_probability
 
     def run_simulation(
         self,
@@ -416,7 +410,7 @@ class EigenmarkovDiffusion:
             n_per_eigenmode_state[:, 0, j] = init_cond[j]
 
         # for each time point
-        for i in range(int(self.n_time_pts) - 1):
+        for i in range(self.n_time_pts - 1):
             # for each eigenmode
             for k in range(self.n_spatial_locs):
                 # initialize the number of particles that transition
