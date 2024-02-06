@@ -180,9 +180,6 @@ class EigenmarkovDiffusion:
         eigenvalues[0] = round(eigenvalues[0])
         eigenvectors = e_vec_unsorted[:, eval_sort_index]
 
-        # normalize eigenvector values
-        eigenvectors = eigenvectors / eigenvectors[0, 0]
-
         if print_output:
             print("EIGENVALUES")
             print(" ", end="")
