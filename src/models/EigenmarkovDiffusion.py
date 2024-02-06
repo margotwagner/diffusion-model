@@ -244,9 +244,7 @@ class EigenmarkovDiffusion:
         # new index of starting node location in sorted eigenvalue/vector arrays
         start_loc_eigenvalue_i = np.where(eval_sort_index == self.particle_start_loc)[
             0
-        ][
-            0
-        ]  # np.where returns some nested arrays, index out here
+        ][0]
 
         # get eigenvector for starting location, all eigenmodes (v_k)
         start_loc_eigenvector = eigenvectors[start_loc_eigenvalue_i, :]

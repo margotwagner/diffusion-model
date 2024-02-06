@@ -75,7 +75,9 @@ class PlotMultiRuns(object):
         for i in range(n_runs):
             # store run in array
             print(f"{data_dir}{run_type}-run-{i:03}.csv")
-            runs[i, :, :] = np.loadtxt(f"{data_dir}{run_type}-run-{i:03}.csv", delimiter=",")
+            runs[i, :, :] = np.loadtxt(
+                f"{data_dir}{run_type}-run-{i:03}.csv", delimiter=","
+            )
 
         # return array of all runs
         return runs
@@ -249,7 +251,7 @@ class PlotMultiRuns(object):
         )
         plt.xlabel("timepoint", fontsize=14)
         plt.ylabel("normalized count", fontsize=14)
-        #plt.legend()
+        # plt.legend()
         plt.show()
 
     def plot_separately(self, shape=(4, 3)):

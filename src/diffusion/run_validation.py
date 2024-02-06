@@ -1,4 +1,5 @@
 import sys
+
 sys.path.append("../../src/")
 import models.RandomWalk as rw
 import models.EigenmarkovDiffusion as emd

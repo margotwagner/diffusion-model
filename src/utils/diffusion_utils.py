@@ -94,6 +94,7 @@ def total_diff(true_load_dir, exp_load_dir, percent):
     else:
         return total_diff
 
+
 def ca_percent_error(true_load_dir, exp_load_dir, save_dir):
     # Initialize simulation data
     u_true = np.load(true_load_dir)
@@ -134,7 +135,7 @@ def ca_percent_error(true_load_dir, exp_load_dir, save_dir):
 
     # plot percent_error vs spatial mesh
     # plot with space on the x-axis
-    times = [0, 1, 2, 3, 4, 5, 10] #20, 40, 50, 100]
+    times = [0, 1, 2, 3, 4, 5, 10]  # 20, 40, 50, 100]
     colors = sns.color_palette("crest", len(times))
     for t in range(len(times)):
         axs[1].plot(
@@ -164,15 +165,15 @@ def ca_percent_error(true_load_dir, exp_load_dir, save_dir):
     for i in range(2):
 
         if i % 2 == 0:
-            ax[i].set_xlim([-.05, 8])
+            ax[i].set_xlim([-0.05, 8])
         else:
             ax[i].set_xlim([2, 2.8])
 
         ax[i].set_xlabel(xlabs[i % 2], fontsize=16)
         ax[i].set_ylabel("% difference", fontsize=16)
         ax[i].set_title(titles[i], fontsize=18)
-        ax[i].tick_params(axis='both', which='major', labelsize=14)
-        ax[i].tick_params(axis='both', which='minor', labelsize=14)
+        ax[i].tick_params(axis="both", which="major", labelsize=14)
+        ax[i].tick_params(axis="both", which="minor", labelsize=14)
 
     # print summary report
     print("Percent Difference Summary Report")
@@ -183,11 +184,11 @@ def ca_percent_error(true_load_dir, exp_load_dir, save_dir):
         print(f"{species[i]}:\t {total_error_by_species[i]}")
 
     # Set title and save
-    '''
+    """
     fig.suptitle(
         "Difference Between Spectral and Finite Difference Diffusion Simulations",
         fontsize=20,
-    )'''
+    )"""
     plt.tight_layout()
     plt.savefig(f"{save_dir}error.png", dpi=500)
     plt.show()
@@ -209,12 +210,12 @@ def ca_percent_error(true_load_dir, exp_load_dir, save_dir):
     total_error_over_time = diff_over_time(true_load_dir, exp_load_dir, percent=True)
     total_error_over_space = diff_over_space(true_load_dir, exp_load_dir, percent=True)
     total_error = total_diff(true_load_dir, exp_load_dir, percent=True)
-    
+
     print(total_error_by_species[0])
 
     print("Total error: ", total_error)
 
-    '''
+    """
     fig, axs = plt.subplots(1, 2, figsize=(12, 5))
     # plot total percent_error by species vs time step
     species = ["ca", "calb", "ca-calb"]
@@ -293,10 +294,7 @@ def ca_percent_error(true_load_dir, exp_load_dir, save_dir):
     plt.tight_layout()
     plt.savefig(f"{save_dir}error.png", dpi=500)
     plt.show()
-    '''
-
-
-
+    """
 
 
 def percent_error(true_load_dir, exp_load_dir, save_dir):

@@ -7,7 +7,7 @@ import math
 import matplotlib.pyplot as plt
 import scipy.stats as stats
 
-'''
+"""
 # Test
 mu = 0          # mean
 variance = 1
@@ -17,23 +17,28 @@ plt.plot(x, stats.norm.pdf(x, mu, sigma))
 plt.plot(x, stats.norm.pdf(x, mu+2, sigma))     # shift
 plt.plot(x, -stats.norm.pdf(x,mu, sigma))       # opposite
 plt.show()
-'''
+"""
 
 r_post = 1  # point at which concentration is zero (astrocyte location)
 
-def p_glu(r, t, plot = "on"):
+
+def p_glu(r, t, plot="on"):
     d_glu = 2.2e-4  # micron^2/microsec
     mu = 0  # mean
     variance = 2 * d_glu * t
     sigma = math.sqrt(variance)  # std dev
-    p_glu = stats.norm.pdf(r, mu, sigma) - stats.norm.pdf(r, mu+2*r_post, sigma) - stats.norm.pdf(r, mu-2*r_post, sigma)        # zero value BC
+    p_glu = (
+        stats.norm.pdf(r, mu, sigma)
+        - stats.norm.pdf(r, mu + 2 * r_post, sigma)
+        - stats.norm.pdf(r, mu - 2 * r_post, sigma)
+    )  # zero value BC
 
     if plot == "on":
         plt.plot(r, p_glu)
-        plt.hlines(0, - r_post - 0.5 * sigma, r_post + 0.5 * sigma)
+        plt.hlines(0, -r_post - 0.5 * sigma, r_post + 0.5 * sigma)
         plt.vlines(0, -0.1, 1)
-        plt.vlines(r_post, 0, 1, linestyles='dotted')
-        plt.vlines(-r_post, 0, 1, linestyles='dotted')
+        plt.vlines(r_post, 0, 1, linestyles="dotted")
+        plt.vlines(-r_post, 0, 1, linestyles="dotted")
         plt.title("Diffusion of glutamate")
         plt.xlabel("Distance from center")
         plt.ylabel("Probability")
@@ -41,18 +46,18 @@ def p_glu(r, t, plot = "on"):
 
     return p_glu
 
+
 r = np.linspace(-r_post, r_post, 100)
 t = [500, 750, 1000, 1250]
 
 p_array = p_glu(r, 500)
 
 for time in t:
-    p_glu(r,time)
-
+    p_glu(r, time)
 
 
 ## Bessel functions for long time (MATLAB code)
-'''BesselRoots = ...  # first five roots of the Bessel function J0 and J1
+"""BesselRoots = ...  # first five roots of the Bessel function J0 and J1
 [2.4048,  3.8317,  
  5.5201,  7.0156, 
  8.6537, 10.1735, 
@@ -85,5 +90,4 @@ for n = 0:4
     print('-depsc', ['cylindrical_x_', num2str(n), '.eps'])
 end
 
-'''
-
+"""

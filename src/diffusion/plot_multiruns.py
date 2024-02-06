@@ -8,6 +8,7 @@ __contact__ = "mwagner@ucsd.edu"
 __date__ = "2023/06/13"
 
 import sys
+
 sys.path.append("../../src/")
 import utils.PlotMultiruns as pm
 
@@ -20,5 +21,5 @@ plotter = pm.PlotMultiRuns(
 
 # plotter.plot_multiruns()
 # TODO: debug multirun plot for EME -- giving impulse at boundary
-#plotter.plot_multiruns_time([0, 10, 99])
+# plotter.plot_multiruns_time([0, 10, 99])
 plotter.plot_multiruns()
