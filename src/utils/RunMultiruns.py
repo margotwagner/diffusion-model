@@ -63,14 +63,19 @@ class RunMultiruns:
         else:
             return node_vals_from_modes
 
-    def run_multi_rw(self, normalize=False, make_dir=True):
+    def run_multi_rw(self, normalize=False, make_dir=True, data_dir=None):
         if make_dir:
             from datetime import datetime
 
             time_now = datetime.now()  # UNIX time
             time_stamp = time_now.strftime("%Y%m%d_%H%M%S")
 
-            rw_dir = r"../../data/eme-validation/random-walk/{}/".format(time_stamp)
+            if dir:
+                rw_dir = r"{}/eme-validation/random-walk/{}/".format(
+                    data_dir, time_stamp
+                )
+            else:
+                rw_dir = r"../../data/eme-validation/random-walk/{}/".format(time_stamp)
             os.mkdir(rw_dir)
             print("Made new directory:", rw_dir)
 

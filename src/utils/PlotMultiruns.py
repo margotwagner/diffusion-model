@@ -6,10 +6,10 @@ import glob
 class PlotMultiRuns(object):
     def __init__(
         self,
-        rw_dir,
-        eme_dir,
-        plot_rw=True,
-        plot_eme=True,
+        rw_dir="",
+        eme_dir="",
+        plot_rw=False,
+        plot_eme=False,
     ):
         self.rw_dir = rw_dir
         self.eme_dir = eme_dir
@@ -27,6 +27,10 @@ class PlotMultiRuns(object):
     def spatial_mesh(self):
         """Return spatial mesh."""
         return np.linspace(0, self.line_length, self.n_spatial_locs)
+
+    @property
+    def time_mesh(self):
+        return list(range(self.n_time_pts))
 
     def n_runs_rw(self):
         n_runs_rw = len(glob.glob(self.rw_dir + "*"))
@@ -105,6 +109,22 @@ class PlotMultiRuns(object):
             for i in time:
                 plt.plot(self.spatial_mesh, mean[:, i], label=f"t = {i}")
 
+    def plot_mean_space(self, mean, space, colors):
+        # TODO: add colors
+        if isinstance(space, int):
+            plt.plot(
+                self.time_mesh,
+                np.transpose(mean[space, :]),
+                label=f"$\Delta$x = {space - self.particle_start_loc + 1}",
+            )
+        elif isinstance(space, list):
+            for i in space:
+                plt.plot(
+                    self.time_mesh,
+                    np.transpose(mean[i, :]),
+                    label=f"$\Delta$x = {i - self.particle_start_loc}",
+                )
+
     def plot_mean(self, mean, colors):
         for i in range(self.n_spatial_locs):
             plt.plot(list(range(self.n_time_pts)), mean[i, :], color=colors[i], label=i)
@@ -144,6 +164,23 @@ class PlotMultiRuns(object):
                     # color=colors[i],
                 )
 
+    def plot_std_space(self, mean, std, space, colors):
+        if isinstance(space, int):
+            plt.fill_between(
+                self.time_mesh,
+                mean[space, :] + std[space, :],
+                mean[space, :] - std[space, :],
+                alpha=0.2,
+            )
+        elif isinstance(space, list):
+            for i in space:
+                plt.fill_between(
+                    self.time_mesh,
+                    mean[i, :] + std[i, :],
+                    mean[i, :] - std[i, :],
+                    alpha=0.2,
+                )
+
     def plot_std_sep(self, mean, std, colors, shape, axs):
         loc = 0
         for i in range(shape[0]):
@@ -169,6 +206,8 @@ class PlotMultiRuns(object):
             )
 
     def plot_multiruns_time(self, time):
+        time.reverse()
+
         plt.figure(figsize=(14, 10))
 
         # get list of colors
@@ -209,6 +248,52 @@ class PlotMultiRuns(object):
         )
         plt.xlabel("distance (um)", fontsize=14)
         plt.ylabel("normalized count", fontsize=14)
+        plt.xlim([1.5, 3])
+        plt.legend()
+        plt.show()
+
+    def plot_multiruns_space(self):
+        space = [i + self.particle_start_loc for i in range(10)]
+
+        plt.figure(figsize=(14, 10))
+
+        # get list of colors
+        colors = plt.cm.tab10_r(np.linspace(0, 1, len(space)))
+
+        if self.plot_eme:
+            print("Preparing to plot eigenmarkov data...")
+
+            # get data
+            eme_mean, eme_std, _ = self.get_stats("eme", normalize=True)
+
+            print("Plotting eigenmarkov data...")
+            # plot mean
+            self.plot_mean_space(eme_mean, space, colors)
+
+            # plot std
+            self.plot_std_space(eme_mean, eme_std, space, colors)
+
+        if self.plot_rw:
+            print("Preparing to plot random walk data...")
+
+            # get data
+            rw_mean, rw_std, _ = self.get_stats("rw", normalize=True)
+
+            print("Plotting random walk data...")
+            # plot mean
+            self.plot_mean_space(rw_mean, space, colors)
+
+            # plot std
+            self.plot_std_space(rw_mean, rw_std, space, colors)
+
+        print("Beautifying plot...")
+        plt.title(
+            "Normalized number of particles at each time over space",
+            fontsize=20,
+        )
+        plt.xlabel("time (usec)", fontsize=14)
+        plt.ylabel("normalized count", fontsize=14)
+        # plt.xlim([1.5, 3])
         plt.legend()
         plt.show()
 
