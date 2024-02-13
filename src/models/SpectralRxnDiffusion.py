@@ -183,7 +183,7 @@ class SpectralRxnDiffusion:
         )
 
     def diffusion_spectral_eqtn(self, x_idx, t_idx):
-        u = self.Z_n(0) + sum(
+        u = (self.n_ca / (self.n_spatial_locs / self.line_length)) * self.Z_n(0) + sum(
             [
                 (
                     (self.n_ca / (self.n_spatial_locs / self.line_length))
