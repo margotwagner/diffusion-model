@@ -4,17 +4,16 @@ import os
 import numpy as np
 
 
-class RunMultiruns:
+class RWRunMultiruns:
+
     def __init__(
         self,
-        scaling_factor,
         n_runs,
         n_particles,
         n_spatial_locs,
         n_time_pts,
         particle_start_loc,
     ):
-        self.scaling_factor = scaling_factor
         self.n_runs = n_runs
         self.n_particles = n_particles
         self.n_spatial_locs = n_spatial_locs
@@ -41,6 +40,52 @@ class RunMultiruns:
         else:
             return unnorm_n_per_loc
 
+    def run_multi_rw(self, normalize=False, make_dir=True, data_dir=None):
+        if make_dir:
+            from datetime import datetime
+
+            time_now = datetime.now()  # UNIX time
+            time_stamp = time_now.strftime("%Y%m%d_%H%M%S")
+
+            if data_dir:
+                rw_dir = r"{}/eme-validation/random-walk/{}/".format(
+                    data_dir, time_stamp
+                )
+            else:
+                rw_dir = r"../../data/eme-validation/random-walk/{}/".format(time_stamp)
+            os.mkdir(rw_dir)
+            print("Made new directory:", rw_dir)
+
+        for i in range(self.n_runs):
+            if i % 10 == 0:  # print once every 10 sims
+                print("RUNNING SIMULATION {}".format(i))
+
+            # run simulation
+            n_per_loc = self.run_rw(normalize)
+
+            # save output to csv
+            np.savetxt(
+                rw_dir + "/rw-run-{}.csv".format(f"{i:03}"), n_per_loc, delimiter=","
+            )
+
+
+class EMERunMultiruns:
+
+    def __init__(
+        self,
+        n_runs,
+        n_particles,
+        n_spatial_locs,
+        n_time_pts,
+        particle_start_loc,
+    ):
+        self.n_runs = n_runs
+        self.n_particles = n_particles
+        self.n_spatial_locs = n_spatial_locs
+        self.n_time_pts = n_time_pts
+        self.particle_start_loc = particle_start_loc
+        self.scaling_factor = 2
+
     def run_eme(self, normalize=False):
 
         eigenmarkov = emd.EigenmarkovDiffusion(
@@ -63,42 +108,19 @@ class RunMultiruns:
         else:
             return node_vals_from_modes
 
-    def run_multi_rw(self, normalize=False, make_dir=True, data_dir=None):
+    def run_multi_eme(self, normalize=False, make_dir=True, data_dir=None):
         if make_dir:
             from datetime import datetime
 
             time_now = datetime.now()  # UNIX time
             time_stamp = time_now.strftime("%Y%m%d_%H%M%S")
 
-            if dir:
-                rw_dir = r"{}/eme-validation/random-walk/{}/".format(
+            if data_dir:
+                eme_dir = r"{}/eme-validation/markov-eme/{}/".format(
                     data_dir, time_stamp
                 )
             else:
-                rw_dir = r"../../data/eme-validation/random-walk/{}/".format(time_stamp)
-            os.mkdir(rw_dir)
-            print("Made new directory:", rw_dir)
-
-        for i in range(self.n_runs):
-            if i % 10 == 0:  # print once every 10 sims
-                print("RUNNING SIMULATION {}".format(i))
-
-            # run simulation
-            n_per_loc = self.run_rw(normalize)
-
-            # save output to csv
-            np.savetxt(
-                rw_dir + "/rw-run-{}.csv".format(f"{i:03}"), n_per_loc, delimiter=","
-            )
-
-    def run_multi_eme(self, normalize=False, make_dir=True):
-        if make_dir:
-            from datetime import datetime
-
-            time_now = datetime.now()  # UNIX time
-            time_stamp = time_now.strftime("%Y%m%d_%H%M%S")
-
-            eme_dir = r"../../data/eme-validation/markov-eme/{}/".format(time_stamp)
+                eme_dir = r"../../data/eme-validation/markov-eme/{}/".format(time_stamp)
             os.mkdir(eme_dir)
             print("Made new directory:", eme_dir)
 
