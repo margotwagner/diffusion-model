@@ -165,7 +165,7 @@ class PlotMultiRuns(object):
         )
         plt.xlabel("distance (um)", fontsize=14)
         plt.ylabel("normalized count", fontsize=14)
-        plt.xlim([1.5, 3])
+        # plt.xlim([1.5, 3])
         plt.legend()
         plt.show()
 

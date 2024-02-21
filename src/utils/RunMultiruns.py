@@ -20,7 +20,7 @@ class RWRunMultiruns:
         self.n_time_pts = n_time_pts
         self.particle_start_loc = particle_start_loc
 
-    def run_rw(self, normalize=False):
+    def run(self, normalize=False):
         random_walk = rw.RandomWalk(
             n_particles=self.n_particles,
             n_spatial_locs=self.n_spatial_locs,
@@ -40,7 +40,7 @@ class RWRunMultiruns:
         else:
             return unnorm_n_per_loc
 
-    def run_multi_rw(self, normalize=False, make_dir=True, data_dir=None):
+    def run_multi(self, normalize=False, make_dir=True, data_dir=None):
         if make_dir:
             from datetime import datetime
 
@@ -61,7 +61,7 @@ class RWRunMultiruns:
                 print("RUNNING SIMULATION {}".format(i))
 
             # run simulation
-            n_per_loc = self.run_rw(normalize)
+            n_per_loc = self.run(normalize)
 
             # save output to csv
             np.savetxt(
@@ -86,7 +86,7 @@ class EMERunMultiruns:
         self.particle_start_loc = particle_start_loc
         self.scaling_factor = 2
 
-    def run_eme(self, normalize=False):
+    def run(self, normalize=False):
 
         eigenmarkov = emd.EigenmarkovDiffusion(
             n_particles=self.n_particles,
@@ -108,7 +108,7 @@ class EMERunMultiruns:
         else:
             return node_vals_from_modes
 
-    def run_multi_eme(self, normalize=False, make_dir=True, data_dir=None):
+    def run_multi(self, normalize=False, make_dir=True, data_dir=None):
         if make_dir:
             from datetime import datetime
 
@@ -129,7 +129,7 @@ class EMERunMultiruns:
                 print("RUNNING SIMULATION {}".format(i))
 
             # run simulation
-            node_vals_from_modes = self.run_eme(normalize)
+            node_vals_from_modes = self.run(normalize)
 
             # save output to csv
             np.savetxt(
