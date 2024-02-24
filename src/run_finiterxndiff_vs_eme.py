@@ -36,7 +36,7 @@ def main():
 
     plotter = pm.PlotMultiRuns(
         rw_dir="../data/eme-validation/random-walk/20231120_111038/rw-run-{}.csv",  # "/Users/margotwagner/diffusion-model/data/eme-validation/random-walk/20230118_192600/rw-run-{}.csv",
-        eme_dir="../data/eme-validation/markov-eme/20240224_135854/eme-run-{}.csv",  # "/Users/margotwagner/diffusion-model/data/eme-validation/markov-eme/20230405_105433_2/eme-run-{}.csv",
+        eme_dir="../data/eme-validation/markov-eme/20240224_141238/eme-run-{}.csv",  # "/Users/margotwagner/diffusion-model/data/eme-validation/markov-eme/20230405_105433_2/eme-run-{}.csv",
         n_runs=10,
         n_spatial_locs=n_space_pts,
         n_time_pts=n_time_pts,  # TODO: make automatic
