@@ -194,7 +194,7 @@ class PlotMultiRuns(object):
         plt.show()
 
     def plot_multiruns_space(self):
-        space = [i + self.particle_start_loc for i in range(10)]
+        space = [i + self.particle_start_loc for i in range(39)]
 
         plt.figure(figsize=(14, 10))
 
