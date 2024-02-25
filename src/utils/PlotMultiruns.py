@@ -48,18 +48,17 @@ class PlotMultiRuns(object):
         return start_loc
 
     def n_particles(self):
-        if self.file_id == "eme":
-            return self.eme_particles
         dir = glob.glob(self.dir + "*")[0]
         run = np.loadtxt(dir, delimiter=",")
         n_particles = run[self.particle_start_loc, 0]
         print("n_particles:", n_particles)
+        if self.file_id == "eme":
+            return self.eme_particles
         return n_particles
 
     def combine_runs(self):
         # initialize array to store all runs
         runs = np.zeros((self.n_runs, self.n_spatial_locs, self.n_time_pts))
-
         # loop through runs
         for i in range(self.n_runs):
             # store run in array
@@ -80,6 +79,7 @@ class PlotMultiRuns(object):
 
         # get mean and std
         mean = np.mean(runs, axis=0)
+        print(mean)
         std = np.std(runs, axis=0)
 
         # return mean and std
@@ -194,7 +194,7 @@ class PlotMultiRuns(object):
         plt.show()
 
     def plot_multiruns_space(self):
-        space = [i + self.particle_start_loc for i in range(39)]
+        space = [i + self.particle_start_loc for i in range(41)]
 
         plt.figure(figsize=(14, 10))
 

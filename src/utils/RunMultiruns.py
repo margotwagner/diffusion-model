@@ -103,6 +103,9 @@ class EMERunMultiruns:
             n_per_eigenmode_state, print_output=False
         )
 
+        if normalize:
+            return node_vals_from_modes
+
         return node_vals_from_modes
 
     def run_multi(self, normalize=False, make_dir=True, data_dir=None):
