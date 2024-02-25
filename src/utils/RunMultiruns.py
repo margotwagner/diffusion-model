@@ -103,10 +103,7 @@ class EMERunMultiruns:
             n_per_eigenmode_state, print_output=False
         )
 
-        if normalize:
-            return node_vals_from_modes / self.n_particles
-        else:
-            return node_vals_from_modes
+        return node_vals_from_modes
 
     def run_multi(self, normalize=False, make_dir=True, data_dir=None):
         if make_dir:
@@ -137,3 +134,29 @@ class EMERunMultiruns:
                 node_vals_from_modes,
                 delimiter=",",
             )
+
+"""
+        if make_dir:
+            from datetime import datetime
+
+            time_now = datetime.now()  # UNIX time
+            time_stamp = time_now.strftime("%Y%m%d_%H%M%S")
+
+            eme_dir = r"../data/eme-validation/markov-eme/{}/".format(time_stamp)
+            os.makedirs(eme_dir)
+            print("Made new directory:", eme_dir)
+
+        for i in range(self.n_runs):
+            if i % 10 == 0:  # print once every 10 sims
+                print("RUNNING SIMULATION {}".format(i))
+
+            # run simulation
+            node_vals_from_modes = self.run_eme()
+
+            # save output to csv
+            np.savetxt(
+                eme_dir + "/eme-run-{}.csv".format(f"{i:03}"),
+                node_vals_from_modes,
+                delimiter=",",
+            )
+"""
