@@ -4,7 +4,7 @@ import glob
 
 
 class PlotMultiRuns(object):
-    def __init__(self, dir, file_id=None):
+    def __init__(self, dir, file_id=None, eme_particles=50):
         self.dir = dir
         self.file_id = file_id
         self.line_length = 4
@@ -12,7 +12,9 @@ class PlotMultiRuns(object):
         self.n_spatial_locs = self.n_spatial_locs()
         self.n_time_pts = self.n_time_pts()
         self.particle_start_loc = self.particle_start_loc()
-        self.n_particles = self.n_particles()
+        self.eme_particles = eme_particles
+        self.n_particles = self.n_particles() 
+
 
     @property
     def spatial_mesh(self):
@@ -46,6 +48,8 @@ class PlotMultiRuns(object):
         return start_loc
 
     def n_particles(self):
+        if self.file_id == "eme":
+            return self.eme_particles
         dir = glob.glob(self.dir + "*")[0]
         run = np.loadtxt(dir, delimiter=",")
         n_particles = run[self.particle_start_loc, 0]
@@ -189,84 +193,84 @@ class PlotMultiRuns(object):
         plt.legend()
         plt.show()
 
-    # def plot_multiruns_space(self):
-    #     space = [i + self.particle_start_loc for i in range(10)]
+    def plot_multiruns_space(self):
+        space = [i + self.particle_start_loc for i in range(10)]
 
-    #     plt.figure(figsize=(14, 10))
-
-    #     # get list of colors
-    #     colors = plt.cm.tab10_r(np.linspace(0, 1, len(space)))
-
-    #     print("Preparing to plot simulation data...")
-
-    #     # get data
-    #     if self.file_id == "eme":
-    #         mean, std, _ = self.get_stats(normalize=True)
-    #     elif self.file_id == "rw":
-    #         mean, std, _ = self.get_stats(normalize=True)
-    #     else:
-    #         raise ValueError("Invalid file_id. Please choose 'eme' or 'rw'.")
-
-    #     print("Plotting simulation data...")
-    #     # # # plot mean
-    #     # self.plot_mean_space(mean, space)
-
-    #     # # # plot std
-    #     # self.plot_std_space(mean, std, space)
-    #     self.plot_mean(mean)
-    #     self.plot_std(mean, std)
-
-    #     print("Beautifying plot...")
-    #     plt.title(
-    #         "Normalized number of particles at each time over space",
-    #         fontsize=20,
-    #     )
-    #     plt.xlabel("time (usec)", fontsize=14)
-    #     plt.ylabel("normalized count", fontsize=14)
-    #     plt.legend()
-    #     plt.show()
-    def plot_multiruns_space(self, new_fig=True):
-        if new_fig:
-            plt.figure(figsize=(14, 10))
+        plt.figure(figsize=(14, 10))
 
         # get list of colors
-        colors = plt.cm.tab10_r(np.linspace(0, 1, self.n_spatial_locs))
+        colors = plt.cm.tab10_r(np.linspace(0, 1, len(space)))
 
-        if self.file_id == "rw":
-            print("Preparing to plot random walk data...")
+        print("Preparing to plot simulation data...")
 
-            # get data
-            rw_mean, rw_std, rw_runs = self.get_stats(normalize=True)
-
-            print("Plotting random walk data...")
-            # plot mean
-            self.plot_mean(rw_mean, colors)
-
-            # plot std
-            self.plot_std(rw_mean, rw_std, colors)
-
+        # get data
         if self.file_id == "eme":
-            print("Preparing to plot eigenmarkov data...")
+            mean, std, _ = self.get_stats(normalize=True)
+        elif self.file_id == "rw":
+            mean, std, _ = self.get_stats(normalize=True)
+        else:
+            raise ValueError("Invalid file_id. Please choose 'eme' or 'rw'.")
 
-            # get data
-            eme_mean, eme_std, eme_runs = self.get_stats(normalize=True)
+        print("Plotting simulation data...")
+        # # # plot mean
+        # self.plot_mean_space(mean, space)
 
-            print("Plotting eigenmarkov data...")
-            # plot mean
-            self.plot_mean(eme_mean, colors)
-
-            # plot std
-            self.plot_std(eme_mean, eme_std, colors)
+        # # # plot std
+        # self.plot_std_space(mean, std, space)
+        self.plot_mean_space(mean, space)
+        self.plot_std_space(mean, std, space)
 
         print("Beautifying plot...")
         plt.title(
-            "Normalized number of particles in each position over time",
+            "Normalized number of particles at each time over space",
             fontsize=20,
         )
-        plt.xlabel("timepoint", fontsize=14)
+        plt.xlabel("time (usec)", fontsize=14)
         plt.ylabel("normalized count", fontsize=14)
         plt.legend()
         plt.show()
+    # def plot_multiruns_space(self, new_fig=True):
+    #     if new_fig:
+    #         plt.figure(figsize=(14, 10))
+
+    #     # get list of colors
+    #     colors = plt.cm.tab10_r(np.linspace(0, 1, self.n_spatial_locs))
+
+    #     if self.file_id == "rw":
+    #         print("Preparing to plot random walk data...")
+
+    #         # get data
+    #         rw_mean, rw_std, rw_runs = self.get_stats(normalize=True)
+
+    #         print("Plotting random walk data...")
+    #         # plot mean
+    #         self.plot_mean(rw_mean, colors)
+
+    #         # plot std
+    #         self.plot_std(rw_mean, rw_std, colors)
+
+    #     if self.file_id == "eme":
+    #         print("Preparing to plot eigenmarkov data...")
+
+    #         # get data
+    #         eme_mean, eme_std, eme_runs = self.get_stats(normalize=True)
+
+    #         print("Plotting eigenmarkov data...")
+    #         # plot mean
+    #         self.plot_mean(eme_mean, colors)
+
+    #         # plot std
+    #         self.plot_std(eme_mean, eme_std, colors)
+
+    #     print("Beautifying plot...")
+    #     plt.title(
+    #         "Normalized number of particles in each position over time",
+    #         fontsize=20,
+    #     )
+    #     plt.xlabel("timepoint", fontsize=14)
+    #     plt.ylabel("normalized count", fontsize=14)
+    #     plt.legend()
+    #     plt.show()
 
 import numpy as np
 import matplotlib.pyplot as plt
