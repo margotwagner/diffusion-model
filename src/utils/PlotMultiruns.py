@@ -186,7 +186,7 @@ class PlotMultiRuns(object):
                 fd.time_mesh,
                 fd.u_diff[x_idx[i], :] / fd.n_ca,
                 label=f"$\Delta$x = {i}",
-                color='orange'
+                color='black'
             )
         
         # 2. plot random walk (Want this to be orange, plot on legend)

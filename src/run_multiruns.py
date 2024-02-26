@@ -57,13 +57,15 @@ if __name__ == "__main__":
     n_time_pts = 100  # number of time points
     n_space_pts = 101  # 150  # number of spatial points
     ca_init_idx = get_ca_init_idx(n_space_pts)
+    print("ca_init_idx", ca_init_idx)
 
     main(
         n_runs=10,
         n_particles=50,
         n_spatial_locs=n_space_pts,
         n_time_pts=n_time_pts,
-        particle_start_loc=ca_init_idx,
+        particle_start_loc=get_ca_init_idx(n_space_pts),
+        # particle_start_loc=58,
         run_type="eme",  # type of simulation to run
         scaling_factor=2,
     )
