@@ -83,33 +83,33 @@ class PlotMultiRuns(object):
         # return mean and std
         return mean, std, runs
 
-    def plot_mean_time(self, mean, time):
+    def plot_mean_time(self, mean, time, axis = plt):
         if isinstance(time, int):
-            plt.plot(self.spatial_mesh, mean[:, time], label=f"t = {time}")
+            axis.plot(self.spatial_mesh, mean[:, time], label=f"t = {time}")
         elif isinstance(time, list):
             time.reverse()
             for i in time:
-                plt.plot(self.spatial_mesh, mean[:, i], label=f"t = {i}")
+                axis.plot(self.spatial_mesh, mean[:, i], label=f"t = {i}")
 
-    def plot_mean_space(self, mean, space):
+    def plot_mean_space(self, mean, space, axis = plt):
         if isinstance(space, int):
-            plt.plot(
+            axis.plot(
                 self.time_mesh,
                 np.transpose(mean[space, :]),
                 label=f"$\Delta$x = {space - self.particle_start_loc + 1}",
             )
         elif isinstance(space, list):
             for i in space:
-                plt.plot(
+                axis.plot(
                     self.time_mesh,
                     np.transpose(mean[i, :]),
                     label=f"$\Delta$x = {i - self.particle_start_loc}",
                 )
 
 
-    def plot_std_time(self, mean, std, time):
+    def plot_std_time(self, mean, std, time, axis = plt):
         if isinstance(time, int):
-            plt.fill_between(
+            axis.fill_between(
                 self.spatial_mesh,
                 mean[:, time] + std[:, time],
                 mean[:, time] - std[:, time],
@@ -118,16 +118,16 @@ class PlotMultiRuns(object):
         elif isinstance(time, list):
             time.reverse()
             for i in time:
-                plt.fill_between(
+                axis.fill_between(
                     self.spatial_mesh,
                     mean[:, i] + std[:, i],
                     mean[:, i] - std[:, i],
                     alpha=0.2,
                 )
 
-    def plot_std_space(self, mean, std, space):
+    def plot_std_space(self, mean, std, space, axis = plt):
         if isinstance(space, int):
-            plt.fill_between(
+            axis.fill_between(
                 self.time_mesh,
                 mean[space, :] + std[space, :],
                 mean[space, :] - std[space, :],
@@ -135,20 +135,20 @@ class PlotMultiRuns(object):
             )
         elif isinstance(space, list):
             for i in space:
-                plt.fill_between(
+                axis.fill_between(
                     self.time_mesh,
                     mean[i, :] + std[i, :],
                     mean[i, :] - std[i, :],
                     alpha=0.2,
                 )
 
-    def plot_mean(self, mean, colors=[]):
+    def plot_mean(self, mean, colors=[], axis = plt):
         for i in range(self.n_spatial_locs):
-            plt.plot(list(range(self.n_time_pts)), mean[i, :], label=i)
+            axis.plot(list(range(self.n_time_pts)), mean[i, :], label=i)
     
-    def plot_std(self, mean, std, colors=[]):
+    def plot_std(self, mean, std, colors=[], axis = plt):
         for i in range(self.n_spatial_locs):
-            plt.fill_between(
+            axis.fill_between(
                 list(range(self.n_time_pts)),
                 mean[i, :] + std[i, :],
                 mean[i, :] - std[i, :],
@@ -160,8 +160,6 @@ class PlotMultiRuns(object):
         if axis == None:
             axis = plt
             plt.figure(figsize=(14, 10))
-
-        plt.figure(figsize=(14, 10))
 
         # get list of colors
         colors = plt.cm.tab10_r(np.linspace(0, 1, len(time)))
@@ -178,21 +176,31 @@ class PlotMultiRuns(object):
 
         print("Plotting simulation data...")
         # plot mean
-        self.plot_mean_time(mean, time)
+        self.plot_mean_time(mean, time, axis=axis)
 
         # plot std
-        self.plot_std_time(mean, std, time)
+        self.plot_std_time(mean, std, time, axis=axis)
 
         print("Beautifying plot...")
-        plt.title(
-            "Normalized number of particles in each position over time",
-            fontsize=20,
-        )
-        plt.xlabel("distance (um)", fontsize=14)
-        plt.ylabel("normalized count", fontsize=14)
-        # plt.xlim([1.5, 3])
-        plt.legend()
-        plt.show()
+        if axis != plt:
+            axis.set_title(
+                "Normalized number of particles in each position over time",
+                fontsize=20,
+            )
+            axis.set_xlabel("distance (um)", fontsize=14)
+            axis.set_ylabel("normalized count", fontsize=14)
+            # plt.xlim([1.5, 3])
+            axis.legend()
+        else:
+            axis.title(
+                "Normalized number of particles in each position over time",
+                fontsize=20,
+            )
+            axis.xlabel("distance (um)", fontsize=14)
+            axis.ylabel("normalized count", fontsize=14)
+            # plt.xlim([1.5, 3])
+            axis.legend()
+            axis.show()
 
     def plot_multiruns_space(self, axis = None):
         if axis == None:
@@ -221,18 +229,27 @@ class PlotMultiRuns(object):
 
         # # # plot std
         # self.plot_std_space(mean, std, space)
-        self.plot_mean_space(mean, space)
-        self.plot_std_space(mean, std, space)
+        self.plot_mean_space(mean, space, axis=axis)
+        self.plot_std_space(mean, std, space, axis=axis)
 
         print("Beautifying plot...")
-        axis.title(
-            "Normalized number of particles at each time over space",
-            fontsize=20,
-        )
-        axis.xlabel("time (usec)", fontsize=14)
-        axis.ylabel("normalized count", fontsize=14)
-        axis.legend()
-        axis.show()
+        if axis != plt:
+            axis.set_title(
+                "Normalized number of particles at each time over space",
+                fontsize=20,
+            )
+            axis.set_xlabel("time (usec)", fontsize=14)
+            axis.set_ylabel("normalized count", fontsize=14)
+            axis.legend()
+        else:
+            axis.title(
+                "Normalized number of particles at each time over space",
+                fontsize=20,
+            )
+            axis.xlabel("time (usec)", fontsize=14)
+            axis.ylabel("normalized count", fontsize=14)
+            axis.legend()
+            axis.show()
 
 
 class OldPlotMultiRuns(object):
