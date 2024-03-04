@@ -251,6 +251,8 @@ class PlotMultiRuns(object):
             axis.legend()
             axis.show()
 
+    # def direct_compare()
+
 
 class OldPlotMultiRuns(object):
     def __init__(
