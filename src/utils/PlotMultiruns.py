@@ -190,7 +190,7 @@ class PlotMultiRuns(object):
             axis.set_xlabel("distance (um)", fontsize=14)
             axis.set_ylabel("normalized count", fontsize=14)
             # plt.xlim([1.5, 3])
-            axis.legend()
+            axis.legend(title="timesteps")
         else:
             axis.title(
                 "Normalized number of particles in each position over time",
@@ -199,7 +199,7 @@ class PlotMultiRuns(object):
             axis.xlabel("distance (um)", fontsize=14)
             axis.ylabel("normalized count", fontsize=14)
             # plt.xlim([1.5, 3])
-            axis.legend()
+            axis.legend(title="timesteps")
             axis.show()
 
     def plot_multiruns_space(self, axis = None):
@@ -240,7 +240,7 @@ class PlotMultiRuns(object):
             )
             axis.set_xlabel("time (usec)", fontsize=14)
             axis.set_ylabel("normalized count", fontsize=14)
-            axis.legend()
+            axis.legend(title="steps from impulse")
         else:
             axis.title(
                 "Normalized number of particles at each time over space",
@@ -248,11 +248,35 @@ class PlotMultiRuns(object):
             )
             axis.xlabel("time (usec)", fontsize=14)
             axis.ylabel("normalized count", fontsize=14)
-            axis.legend()
+            axis.legend(title="steps from impulse")
             axis.show()
 
-    # def direct_compare()
+    def compare_overlap_space(self,compare, axis = None):
+        # plot with time on the x-axis
+        if axis == None:
+            fig, axis = plt.subplots(1, 1, figsize=(10, 5), sharey=True)
+        x_idx = [compare.impulse_idx + i for i in range(0, 10)]
+        x_labels = [*range(0, 10)]
+        for i in range(len(x_idx)):
+            axis.plot(
+                compare.time_mesh,
+                compare.u_diff[x_idx[i], :] / compare.n_ca,
+                color="black"
+            )
+        self.plot_multiruns_space(axis=axis)
 
+    def compare_overlap_time(self, time, compare, axis = None):
+        if axis == None:
+            fig, axis = plt.subplots(1, 1, figsize=(10, 5), sharey=True)
+        for i in time:
+            axis.plot(
+                compare.spatial_mesh, compare.u_diff[:, i] / compare.n_ca, color="black"
+            )
+
+        self.plot_multiruns_time(time=time, axis=axis)
+
+    # HACKY SOLUTIONS
+    
 
 class OldPlotMultiRuns(object):
     def __init__(
