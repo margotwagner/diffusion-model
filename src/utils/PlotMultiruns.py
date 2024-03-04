@@ -106,7 +106,6 @@ class PlotMultiRuns(object):
                     label=f"$\Delta$x = {i - self.particle_start_loc}",
                 )
 
-
     def plot_std_time(self, mean, std, time, axis = plt):
         if isinstance(time, int):
             axis.fill_between(
@@ -141,19 +140,6 @@ class PlotMultiRuns(object):
                     mean[i, :] - std[i, :],
                     alpha=0.2,
                 )
-
-    def plot_mean(self, mean, colors=[], axis = plt):
-        for i in range(self.n_spatial_locs):
-            axis.plot(list(range(self.n_time_pts)), mean[i, :], label=i)
-    
-    def plot_std(self, mean, std, colors=[], axis = plt):
-        for i in range(self.n_spatial_locs):
-            axis.fill_between(
-                list(range(self.n_time_pts)),
-                mean[i, :] + std[i, :],
-                mean[i, :] - std[i, :],
-                alpha=0.2,
-            )
 
     def plot_multiruns_time(self, time, axis = None):
         time.reverse()
@@ -202,12 +188,11 @@ class PlotMultiRuns(object):
             axis.legend(title="timesteps")
             axis.show()
 
-    def plot_multiruns_space(self, axis = None):
+    def plot_multiruns_space(self, axis = None, steps_from_impulse=41):
         if axis == None:
             axis = plt
             plt.figure(figsize=(14, 10))
-
-        space = [i + self.particle_start_loc for i in range(41)]
+        space = [i + self.particle_start_loc for i in range(steps_from_impulse)]
 
 
         # get list of colors
@@ -276,7 +261,128 @@ class PlotMultiRuns(object):
         self.plot_multiruns_time(time=time, axis=axis)
 
     # HACKY SOLUTIONS
+    def eme_bug_plot_multiruns_space(self, axis = None, steps_from_impulse=41, nonsense=False):
+        if axis == None:
+            axis = plt
+            plt.figure(figsize=(14, 10))
+        if nonsense:
+            space = [i + self.particle_start_loc for i in range(steps_from_impulse)][:-10]
+        else:
+            space = [i + self.particle_start_loc for i in range(steps_from_impulse)][-10:]
+
+
+        # get list of colors
+        colors = plt.cm.tab10_r(np.linspace(0, 1, len(space)))
+
+        print("Preparing to plot simulation data...")
+
+        # get data
+        if self.file_id == "eme":
+            mean, std, _ = self.get_stats(normalize=True)
+        elif self.file_id == "rw":
+            mean, std, _ = self.get_stats(normalize=True)
+        else:
+            raise ValueError("Invalid file_id. Please choose 'eme' or 'rw'.")
+
+        print("Plotting simulation data...")
+        self.plot_mean_space(mean, space, axis=axis)
+        self.plot_std_space(mean, std, space, axis=axis)
+
+        print("Beautifying plot...")
+        if axis != plt:
+            axis.set_title(
+                "Normalized number of particles at each time over space",
+                fontsize=20,
+            )
+            axis.set_xlabel("time (usec)", fontsize=14)
+            axis.set_ylabel("normalized count", fontsize=14)
+            axis.legend(title="last 10 steps ")
+        else:
+            axis.title(
+                "Normalized number of particles at each time over space",
+                fontsize=20,
+            )
+            axis.xlabel("time (usec)", fontsize=14)
+            axis.ylabel("normalized count", fontsize=14)
+            axis.legend(title="last 10 steps")
+            axis.show()
     
+    def eme_bug_plot_multiruns_time(self, time, axis = None):
+        # NOT REVERSING TIME
+        time.reverse()
+        if axis == None:
+            axis = plt
+            plt.figure(figsize=(14, 10))
+
+        # get list of colors
+        colors = plt.cm.tab10_r(np.linspace(0, 1, len(time)))
+
+        print("Preparing to plot simulation data...")
+        mean, std = None, None
+        # get data
+        if self.file_id == "eme":
+            mean, std, _ = self.get_stats(normalize=True)
+        elif self.file_id == "rw":
+            mean, std, _ = self.get_stats(normalize=True)
+        else:
+            raise ValueError("Invalid file_id. Please choose 'eme' or 'rw'.")
+
+        print("Plotting simulation data...")
+        # plot mean
+        self.plot_mean_time(mean, time, axis=axis)
+
+        # plot std
+        self.plot_std_time(mean, std, time, axis=axis)
+
+        print("Beautifying plot...")
+        if axis != plt:
+            axis.set_title(
+                "Normalized number of particles in each position over time",
+                fontsize=20,
+            )
+            axis.set_xlabel("distance (um)", fontsize=14)
+            axis.set_ylabel("normalized count", fontsize=14)
+            # plt.xlim([1.5, 3])
+            axis.legend(title="timesteps")
+        else:
+            axis.title(
+                "Normalized number of particles in each position over time",
+                fontsize=20,
+            )
+            axis.xlabel("distance (um)", fontsize=14)
+            axis.ylabel("normalized count", fontsize=14)
+            # plt.xlim([1.5, 3])
+            axis.legend(title="timesteps")
+            axis.show()
+
+    def eme_bug_compare_overlap_space(self,compare, axis = None):
+        # plot with time on the x-axis
+        if axis == None:
+            fig, axis = plt.subplots(1, 1, figsize=(10, 5), sharey=True)
+        x_idx = [compare.impulse_idx + i for i in range(0, 10)]
+        x_labels = [*range(0, 10)]
+        for i in range(len(x_idx)):
+            axis.plot(
+                compare.time_mesh,
+                compare.u_diff[x_idx[i], :] / compare.n_ca,
+                color="black"
+            )
+        self.eme_bug_plot_multiruns_space(axis=axis)
+
+    def eme_bug_compare_overlap_time(self, time, compare, axis = None):
+        if axis == None:
+            fig, axis = plt.subplots(1, 1, figsize=(10, 5), sharey=True)
+        for i in time:
+            axis.plot(
+                compare.spatial_mesh, compare.u_diff[:, i] / compare.n_ca, color="black"
+            )
+
+        self.eme_bug_plot_multiruns_time(time=time, axis=axis)
+
+    
+
+    
+
 
 class OldPlotMultiRuns(object):
     def __init__(
