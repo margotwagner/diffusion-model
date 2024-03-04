@@ -209,11 +209,6 @@ class PlotMultiRuns(object):
             raise ValueError("Invalid file_id. Please choose 'eme' or 'rw'.")
 
         print("Plotting simulation data...")
-        # # # plot mean
-        # self.plot_mean_space(mean, space)
-
-        # # # plot std
-        # self.plot_std_space(mean, std, space)
         self.plot_mean_space(mean, space, axis=axis)
         self.plot_std_space(mean, std, space, axis=axis)
 
