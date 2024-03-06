@@ -187,6 +187,7 @@ class PlotMultiRuns(object):
             # plt.xlim([1.5, 3])
             axis.legend(title="timesteps")
             axis.show()
+        return axis
 
     def plot_multiruns_space(self, axis = None, steps_from_impulse=41):
         if axis == None:
@@ -230,6 +231,7 @@ class PlotMultiRuns(object):
             axis.ylabel("normalized count", fontsize=14)
             axis.legend(title="steps from impulse")
             axis.show()
+        return axis
 
     def compare_overlap_space(self,compare, axis = None):
         # plot with time on the x-axis
@@ -243,7 +245,7 @@ class PlotMultiRuns(object):
                 compare.u_diff[x_idx[i], :] / compare.n_ca,
                 color="black"
             )
-        self.plot_multiruns_space(axis=axis)
+        return self.plot_multiruns_space(axis=axis)
 
     def compare_overlap_time(self, time, compare, axis = None):
         if axis == None:
@@ -253,7 +255,7 @@ class PlotMultiRuns(object):
                 compare.spatial_mesh, compare.u_diff[:, i] / compare.n_ca, color="black"
             )
 
-        self.plot_multiruns_time(time=time, axis=axis)
+        return self.plot_multiruns_time(time=time, axis=axis)
 
     # HACKY SOLUTIONS
     def eme_bug_plot_multiruns_space(self, axis = None, steps_from_impulse=41, nonsense=False):
@@ -301,6 +303,7 @@ class PlotMultiRuns(object):
             axis.ylabel("normalized count", fontsize=14)
             axis.legend(title="last 10 steps")
             axis.show()
+        return axis
     
     def eme_bug_plot_multiruns_time(self, time, axis = None):
         # NOT REVERSING TIME
@@ -349,6 +352,7 @@ class PlotMultiRuns(object):
             # plt.xlim([1.5, 3])
             axis.legend(title="timesteps")
             axis.show()
+        return axis
 
     def eme_bug_compare_overlap_space(self,compare, axis = None):
         # plot with time on the x-axis
@@ -362,7 +366,7 @@ class PlotMultiRuns(object):
                 compare.u_diff[x_idx[i], :] / compare.n_ca,
                 color="black"
             )
-        self.eme_bug_plot_multiruns_space(axis=axis)
+        return self.eme_bug_plot_multiruns_space(axis=axis)
 
     def eme_bug_compare_overlap_time(self, time, compare, axis = None):
         if axis == None:
@@ -372,4 +376,4 @@ class PlotMultiRuns(object):
                 compare.spatial_mesh, compare.u_diff[:, i] / compare.n_ca, color="black"
             )
 
-        self.eme_bug_plot_multiruns_time(time=time, axis=axis)
+        return self.eme_bug_plot_multiruns_time(time=time, axis=axis)
