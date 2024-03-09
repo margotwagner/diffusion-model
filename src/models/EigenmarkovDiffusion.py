@@ -173,18 +173,15 @@ class EigenmarkovDiffusion:
         # eigenmode[k] is composed of eigenvector[:, k] and eigenvalue[k]
         e_val_unsorted, e_vec_unsorted = eig(self.get_transition_matrix())
         np.set_printoptions(suppress=True)  # gets rid of scientific notation
-        eigenvalues = e_val_unsorted   
-        eigenvectors = e_vec_unsorted
+
         # sort values and vectors
-        # eigenvalues = np.sort(e_val_unsorted)
+        eigenvalues = np.sort(e_val_unsorted)
         eval_sort_index = np.argsort(e_val_unsorted)
         eigenvalues[0] = round(eigenvalues[0])
-        # eigenvectors = e_vec_unsorted[:, eval_sort_index]
+        eigenvectors = e_vec_unsorted[:, eval_sort_index]
 
         # normalize eigenvector values
-        eigenvectors = eigenvectors / eigenvectors[
-                eval_sort_index[0], eval_sort_index[0]
-            ]
+        eigenvectors = eigenvectors / eigenvectors[0, 0]
 
         if print_output:
             print("EIGENVALUES")
@@ -254,10 +251,8 @@ class EigenmarkovDiffusion:
             0
         ]  # np.where returns some nested arrays, index out here
 
-        print("STARTING LOCATION EIGENVALUE", start_loc_eigenvalue_i)
-
         # get eigenvector for starting location, all eigenmodes (v_k)
-        start_loc_eigenvector = eigenvectors[self.particle_start_loc, :]
+        start_loc_eigenvector = eigenvectors[start_loc_eigenvalue_i, :]
 
         # UNNORMALIZED SOLUTION
         n_per_positive_mode = 0.5 * (
