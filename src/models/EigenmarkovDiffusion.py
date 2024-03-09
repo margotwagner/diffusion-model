@@ -177,8 +177,10 @@ class EigenmarkovDiffusion:
         # sort values and vectors
         eigenvalues = np.sort(e_val_unsorted)
         eval_sort_index = np.argsort(e_val_unsorted)
+
         eigenvalues[0] = round(eigenvalues[0])
         eigenvectors = e_vec_unsorted[:, eval_sort_index]
+        print("prior to sorting", e_val_unsorted)
 
         # normalize eigenvector values
         eigenvectors = eigenvectors / eigenvectors[0, 0]
@@ -508,7 +510,10 @@ class EigenmarkovDiffusion:
             np array containing normalized particle counts for each node
             (n_nodes x n_time_pts)
         """
-        _, eigenvectors, _ = self.get_eigenvalues_and_vectors()
+        eigenvalues, eigenvectors, eval_sort_index = self.get_eigenvalues_and_vectors()
+
+        inverse_indexes = np.argsort(eval_sort_index)
+
 
         # initialize node values (n_nodes x n_time_pts)
         node_vals_from_modes = np.zeros((self.n_spatial_locs, self.n_time_pts))
@@ -517,6 +522,10 @@ class EigenmarkovDiffusion:
         n_per_eigenmode = (
             n_per_eigenmode_state[:, :, 0] - n_per_eigenmode_state[:, :, 1]
         )
+
+        n_per_eigenmode = n_per_eigenmode[inverse_indexes, :]
+        eigenvectors = eigenvectors[:, inverse_indexes]
+        print("after inverting", eigenvalues[inverse_indexes])
 
         """
         A NOTE ON MATRIX MULTIPLICATION IN PYTHON
