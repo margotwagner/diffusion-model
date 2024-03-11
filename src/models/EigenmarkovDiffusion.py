@@ -255,7 +255,7 @@ class EigenmarkovDiffusion:
             0
         ]  # np.where returns some nested arrays, index out here
 
-        start_loc_eigenvalue_i = (self.particle_start_loc - 1)
+        start_loc_eigenvalue_i = (self.particle_start_loc)
         # get eigenvector for starting location, all eigenmodes (v_k)
         start_loc_eigenvector = eigenvectors[start_loc_eigenvalue_i, :]
 
@@ -526,9 +526,9 @@ class EigenmarkovDiffusion:
             n_per_eigenmode_state[:, :, 0] - n_per_eigenmode_state[:, :, 1]
         )
 
-        n_per_eigenmode = n_per_eigenmode[inverse_indexes, :]
-        eigenvectors = eigenvectors[:, inverse_indexes]
-        print("after inverting", eigenvalues[inverse_indexes])
+        # n_per_eigenmode = n_per_eigenmode[inverse_indexes, :]
+        # eigenvectors = eigenvectors[:, inverse_indexes]
+        # print("after inverting", eigenvalues[inverse_indexes])
 
         """
         A NOTE ON MATRIX MULTIPLICATION IN PYTHON
