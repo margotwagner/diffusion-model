@@ -189,11 +189,12 @@ class PlotMultiRuns(object):
             axis.show()
         return axis
 
-    def plot_multiruns_space(self, axis = None, steps_from_impulse=41):
+    def plot_multiruns_space(self, axis = None, steps_from_impulse=101):
         if axis == None:
             axis = plt
             plt.figure(figsize=(14, 10))
-        space = [i + self.particle_start_loc for i in range(steps_from_impulse)]
+        # space = [i + self.particle_start_loc for i in range(steps_from_impulse)]
+        space = list(range(steps_from_impulse))
 
 
         # get list of colors
