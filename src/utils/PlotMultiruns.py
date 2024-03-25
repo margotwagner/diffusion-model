@@ -3,14 +3,14 @@ import matplotlib.pyplot as plt
 import glob as glob
 
 class PlotMultiRuns(object):
-    def __init__(self, dir, file_id=None, eme_particles=50):
+    def __init__(self, dir, file_id=None, start_loc=59, eme_particles=50):
         self.dir = dir
         self.file_id = file_id
         self.line_length = 4
         self.n_runs = self.n_runs()
         self.n_spatial_locs = self.n_spatial_locs()
         self.n_time_pts = self.n_time_pts()
-        self.particle_start_loc = self.particle_start_loc()
+        self.particle_start_loc = self.particle_start_loc() if file_id == "rw" else start_loc
         self.eme_particles = eme_particles
         self.n_particles = self.n_particles() 
 
@@ -104,8 +104,7 @@ class PlotMultiRuns(object):
                 axis.plot(
                     self.time_mesh,
                     np.transpose(mean[i, :]),
-                    # label=f"$\Delta$x = {i - self.particle_start_loc}",
-                    label=f"$\Delta$x = {i}",
+                    label=f"$\Delta$x = {i - self.particle_start_loc}",
                 )
 
     def plot_std_time(self, mean, std, time, axis = plt):
@@ -196,7 +195,7 @@ class PlotMultiRuns(object):
             axis = plt
             plt.figure(figsize=(14, 10))
         # space = [i + self.particle_start_loc for i in range(steps_from_impulse)]
-        space = list(range(58, 58 + steps_from_impulse))
+        space = list(range(self.particle_start_loc, self.particle_start_loc + steps_from_impulse))
 
 
         # get list of colors
