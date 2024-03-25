@@ -99,11 +99,13 @@ class PlotMultiRuns(object):
                 label=f"$\Delta$x = {space - self.particle_start_loc + 1}",
             )
         elif isinstance(space, list):
+            print(self.file_id)
             for i in space:
                 axis.plot(
                     self.time_mesh,
                     np.transpose(mean[i, :]),
-                    label=f"$\Delta$x = {i - self.particle_start_loc}",
+                    # label=f"$\Delta$x = {i - self.particle_start_loc}",
+                    label=f"$\Delta$x = {i}",
                 )
 
     def plot_std_time(self, mean, std, time, axis = plt):
@@ -189,12 +191,12 @@ class PlotMultiRuns(object):
             axis.show()
         return axis
 
-    def plot_multiruns_space(self, axis = None, steps_from_impulse=101):
+    def plot_multiruns_space(self, axis = None, steps_from_impulse=10):
         if axis == None:
             axis = plt
             plt.figure(figsize=(14, 10))
         # space = [i + self.particle_start_loc for i in range(steps_from_impulse)]
-        space = list(range(steps_from_impulse))
+        space = list(range(58, 58 + steps_from_impulse))
 
 
         # get list of colors
