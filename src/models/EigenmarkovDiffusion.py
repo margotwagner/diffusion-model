@@ -252,10 +252,9 @@ class EigenmarkovDiffusion:
         ][
             0
         ]  # np.where returns some nested arrays, index out here
-        print("start_loc_eigenvalue_i", start_loc_eigenvalue_i)
+
         # get eigenvector for starting location, all eigenmodes (v_k)
         start_loc_eigenvector = eigenvectors[start_loc_eigenvalue_i, :]
-        print("start_loc_eigenvector", start_loc_eigenvector)
 
         # UNNORMALIZED SOLUTION
         n_per_positive_mode = 0.5 * (
