@@ -189,7 +189,7 @@ class PlotMultiRuns(object):
             axis.show()
         return axis
 
-    def plot_multiruns_space(self, axis = None, steps_from_impulse=41):
+    def plot_multiruns_space(self, axis = None, steps_from_impulse=10):
         if axis == None:
             axis = plt
             plt.figure(figsize=(14, 10))
