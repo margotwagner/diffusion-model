@@ -175,15 +175,14 @@ class EigenmarkovDiffusion:
         np.set_printoptions(suppress=True)  # gets rid of scientific notation
 
         # sort values and vectors
-        eigenvalues = np.sort(e_val_unsorted)
+        eigenvalues = e_val_unsorted
         eval_sort_index = np.argsort(e_val_unsorted)
-
-        eigenvalues[0] = round(eigenvalues[0])
-        eigenvectors = e_vec_unsorted[:, eval_sort_index]
-        print("prior to sorting", e_val_unsorted)
+        eigenvectors = e_vec_unsorted
 
         # normalize eigenvector values
-        eigenvectors = eigenvectors / eigenvectors[0, 0]
+        eigenvectors = eigenvectors / eigenvectors[
+            eval_sort_index[0], eval_sort_index[0]
+        ]
 
         if print_output:
             print("EIGENVALUES")
@@ -253,6 +252,7 @@ class EigenmarkovDiffusion:
             0
         ]  # np.where returns some nested arrays, index out here
 
+        start_loc_eigenvalue_i = self.particle_start_loc
         # get eigenvector for starting location, all eigenmodes (v_k)
         start_loc_eigenvector = eigenvectors[start_loc_eigenvalue_i, :]
 

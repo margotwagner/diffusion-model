@@ -3,14 +3,14 @@ import matplotlib.pyplot as plt
 import glob as glob
 
 class PlotMultiRuns(object):
-    def __init__(self, dir, file_id=None, eme_particles=50):
+    def __init__(self, dir, file_id=None, eme_particles=50, start_loc=59):
         self.dir = dir
         self.file_id = file_id
         self.line_length = 4
         self.n_runs = self.n_runs()
         self.n_spatial_locs = self.n_spatial_locs()
         self.n_time_pts = self.n_time_pts()
-        self.particle_start_loc = self.particle_start_loc()
+        self.particle_start_loc = self.particle_start_loc() if self.file_id == "rw" else start_loc
         self.eme_particles = eme_particles
         self.n_particles = self.n_particles() 
 
