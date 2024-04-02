@@ -170,20 +170,18 @@ class PlotMultiRuns(object):
         print("Beautifying plot...")
         if axis != plt:
             axis.set_title(
-                "Normalized number of particles in each position over time",
-                fontsize=20,
+                "Calcium vs Time",
             )
-            axis.set_xlabel("distance (um)", fontsize=14)
-            axis.set_ylabel("normalized count", fontsize=14)
+            axis.set_xlabel("distance (um)")
+            axis.set_ylabel("normalized count")
             # plt.xlim([1.5, 3])
             axis.legend(title="timesteps")
         else:
             axis.title(
-                "Normalized number of particles in each position over time",
-                fontsize=20,
+                "Calcium vs Time",
             )
-            axis.xlabel("distance (um)", fontsize=14)
-            axis.ylabel("normalized count", fontsize=14)
+            axis.xlabel("distance (um)")
+            axis.ylabel("normalized count")
             # plt.xlim([1.5, 3])
             axis.legend(title="timesteps")
             axis.show()
@@ -216,19 +214,17 @@ class PlotMultiRuns(object):
         print("Beautifying plot...")
         if axis != plt:
             axis.set_title(
-                "Normalized number of particles at each time over space",
-                fontsize=20,
+                "Calcium vs Distance",
             )
-            axis.set_xlabel("time (usec)", fontsize=14)
-            axis.set_ylabel("normalized count", fontsize=14)
+            axis.set_xlabel("time (usec)")
+            axis.set_ylabel("normalized count")
             axis.legend(title="steps from impulse")
         else:
             axis.title(
-                "Normalized number of particles at each time over space",
-                fontsize=20,
+                "Calcium vs Distance",
             )
-            axis.xlabel("time (usec)", fontsize=14)
-            axis.ylabel("normalized count", fontsize=14)
+            axis.xlabel("time (usec)")
+            axis.ylabel("normalized count")
             axis.legend(title="steps from impulse")
             axis.show()
         return axis

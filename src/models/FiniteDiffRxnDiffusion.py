@@ -454,7 +454,7 @@ class FiniteDiffRxnDiffusion:
 
     def plot_diffusion(self, t, show=True):
         print("Plotting...")
-        fig, axs = plt.subplots(1, 2, figsize=(10, 5), sharey=True)
+        fig, axs = plt.subplots(1, 2, figsize=(10, 5), sharey=False)
 
         # plot with space on the x-axis
         for i in t:
@@ -464,9 +464,8 @@ class FiniteDiffRxnDiffusion:
                 label=f"t = {i}",
             )
         axs[0].set_xlabel("Distance (um)")
-        axs[0].set_ylabel("Normalized Calcium count")
+        axs[0].set_ylabel("normalized count")
         axs[0].set_title("Calcium vs Distance")
-        axs[0].set_xlim([1.5, 3])
         axs[0].legend(title="time steps")
         axs[0].annotate(
             "A", xy=(-0.11, 1.05), xycoords="axes fraction", fontsize=16, weight="bold"
@@ -482,6 +481,7 @@ class FiniteDiffRxnDiffusion:
                 label=f"$\Delta$x = {x_labels[i]}",
             )
         axs[1].set_xlabel("Time (usec)")
+        axs[1].set_ylabel("normalized count")
         axs[1].set_title("Calcium vs Time")
         axs[1].legend(title="steps from impulse")
         axs[1].annotate(

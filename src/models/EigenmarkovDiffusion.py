@@ -171,13 +171,11 @@ class EigenmarkovDiffusion:
 
         # get eigenvalues/eigenvectors
         # eigenmode[k] is composed of eigenvector[:, k] and eigenvalue[k]
-        e_val_unsorted, e_vec_unsorted = eig(self.get_transition_matrix())
+        eigenvalues, eigenvectors = eig(self.get_transition_matrix())
         np.set_printoptions(suppress=True)  # gets rid of scientific notation
 
         # sort values and vectors
-        eigenvalues = e_val_unsorted
-        eval_sort_index = np.argsort(e_val_unsorted)
-        eigenvectors = e_vec_unsorted
+        eval_sort_index = np.argsort(eigenvalues)
 
         # normalize eigenvector values
         eigenvectors = eigenvectors / eigenvectors[
@@ -244,13 +242,6 @@ class EigenmarkovDiffusion:
             plot_eigenmodes=plot_eigenmodes,
             plot_eigenvectors=plot_eigenvectors,
         )
-
-        # new index of starting node location in sorted eigenvalue/vector arrays
-        start_loc_eigenvalue_i = np.where(eval_sort_index == self.particle_start_loc)[
-            0
-        ][
-            0
-        ]  # np.where returns some nested arrays, index out here
 
         start_loc_eigenvalue_i = self.particle_start_loc
         # get eigenvector for starting location, all eigenmodes (v_k)
