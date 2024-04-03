@@ -3,14 +3,16 @@ import matplotlib.pyplot as plt
 import glob as glob
 
 class PlotMultiRuns(object):
-    def __init__(self, dir, file_id=None, eme_particles=50):
+    def __init__(self, dir, file_id=None, eme_particles=50, start_loc=59):
         self.dir = dir
         self.file_id = file_id
         self.line_length = 4
         self.n_runs = self.n_runs()
         self.n_spatial_locs = self.n_spatial_locs()
         self.n_time_pts = self.n_time_pts()
-        self.particle_start_loc = self.particle_start_loc()
+        ## RW has start loc in a specific location, 
+        ## not sure where it is for eme so we hard code it for now
+        self.particle_start_loc = self.particle_start_loc() if self.file_id == "rw" else start_loc
         self.eme_particles = eme_particles
         self.n_particles = self.n_particles() 
 
@@ -189,7 +191,7 @@ class PlotMultiRuns(object):
             axis.show()
         return axis
 
-    def plot_multiruns_space(self, axis = None, steps_from_impulse=41):
+    def plot_multiruns_space(self, axis = None, steps_from_impulse=10):
         if axis == None:
             axis = plt
             plt.figure(figsize=(14, 10))
