@@ -5,7 +5,6 @@ import numpy as np
 
 
 class RWRunMultiruns:
-
     def __init__(
         self,
         n_runs,
@@ -70,7 +69,6 @@ class RWRunMultiruns:
 
 
 class EMERunMultiruns:
-
     def __init__(
         self,
         n_runs,
