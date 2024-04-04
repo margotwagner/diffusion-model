@@ -38,9 +38,9 @@ class EigenmarkovDiffusion:
     def get_jump_probability(
         self,
     ) -> Tuple[float, float]:
-        """Find the probability of moving one spot to the left or right based on finite-difference approximations
-        Rate constant, k = D/dx^2
-        P(move one spot to the right/left) = k*dt
+        """Find the probability of moving one spot to the left or right based on finite-difference approximations.
+        Given a rate constant, k = D/dx^2
+        Probability is given as, P(move one spot to the right/left) = k*dt
 
         return:
             float: probability of diffusing one spot to the left or right (k*dt)
@@ -63,16 +63,12 @@ class EigenmarkovDiffusion:
         # get diffusion rate constant
         diffusion_rate_constant_k = self.get_jump_probability()[1]
 
-        # Define A (transition) matrix
-        A = np.zeros(
-            (self.n_spatial_locs, self.n_spatial_locs)
-        )  # transition probability between grid points
+        # Define A (transition) matrix as transition probability between grid points
+        A = np.zeros((self.n_spatial_locs, self.n_spatial_locs))
 
         # Transition matrix is given by the ODE dynamics equation (using k-values)
         vec_diag = np.full(self.n_spatial_locs, (2 * diffusion_rate_constant_k))
-        vec_off_diag = np.full(
-            (self.n_spatial_locs - 1), -diffusion_rate_constant_k
-        )  # off-diagonal values
+        vec_off_diag = np.full((self.n_spatial_locs - 1), -diffusion_rate_constant_k)
 
         # create transition matrix
         A = (
@@ -95,6 +91,8 @@ class EigenmarkovDiffusion:
             np.array: eigenvectors - 2d matrix of eigenvectors where columns
                     correspond to eigenvalues (ie evec[:,k] <-> eval[k])
         """
+
+        # NOTE: MIGHT NEED TO RENORMALIZE
         eigenvalues, eigenvectors = eig(self.get_transition_matrix())
 
         return eigenvalues, eigenvectors
@@ -121,7 +119,7 @@ class EigenmarkovDiffusion:
         print(f"PARTICLE STARTING LOCATION: {self.particle_start_loc}")
         start_loc_eigenvector = eigenvectors[self.particle_start_loc, :]
 
-        # UNNORMALIZED SOLUTION
+        # UNNORMALIZED SOLUTION (NOTE: MIGHT NEED TO NORMALIZE?)
         n_per_positive_mode = 0.5 * (
             np.sqrt(self.n_particles**2 * start_loc_eigenvector**2)
             + (self.n_particles * start_loc_eigenvector)
@@ -132,6 +130,7 @@ class EigenmarkovDiffusion:
             - (self.n_particles * start_loc_eigenvector)
         )
 
+        print(f"INITIAL CONDITIONS: {n_per_positive_mode, n_per_negative_mode}")
         return n_per_positive_mode, n_per_negative_mode
 
     def get_eigenmode_transition_probability(self) -> np.ndarray:
@@ -174,11 +173,9 @@ class EigenmarkovDiffusion:
             (self.n_spatial_locs, self.n_time_pts, n_spins)
         ).astype("int")
 
-        # assign initial conditions using number of molecules
+        # assign initial conditions using number of molecules (scaled and rounded)
         init_cond = self.get_eme_init_conditions()
-        init_cond = (
-            np.rint(init_cond) / self.scaling_factor
-        )  # round initial conditions to nearest int
+        init_cond = np.rint(init_cond) / self.scaling_factor
 
         # get transition probability
         transition_probability = self.get_eigenmode_transition_probability()
@@ -187,9 +184,8 @@ class EigenmarkovDiffusion:
         for j in range(n_spins):
             n_per_eigenmode_state[:, 0, j] = init_cond[j]
 
-        # for each time point
+        # for each time point and eigenmode
         for i in range(self.n_time_pts - 1):
-            # for each eigenmode
             for k in range(self.n_spatial_locs):
                 # initialize the number of particles that transition
                 # [from + -> -, from - -> +]
@@ -227,12 +223,7 @@ class EigenmarkovDiffusion:
         representation.
 
         Args:
-            n_per_eigenmode_state: normalize the number of particles in each node;
-            np aray shape (n_modes x n_time x n_eigenmode_states)
-            eigenvectors: eigenvector of node i (vector); v[:,k] is the eigenvector
-            corresponding to the eigenvalue w[k]; (ie evec[:,k] <-> eval[k])
-                eigenvector[e, eigenmode (k)]
-
+            n_per_eigenmode_state: normalize the number of particles in each node; np array shape (n_modes x n_time x n_eigenmode_states)
 
         Returns:
             np array containing normalized particle counts for each node

@@ -98,7 +98,7 @@ class EMERunMultiruns:
         n_per_eigenmode_state = eigenmarkov.run_simulation()
 
         node_vals_from_modes = eigenmarkov.convert_to_spatial_nodes(
-            n_per_eigenmode_state, print_output=False
+            n_per_eigenmode_state
         )
 
         if normalize:
@@ -135,3 +135,5 @@ class EMERunMultiruns:
                 node_vals_from_modes,
                 delimiter=",",
             )
+
+        return eme_dir
