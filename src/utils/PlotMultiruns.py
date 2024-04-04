@@ -196,7 +196,7 @@ class RWPlotMultiRuns(object):
         plt.show()
 
 
-class PlotMultiRuns(object):
+class EMEPlotMultiRuns(object):
     def __init__(self, dir, file_id=None):
         self.dir = dir
         self.file_id = file_id
@@ -363,17 +363,24 @@ class PlotMultiRuns(object):
         plt.show()
 
     def plot_multiruns_space(self):
-        space = [i + self.particle_start_loc for i in range(10)]
+        # space = [i + self.particle_start_loc for i in range(10)]
 
         plt.figure(figsize=(14, 10))
 
         # get list of colors
-        colors = plt.cm.tab10_r(np.linspace(0, 1, len(space)))
+        # colors = plt.cm.tab10_r(np.linspace(0, 1, len(space)))
 
         print("Preparing to plot simulation data...")
 
         # get data
         mean, std, _ = self.get_stats(normalize=True)
+
+        new_starting_loc = np.argmax(mean[:, 0])
+
+        print(f"ARGMAX INDEX: \t {new_starting_loc} ({round(np.max(mean[:, 0]), 2)})")
+        print(f"ALLEGED START LOC: \t {self.particle_start_loc}")
+
+        space = [i + new_starting_loc for i in range(10)]
 
         print("Plotting simulation data...")
         # plot mean
