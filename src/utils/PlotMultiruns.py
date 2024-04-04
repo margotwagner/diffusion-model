@@ -380,7 +380,7 @@ class EMEPlotMultiRuns(object):
         print(f"ARGMAX INDEX: \t {new_starting_loc} ({round(np.max(mean[:, 0]), 2)})")
         print(f"ALLEGED START LOC: \t {self.particle_start_loc}")
 
-        space = [i + new_starting_loc for i in range(10)]
+        space = [i for i in range(self.n_spatial_locs)]
 
         print("Plotting simulation data...")
         # plot mean
