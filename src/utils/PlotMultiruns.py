@@ -196,7 +196,7 @@ class RWPlotMultiRuns(object):
         plt.show()
 
 
-class PlotMultiRuns(object):
+class EMEPlotMultiRuns(object):
     def __init__(self, dir, file_id=None):
         self.dir = dir
         self.file_id = file_id
@@ -363,7 +363,8 @@ class PlotMultiRuns(object):
         plt.show()
 
     def plot_multiruns_space(self):
-        space = [i + self.particle_start_loc for i in range(10)]
+        # space = [i + self.particle_start_loc for i in range(10)]
+        space = [i for i in range(self.n_spatial_locs)]
 
         plt.figure(figsize=(14, 10))
 
@@ -375,8 +376,6 @@ class PlotMultiRuns(object):
         # get data
         mean, std, _ = self.get_stats(normalize=True)
 
-=======
->>>>>>> parent of 314db1d (changed plotting to automatically find max index and plot 10 points around that rather than hardcoding using particle start loc (for EMEPlotMultiRuns))
         print("Plotting simulation data...")
         # plot mean
         self.plot_mean_space(mean, space)
