@@ -177,11 +177,8 @@ class EigenmarkovDiffusion:
         eigenvectors = e_vec_unsorted[:, eval_sort_index]
 
         # normalize eigenvector values
-        print("BEFORE NORMALIZATION")
-        print(eigenvectors)
-        eigenvectors = eigenvectors / eigenvectors[0, 0]
-        print("AFTER NORMALIZATION")
-        print(eigenvectors)
+        # NOTE: if sorting exists, this normalization will give results that are inverted compared to what is expected.
+        # eigenvectors = eigenvectors / eigenvectors[0, 0]
 
         if print_output:
             print("EIGENVALUES")
@@ -393,7 +390,11 @@ class EigenmarkovDiffusion:
 
         # assign initial conditions using number of molecules
         init_cond = self.get_eme_init_conditions(
-            print_output=print_init_conditions, plot_output=plot_init_conditions
+            print_output=print_init_conditions,
+            plot_output=plot_init_conditions,
+            print_eigenvalues_and_vectors=print_eigenvalues_and_vectors,
+            plot_eigenvectors=plot_eigenvectors,
+            plot_eigenmodes=plot_eigenmodes,
         )
         init_cond = (
             np.rint(init_cond) / self.scaling_factor

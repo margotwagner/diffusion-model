@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import glob
 
 
-class EMEPlotMultiRuns(object):
+class EMEPlotMultiruns(object):
     def __init__(self, dir, file_id=None):
         self.dir = dir
         self.file_id = file_id
