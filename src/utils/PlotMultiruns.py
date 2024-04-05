@@ -376,6 +376,14 @@ class EMEPlotMultiRuns(object):
         # get data
         mean, std, _ = self.get_stats(normalize=True)
 
+        # automatically find max value for y-axis
+        max_start_val = np.max(mean[:, 0])
+        max_start_i = np.argmax(mean[:, 0])
+
+        print(f"ARGMAX INDEX: \t {max_start_i} \t ({round(max_start_val, 2)})")
+
+        print(f"ALLEGED START LOC: \t {self.particle_start_loc}")
+
         print("Plotting simulation data...")
         # plot mean
         self.plot_mean_space(mean, space)
