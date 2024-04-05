@@ -375,14 +375,6 @@ class PlotMultiRuns(object):
         # get data
         mean, std, _ = self.get_stats(normalize=True)
 
-<<<<<<< HEAD
-        new_starting_loc = np.argmax(mean[:, 0])
-
-        print(f"ARGMAX INDEX: \t {new_starting_loc} ({round(np.max(mean[:, 0]), 2)})")
-        print(f"ALLEGED START LOC: \t {self.particle_start_loc}")
-
-        space = [i for i in range(self.n_spatial_locs)]
-
 =======
 >>>>>>> parent of 314db1d (changed plotting to automatically find max index and plot 10 points around that rather than hardcoding using particle start loc (for EMEPlotMultiRuns))
         print("Plotting simulation data...")
