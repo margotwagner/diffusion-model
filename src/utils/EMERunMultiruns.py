@@ -1,4 +1,3 @@
-import models.RandomWalk as rw
 import models.EigenmarkovDiffusion as emd
 import os
 import numpy as np

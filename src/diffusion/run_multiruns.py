@@ -10,7 +10,7 @@ __date__ = "2023/06/13"
 import sys
 
 sys.path.append("../../src/")
-import utils.RunMultiruns as rm
+import utils.RWRunMultiruns as rm
 
 
 def main(

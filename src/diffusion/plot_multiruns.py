@@ -10,7 +10,7 @@ __date__ = "2023/06/13"
 import sys
 
 sys.path.append("../../src/")
-import utils.PlotMultiruns as pm
+import utils.RWPlotMultiruns as pm
 
 plotter = pm.PlotMultiRuns(
     eme_dir="/Users/margotwagner/projects/diffusion-model/data/eme-validation/markov-eme/20231020_152431/",

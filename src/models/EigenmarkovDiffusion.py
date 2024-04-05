@@ -177,7 +177,11 @@ class EigenmarkovDiffusion:
         eigenvectors = e_vec_unsorted[:, eval_sort_index]
 
         # normalize eigenvector values
-        # eigenvectors = eigenvectors / eigenvectors[0, 0]
+        print("BEFORE NORMALIZATION")
+        print(eigenvectors)
+        eigenvectors = eigenvectors / eigenvectors[0, 0]
+        print("AFTER NORMALIZATION")
+        print(eigenvectors)
 
         if print_output:
             print("EIGENVALUES")
