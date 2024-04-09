@@ -32,12 +32,12 @@ class EMERunMultiruns:
         # run eigenmarkov simulation
         n_per_eigenmode_state = eigenmarkov.run_simulation(
             print_eigenvalues_and_vectors=True,
-            print_init_conditions=True,
-            print_transition_probability=True,
-            plot_eigenvectors=True,
-            plot_eigenmodes=True,
-            plot_init_conditions=True,
-            plot_simulation=True,
+            print_init_conditions=False,
+            print_transition_probability=False,
+            plot_eigenvectors=False,
+            plot_eigenmodes=False,
+            plot_init_conditions=False,
+            plot_simulation=False,
         )
 
         node_vals_from_modes = eigenmarkov.convert_to_spatial_nodes(

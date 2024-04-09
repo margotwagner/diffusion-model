@@ -165,6 +165,10 @@ class EigenmarkovDiffusion:
 
         """
 
+        # UNSORTED
+
+        """
+        # SORTING CODE
         # get eigenvalues/eigenvectors
         # eigenmode[k] is composed of eigenvector[:, k] and eigenvalue[k]
         e_val_unsorted, e_vec_unsorted = eig(self.get_transition_matrix())
@@ -175,6 +179,9 @@ class EigenmarkovDiffusion:
         eval_sort_index = np.argsort(e_val_unsorted)
         eigenvalues[0] = round(eigenvalues[0])
         eigenvectors = e_vec_unsorted[:, eval_sort_index]
+        """
+        eigenvalues, eigenvectors = eig(self.get_transition_matrix())
+        np.set_printoptions(suppress=True)  # gets rid of scientific notation
 
         # normalize eigenvector values
         # NOTE: if sorting exists, this normalization will give results that are inverted compared to what is expected.
@@ -206,7 +213,7 @@ class EigenmarkovDiffusion:
             print("EIGENVECTORS (over space)")
             self.make_eigenvector_plots(eigenvalues, eigenvectors)
 
-        return eigenvalues, eigenvectors, eval_sort_index
+        return eigenvalues, eigenvectors  # , eval_sort_index
 
     def get_eme_init_conditions(
         self,
@@ -234,6 +241,15 @@ class EigenmarkovDiffusion:
         """
         # starting loc given by particle_start_loc
 
+        eigenvalues, eigenvectors = self.get_eigenvalues_and_vectors(
+            print_output=print_eigenvalues_and_vectors,
+            plot_eigenmodes=plot_eigenmodes,
+            plot_eigenvectors=plot_eigenvectors,
+        )
+        start_loc_eigenvector = eigenvectors[self.particle_start_loc, :]
+
+        # SORTING CODE
+        """
         # get eigenvalue for starting location
         eigenvalues, eigenvectors, eval_sort_index = self.get_eigenvalues_and_vectors(
             print_output=print_eigenvalues_and_vectors,
@@ -248,6 +264,7 @@ class EigenmarkovDiffusion:
 
         # get eigenvector for starting location, all eigenmodes (v_k)
         start_loc_eigenvector = eigenvectors[start_loc_eigenvalue_i, :]
+        """
 
         # UNNORMALIZED SOLUTION (NOTE: MIGHT NEED TO NORMALIZE?)
         n_per_positive_mode = 0.5 * (
@@ -269,10 +286,7 @@ class EigenmarkovDiffusion:
             print()
 
             # Also visualize the weights as an array
-            # TODO: why do we need the [0]th
-            all_init_modes = np.vstack(
-                (n_per_positive_mode, n_per_negative_mode)  # , axis=0
-            )
+            all_init_modes = np.vstack((n_per_positive_mode, n_per_negative_mode))
 
             plt.imshow(all_init_modes, interpolation="none")
             plt.yticks([0, 1], ["$+$", "$-$"])
@@ -326,7 +340,8 @@ class EigenmarkovDiffusion:
             np.ndarray: transition probability
         """
 
-        eigenvalues, _, _ = self.get_eigenvalues_and_vectors()
+        eigenvalues, _ = self.get_eigenvalues_and_vectors()
+        # eigenvalues, _, _ = self.get_eigenvalues_and_vectors() SORTING CODE
         transition_probability = (eigenvalues / 2) * self.dt
 
         if print_output:
@@ -501,7 +516,8 @@ class EigenmarkovDiffusion:
             np array containing normalized particle counts for each node
             (n_nodes x n_time_pts)
         """
-        _, eigenvectors, _ = self.get_eigenvalues_and_vectors()
+        _, eigenvectors = self.get_eigenvalues_and_vectors()
+        # _, eigenvectors, _ = self.get_eigenvalues_and_vectors() SORTING CODE
 
         # initialize node values (n_nodes x n_time_pts)
         node_vals_from_modes = np.zeros((self.n_spatial_locs, self.n_time_pts))

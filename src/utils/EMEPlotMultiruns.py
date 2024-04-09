@@ -12,7 +12,7 @@ class EMEPlotMultiruns(object):
         self.n_spatial_locs = self.n_spatial_locs()
         self.n_time_pts = self.n_time_pts()
         self.particle_start_loc = self.particle_start_loc()
-        self.n_particles = self.n_particles()
+        self.n_particles = 50  # self.n_particles()
 
     @property
     def spatial_mesh(self):
@@ -42,12 +42,16 @@ class EMEPlotMultiruns(object):
         run = np.loadtxt(dir, delimiter=",")
         start_loc = np.nonzero(run[:, 0])[0][0]
 
+        print(f"START LOC: {start_loc}")
+
         return start_loc
 
     def n_particles(self):
         dir = glob.glob(self.dir + "*")[0]
         run = np.loadtxt(dir, delimiter=",")
         n_particles = run[self.particle_start_loc, 0]
+
+        print(f"NUMBER OF PARTICLES: {n_particles}")
 
         return n_particles
 
