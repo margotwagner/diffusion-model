@@ -164,28 +164,8 @@ class EigenmarkovDiffusion:
                     Can be used to sort via matrix[eval_sort_index]
 
         """
-
-        # UNSORTED
-
-        """
-        # SORTING CODE
-        # get eigenvalues/eigenvectors
-        # eigenmode[k] is composed of eigenvector[:, k] and eigenvalue[k]
-        e_val_unsorted, e_vec_unsorted = eig(self.get_transition_matrix())
-        np.set_printoptions(suppress=True)  # gets rid of scientific notation
-
-        # sort values and vectors
-        eigenvalues = np.sort(e_val_unsorted)
-        eval_sort_index = np.argsort(e_val_unsorted)
-        eigenvalues[0] = round(eigenvalues[0])
-        eigenvectors = e_vec_unsorted[:, eval_sort_index]
-        """
         eigenvalues, eigenvectors = eig(self.get_transition_matrix())
         np.set_printoptions(suppress=True)  # gets rid of scientific notation
-
-        # normalize eigenvector values
-        # NOTE: if sorting exists, this normalization will give results that are inverted compared to what is expected.
-        # eigenvectors = eigenvectors / eigenvectors[0, 0]
 
         if print_output:
             print("EIGENVALUES")
@@ -213,7 +193,7 @@ class EigenmarkovDiffusion:
             print("EIGENVECTORS (over space)")
             self.make_eigenvector_plots(eigenvalues, eigenvectors)
 
-        return eigenvalues, eigenvectors  # , eval_sort_index
+        return eigenvalues, eigenvectors
 
     def get_eme_init_conditions(
         self,
@@ -247,24 +227,6 @@ class EigenmarkovDiffusion:
             plot_eigenvectors=plot_eigenvectors,
         )
         start_loc_eigenvector = eigenvectors[self.particle_start_loc, :]
-
-        # SORTING CODE
-        """
-        # get eigenvalue for starting location
-        eigenvalues, eigenvectors, eval_sort_index = self.get_eigenvalues_and_vectors(
-            print_output=print_eigenvalues_and_vectors,
-            plot_eigenmodes=plot_eigenmodes,
-            plot_eigenvectors=plot_eigenvectors,
-        )
-
-        # new index of starting node location in sorted eigenvalue/vector arrays
-        start_loc_eigenvalue_i = np.where(eval_sort_index == self.particle_start_loc)[
-            0
-        ][0]
-
-        # get eigenvector for starting location, all eigenmodes (v_k)
-        start_loc_eigenvector = eigenvectors[start_loc_eigenvalue_i, :]
-        """
 
         # UNNORMALIZED SOLUTION (NOTE: MIGHT NEED TO NORMALIZE?)
         n_per_positive_mode = 0.5 * (
@@ -341,7 +303,6 @@ class EigenmarkovDiffusion:
         """
 
         eigenvalues, _ = self.get_eigenvalues_and_vectors()
-        # eigenvalues, _, _ = self.get_eigenvalues_and_vectors() SORTING CODE
         transition_probability = (eigenvalues / 2) * self.dt
 
         if print_output:
@@ -517,7 +478,6 @@ class EigenmarkovDiffusion:
             (n_nodes x n_time_pts)
         """
         _, eigenvectors = self.get_eigenvalues_and_vectors()
-        # _, eigenvectors, _ = self.get_eigenvalues_and_vectors() SORTING CODE
 
         # initialize node values (n_nodes x n_time_pts)
         node_vals_from_modes = np.zeros((self.n_spatial_locs, self.n_time_pts))
@@ -527,20 +487,7 @@ class EigenmarkovDiffusion:
             n_per_eigenmode_state[:, :, 0] - n_per_eigenmode_state[:, :, 1]
         )
 
-        """
-        A NOTE ON MATRIX MULTIPLICATION IN PYTHON
-        # np.dot usage: np.dot(a, b, out=None)
-        # If a is an N-D array and b is a 1-D array, it is a sum product over the last axis of a and b.
-            # v: (11, 1)
-            # n_per_eigenmode, m_k: (11, 1000)
-            # np.dot(v, m_k): (1, 1000)
-        # If both a and b are 2-D arrays, it is matrix multiplication, but using matmul or a @ b is preferred.
-            # v: (11, 11)
-            # n_per_eigenmode, m_k: (11, 1000)
-            # np.dot(v, m_k): (11, 1000)
-        """
-
-        # for each spatial node
+        # dot product of eigenvectors and n_per_eigenmode for each spatial node
         for i in range(self.n_spatial_locs):
             node_vals_from_modes[i, :] = (
                 np.dot(eigenvectors[i, :], n_per_eigenmode) / self.n_spatial_locs

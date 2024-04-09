@@ -4,15 +4,15 @@ import glob
 
 
 class EMEPlotMultiruns(object):
-    def __init__(self, dir, file_id=None):
+    def __init__(self, dir, impulse_idx, n_particles_impulse, file_id=None):
         self.dir = dir
+        self.particle_start_loc = impulse_idx
+        self.n_particles = n_particles_impulse
         self.file_id = file_id
         self.line_length = 4
         self.n_runs = self.n_runs()
         self.n_spatial_locs = self.n_spatial_locs()
         self.n_time_pts = self.n_time_pts()
-        self.particle_start_loc = self.particle_start_loc()
-        self.n_particles = 50  # self.n_particles()
 
     @property
     def spatial_mesh(self):
@@ -37,37 +37,18 @@ class EMEPlotMultiruns(object):
         run = np.loadtxt(dir, delimiter=",")
         return run.shape[1]
 
-    def particle_start_loc(self):
-        dir = glob.glob(self.dir + "*")[0]
-        run = np.loadtxt(dir, delimiter=",")
-        start_loc = np.nonzero(run[:, 0])[0][0]
-
-        print(f"START LOC: {start_loc}")
-
-        return start_loc
-
-    def n_particles(self):
-        dir = glob.glob(self.dir + "*")[0]
-        run = np.loadtxt(dir, delimiter=",")
-        n_particles = run[self.particle_start_loc, 0]
-
-        print(f"NUMBER OF PARTICLES: {n_particles}")
-
-        return n_particles
-
     def combine_runs(self):
         # initialize array to store all runs
         runs = np.zeros((self.n_runs, self.n_spatial_locs, self.n_time_pts))
 
         # loop through runs
         for i in range(self.n_runs):
-            # store run in array
-            # print(f"{data_dir}{run_type}-run-{i:03}.csv")
             runs[i, :, :] = np.loadtxt(
                 f"{self.dir}{self.file_id}-run-{i:03}.csv", delimiter=","
             )
 
         # return array of all runs
+        print(runs)
         return runs
 
     def get_stats(self, normalize=False):
@@ -153,7 +134,7 @@ class EMEPlotMultiruns(object):
         print("Preparing to plot simulation data...")
 
         # get data
-        mean, std, _ = self.get_stats(normalize=True)
+        mean, std, _ = self.get_stats(normalize=False)
 
         print("Plotting simulation data...")
         # plot mean
@@ -174,26 +155,23 @@ class EMEPlotMultiruns(object):
         plt.show()
 
     def plot_multiruns_space(self):
-        # space = [i + self.particle_start_loc for i in range(10)]
         space = [i for i in range(self.n_spatial_locs)]
 
         plt.figure(figsize=(14, 10))
 
-        # get list of colors
-        colors = plt.cm.tab10_r(np.linspace(0, 1, len(space)))
-
         print("Preparing to plot simulation data...")
 
         # get data
-        mean, std, _ = self.get_stats(normalize=True)
+        mean, std, _ = self.get_stats(normalize=False)
 
         # automatically find max value for y-axis
         max_start_val = np.max(mean[:, 0])
         max_start_i = np.argmax(mean[:, 0])
 
         print(f"ARGMAX INDEX: \t {max_start_i} \t ({round(max_start_val, 2)})")
-
-        print(f"ALLEGED START LOC: \t {self.particle_start_loc}")
+        print(
+            f"ALLEGED START LOC: \t {self.particle_start_loc} \t ({self.n_particles})"
+        )
 
         print("Plotting simulation data...")
         # plot mean
@@ -209,5 +187,5 @@ class EMEPlotMultiruns(object):
         )
         plt.xlabel("time (usec)", fontsize=14)
         plt.ylabel("normalized count", fontsize=14)
-        plt.legend()
+        # plt.legend()
         plt.show()
