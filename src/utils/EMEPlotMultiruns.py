@@ -48,7 +48,6 @@ class EMEPlotMultiruns(object):
             )
 
         # return array of all runs
-        print(runs)
         return runs
 
     def get_stats(self, normalize=False):
@@ -126,7 +125,7 @@ class EMEPlotMultiruns(object):
     def plot_multiruns_time(self, time):
         time.reverse()
 
-        plt.figure(figsize=(14, 10))
+        plt.figure(figsize=(10, 7))
 
         # get list of colors
         colors = plt.cm.tab10_r(np.linspace(0, 1, len(time)))
@@ -155,9 +154,9 @@ class EMEPlotMultiruns(object):
         plt.show()
 
     def plot_multiruns_space(self):
-        space = [i for i in range(self.n_spatial_locs)]
+        space = [self.particle_start_loc + i for i in range(10)]
 
-        plt.figure(figsize=(14, 10))
+        plt.figure(figsize=(10, 7))
 
         print("Preparing to plot simulation data...")
 

@@ -132,7 +132,6 @@ class EigenmarkovDiffusion:
         for k in range(num_modes):
             λ = eigenvalues[k]
             v = eigenvectors[:, k]
-            # print(v)
 
             plt.plot(v, "*-", c="red", alpha=alpha, label="λ={:.4f}".format(λ))
 
@@ -166,6 +165,12 @@ class EigenmarkovDiffusion:
         """
         eigenvalues, eigenvectors = eig(self.get_transition_matrix())
         np.set_printoptions(suppress=True)  # gets rid of scientific notation
+
+        # scale eigenvector values
+        eval_sort_index = np.argsort(eigenvalues)
+        eigenvectors = (
+            eigenvectors / eigenvectors[eval_sort_index[0], eval_sort_index[0]]
+        )
 
         if print_output:
             print("EIGENVALUES")
@@ -221,7 +226,7 @@ class EigenmarkovDiffusion:
         """
         # starting loc given by particle_start_loc
 
-        eigenvalues, eigenvectors = self.get_eigenvalues_and_vectors(
+        _, eigenvectors = self.get_eigenvalues_and_vectors(
             print_output=print_eigenvalues_and_vectors,
             plot_eigenmodes=plot_eigenmodes,
             plot_eigenvectors=plot_eigenvectors,

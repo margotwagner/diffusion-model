@@ -31,7 +31,7 @@ class EMERunMultiruns:
 
         # run eigenmarkov simulation
         n_per_eigenmode_state = eigenmarkov.run_simulation(
-            print_eigenvalues_and_vectors=True,
+            print_eigenvalues_and_vectors=False,
             print_init_conditions=False,
             print_transition_probability=False,
             plot_eigenvectors=False,
