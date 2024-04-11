@@ -18,7 +18,7 @@ class RWRunMultiruns:
         self.n_time_pts = n_time_pts
         self.particle_start_loc = particle_start_loc
 
-    def run(self, normalize=False):
+    def run(self):
         random_walk = rw.RandomWalk(
             n_particles=self.n_particles,
             n_spatial_locs=self.n_spatial_locs,
@@ -29,16 +29,13 @@ class RWRunMultiruns:
         # run random walk simulation and plot output
         particle_locs = random_walk.run_simulation()
 
-        unnorm_n_per_loc, n_per_loc, mean_n_per_loc = random_walk.postprocess_run(
+        unnorm_n_per_loc, _, mean_n_per_loc = random_walk.postprocess_run(
             particle_locs, plot=False
         )
 
-        if normalize:
-            return n_per_loc
-        else:
-            return unnorm_n_per_loc
+        return unnorm_n_per_loc
 
-    def run_multi(self, normalize=False, make_dir=True, data_dir=None):
+    def run_multi(self, make_dir=True, data_dir=None):
         if make_dir:
             from datetime import datetime
 
@@ -59,9 +56,11 @@ class RWRunMultiruns:
                 print("RUNNING SIMULATION {}".format(i))
 
             # run simulation
-            n_per_loc = self.run(normalize)
+            n_per_loc = self.run()
 
             # save output to csv
             np.savetxt(
                 rw_dir + "/rw-run-{}.csv".format(f"{i:03}"), n_per_loc, delimiter=","
             )
+
+        return rw_dir
