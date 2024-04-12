@@ -397,11 +397,16 @@ class EigenmarkovDiffusion:
         )
 
         print("init_cond before scaling", init_cond)
-        init_cond = (
-            np.round(init_cond, 1) / self.scaling_factor
-        )  # round initial conditions to nearest hundredth
+        # init_cond = (
+        #     np.round(init_cond, 1) / self.scaling_factor
+        # )  # round initial conditions to nearest hundredth
 
-        # Then round to nearest using np.rint
+        # # Then round to nearest using np.rint
+        # init_cond = np.rint(init_cond)
+
+        init_cond_0 = init_cond[0] / float(self.scaling_factor)
+        init_cond_1 = init_cond[1] / float(self.scaling_factor)
+        init_cond = np.array([init_cond_0, init_cond_1])
         init_cond = np.rint(init_cond)
 
 
