@@ -20,7 +20,7 @@ class EigenmarkovDiffusion:
         n_particles: int,  # number of molecules
         n_spatial_locs: int,  # define number of grid points along 1D line,
         n_time_pts: int,  # number of time points
-        particle_start_loc: int,  # start position of input impulse molecules
+        impulse_idx: int,  # start position of input impulse molecules
         scaling_factor: float,  # scaling factor for mode <-> node mapping
         dt: Union[int, float] = 1,  # time step (usec)
         line_length: Union[
@@ -31,7 +31,7 @@ class EigenmarkovDiffusion:
         self.n_spatial_locs = n_spatial_locs
         self.dt = dt
         self.n_time_pts = n_time_pts
-        self.particle_start_loc = particle_start_loc
+        self.impulse_idx = impulse_idx
         self.scaling_factor = scaling_factor
         self.line_length = line_length
         self.n_particles = n_particles
@@ -166,12 +166,6 @@ class EigenmarkovDiffusion:
         eigenvalues, eigenvectors = eig(self.get_transition_matrix())
         np.set_printoptions(suppress=True)  # gets rid of scientific notation
 
-        # scale eigenvector values
-        eval_sort_index = np.argsort(eigenvalues)
-        eigenvectors = (
-            eigenvectors / eigenvectors[eval_sort_index[0], eval_sort_index[0]]
-        )
-
         if print_output:
             print("EIGENVALUES")
             print(" ", end="")
@@ -218,20 +212,21 @@ class EigenmarkovDiffusion:
                 eigenvector[e, eigenmode (k)]
             eval_sort_index:
                 np.argsort(e_val_unsorted)
-            particle_start_loc:
+            impulse_idx:
                 location of impulse
 
         return:
             normalized number of particles in each eigenmode at time = 0
         """
-        # starting loc given by particle_start_loc
+        # starting loc given by impulse_idx
 
         _, eigenvectors = self.get_eigenvalues_and_vectors(
             print_output=print_eigenvalues_and_vectors,
             plot_eigenmodes=plot_eigenmodes,
             plot_eigenvectors=plot_eigenvectors,
         )
-        start_loc_eigenvector = eigenvectors[self.particle_start_loc, :]
+
+        start_loc_eigenvector = eigenvectors[self.impulse_idx, :]
 
         # UNNORMALIZED SOLUTION (NOTE: MIGHT NEED TO NORMALIZE?)
         n_per_positive_mode = 0.5 * (
@@ -294,6 +289,10 @@ class EigenmarkovDiffusion:
             plt.suptitle("Initial spin states $c_k v_k$")
             plt.tight_layout()
             plt.show()
+
+        print("INITIAL CONDITIONS")
+        print(n_per_positive_mode, n_per_negative_mode)
+        print(n_per_positive_mode.shape, n_per_negative_mode.shape)
 
         return n_per_positive_mode, n_per_negative_mode
 
@@ -494,9 +493,7 @@ class EigenmarkovDiffusion:
 
         # dot product of eigenvectors and n_per_eigenmode for each spatial node
         for i in range(self.n_spatial_locs):
-            node_vals_from_modes[i, :] = (
-                np.dot(eigenvectors[i, :], n_per_eigenmode) / self.n_spatial_locs
-            )
+            node_vals_from_modes[i, :] = np.dot(eigenvectors[i, :], n_per_eigenmode)
 
         if print_output:
             import math

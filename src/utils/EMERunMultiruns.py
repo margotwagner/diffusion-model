@@ -10,13 +10,13 @@ class EMERunMultiruns:
         n_particles,
         n_spatial_locs,
         n_time_pts,
-        particle_start_loc,
+        impulse_idx,
     ):
         self.n_runs = n_runs
         self.n_particles = n_particles
         self.n_spatial_locs = n_spatial_locs
         self.n_time_pts = n_time_pts
-        self.particle_start_loc = particle_start_loc
+        self.impulse_idx = impulse_idx
         self.scaling_factor = 2
 
     def run(self, normalize=False):
@@ -25,7 +25,7 @@ class EMERunMultiruns:
             n_particles=self.n_particles,
             n_spatial_locs=self.n_spatial_locs,
             n_time_pts=self.n_time_pts,
-            particle_start_loc=self.particle_start_loc,
+            impulse_idx=self.impulse_idx,
             scaling_factor=self.scaling_factor,
         )
 
