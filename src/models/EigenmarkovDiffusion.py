@@ -260,6 +260,9 @@ class EigenmarkovDiffusion:
             - (self.n_particles * start_loc_eigenvector)
         )
 
+        print("n_per_positive_mode", n_per_positive_mode)
+        print("n_per_negative_mode", n_per_negative_mode)
+
         if print_output:
             print("EIGENMODE INITIAL CONDITIONS")
             print("POSITIVE")
@@ -392,9 +395,17 @@ class EigenmarkovDiffusion:
         init_cond = self.get_eme_init_conditions(
             print_output=print_init_conditions, plot_output=plot_init_conditions
         )
+
+        print("init_cond before scaling", init_cond)
         init_cond = (
-            np.rint(init_cond) / self.scaling_factor
-        )  # round initial conditions to nearest int
+            np.round(init_cond, 1) / self.scaling_factor
+        )  # round initial conditions to nearest hundredth
+
+        # Then round to nearest using np.rint
+        init_cond = np.rint(init_cond)
+
+
+        print("init_cond after scaling", init_cond)
 
         # get transition probability
         transition_probability = self.get_eigenmode_transition_probability(
@@ -551,4 +562,6 @@ class EigenmarkovDiffusion:
                 )
             print()
 
+        print("node_vals_from_modes before scaling", node_vals_from_modes)
+        print("node_vals_from_modes after scaling", node_vals_from_modes * self.scaling_factor)
         return self.scaling_factor * node_vals_from_modes
