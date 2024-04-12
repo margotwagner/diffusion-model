@@ -177,10 +177,10 @@ class EigenmarkovDiffusion:
         # sort values and vectors
         eval_sort_index = np.argsort(eigenvalues)
 
-        # normalize eigenvector values
-        eigenvectors = eigenvectors / eigenvectors[
-                eval_sort_index[0], eval_sort_index[0]
-            ]
+        # scale eigenvector values
+        # eigenvectors = eigenvectors / eigenvectors[
+        #         eval_sort_index[0], eval_sort_index[0]
+        #     ]
 
         if print_output:
             print("EIGENVALUES")
@@ -529,7 +529,7 @@ class EigenmarkovDiffusion:
         # for each spatial node
         for i in range(self.n_spatial_locs):
             node_vals_from_modes[i, :] = (
-                np.dot(eigenvectors[i, :], n_per_eigenmode) / self.n_spatial_locs
+                np.dot(eigenvectors[i, :], n_per_eigenmode)
             )
 
         if print_output:

@@ -177,7 +177,6 @@ class PlotMultiRuns(object):
             )
             axis.set_xlabel("distance (um)", fontsize=14)
             axis.set_ylabel("normalized count", fontsize=14)
-            # plt.xlim([1.5, 3])
             axis.legend(title="timesteps")
         else:
             axis.title(
