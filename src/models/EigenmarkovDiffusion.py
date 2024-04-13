@@ -376,9 +376,9 @@ class EigenmarkovDiffusion:
             plot_eigenvectors=plot_eigenvectors,
             plot_eigenmodes=plot_eigenmodes,
         )
-        init_cond = (
-            np.rint(init_cond) / self.scaling_factor
-        )  # round initial conditions to nearest int
+        # round initial conditions to nearest int
+        init_cond = np.rint(np.round(init_cond, 1) / self.scaling_factor)
+        # init_cond = np.rint(np.array(init_cond) / self.scaling_factor)
 
         # get transition probability
         transition_probability = self.get_eigenmode_transition_probability(
