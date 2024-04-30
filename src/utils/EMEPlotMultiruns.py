@@ -55,7 +55,7 @@ class EMEPlotMultiruns(object):
         runs = self.combine_runs()
 
         if normalize:
-            runs = runs / 48.7  # self.n_particles
+            runs = runs / self.n_particles
 
         # get mean and std
         mean = np.mean(runs, axis=0)
