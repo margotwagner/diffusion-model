@@ -203,10 +203,10 @@ class RWPlotMultiruns(object):
         Z, _, _ = self.get_stats(normalize=True)  # Z
 
         ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap="viridis", edgecolor="none")
-        ax.set_title("Random Walk", fontsize=16)
-        ax.set_xlabel("time", fontsize=12)
-        ax.set_ylabel("space", fontsize=12)
-        ax.set_zlabel("particle count", fontsize=12)
+        ax.set_title("Random Walk")
+        ax.set_xlabel("time")
+        ax.set_ylabel("space")
+        ax.set_zlabel("particle count")
         ax.view_init(30, 60)
         ax.tick_params(axis="both", which="major", labelsize=12)
 

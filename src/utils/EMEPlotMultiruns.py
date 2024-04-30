@@ -55,7 +55,7 @@ class EMEPlotMultiruns(object):
         runs = self.combine_runs()
 
         if normalize:
-            runs = runs / self.n_particles
+            runs = runs / 48.7  # self.n_particles
 
         # get mean and std
         mean = np.mean(runs, axis=0)
@@ -85,6 +85,7 @@ class EMEPlotMultiruns(object):
                     self.time_mesh,
                     np.transpose(mean[i, :]),
                     label=f"$\Delta$x = {i - self.particle_start_loc}",
+                    linewidth=2.0,
                 )
 
     def plot_std_time(self, mean, std, time):
@@ -156,12 +157,12 @@ class EMEPlotMultiruns(object):
     def plot_multiruns_space(self):
         space = [self.particle_start_loc + i for i in range(10)]
 
-        plt.figure(figsize=(10, 7))
+        plt.figure(figsize=(10, 10))
 
         print("Preparing to plot simulation data...")
 
         # get data
-        mean, std, _ = self.get_stats(normalize=False)
+        mean, std, _ = self.get_stats(normalize=True)
 
         # automatically find max value for y-axis
         max_start_val = np.max(mean[:, 0])
@@ -181,10 +182,30 @@ class EMEPlotMultiruns(object):
 
         print("Beautifying plot...")
         plt.title(
-            "Normalized number of particles at each time over space",
+            "EigenMarkov Diffusion",
             fontsize=20,
         )
-        plt.xlabel("time (usec)", fontsize=14)
-        plt.ylabel("normalized count", fontsize=14)
-        # plt.legend()
+        plt.xlabel("time (usec)", fontsize=20)
+        plt.ylabel("normalized count", fontsize=20)
+        plt.legend(fontsize=20)
+        plt.xticks(fontsize=20)
+        plt.yticks(fontsize=20)
+        plt.show()
+
+    def plot_mean_3d(self):
+        fig = plt.figure(figsize=(10, 10), dpi=125)
+        ax = plt.axes(projection="3d")
+
+        X, Y = np.meshgrid(self.time_mesh, self.spatial_mesh)  # X, Y
+        Z, _, _ = self.get_stats(normalize=False)  # Z
+        Z = Z / np.max(Z)
+
+        ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap="viridis", edgecolor="none")
+        ax.set_title("EigenMarkov", fontsize=16)
+        ax.set_xlabel("time", fontsize=12)
+        ax.set_ylabel("space", fontsize=12)
+        ax.set_zlabel("particle count", fontsize=12)
+        ax.view_init(30, 60)
+        ax.tick_params(axis="both", which="major", labelsize=12)
+
         plt.show()

@@ -290,10 +290,6 @@ class EigenmarkovDiffusion:
             plt.tight_layout()
             plt.show()
 
-        print("INITIAL CONDITIONS")
-        print(n_per_positive_mode, n_per_negative_mode)
-        print(n_per_positive_mode.shape, n_per_negative_mode.shape)
-
         return n_per_positive_mode, n_per_negative_mode
 
     def get_eigenmode_transition_probability(self, print_output=False) -> np.ndarray:
@@ -398,6 +394,7 @@ class EigenmarkovDiffusion:
                 # find number of transitions positive/negative eigenmode state;
                 for j in range(n_spins):
                     if binomial_sampling:
+                        print("Running with binomial sampling")
                         # sum number of particles that left current state given by binomial sampling
                         n_change[j] = np.random.binomial(
                             n_per_eigenmode_state[k, i, j], transition_probability[k]
@@ -419,6 +416,7 @@ class EigenmarkovDiffusion:
 
                 # truncate if necessary
                 if truncation_method == "reflect":
+                    print("Truncation method: reflect")
                     if n_spins == 2:
                         # positive - negative
                         n_per_eigenmode_init_cond = (
