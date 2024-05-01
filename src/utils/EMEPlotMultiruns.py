@@ -55,7 +55,7 @@ class EMEPlotMultiruns(object):
         runs = self.combine_runs()
 
         if normalize:
-            runs = runs / 48.7  # self.n_particles
+            runs = runs / self.n_particles
 
         # get mean and std
         mean = np.mean(runs, axis=0)
@@ -168,9 +168,9 @@ class EMEPlotMultiruns(object):
         max_start_val = np.max(mean[:, 0])
         max_start_i = np.argmax(mean[:, 0])
 
-        print(f"ARGMAX INDEX: \t {max_start_i} \t ({round(max_start_val, 2)})")
+        print(f"ARGMAX INDEX: \t {max_start_i} \t ({round(max_start_val, 4)})")
         print(
-            f"ALLEGED START LOC: \t {self.particle_start_loc} \t ({self.n_particles})"
+            f"{round(max_start_val, 4)}, {round(std[max_start_i, 0], 4)}, {round(std[max_start_i, 9], 4)}, {round(std[max_start_i, 24], 4)}, {round(std[max_start_i, 49], 4)}, {round(std[max_start_i, 74], 4)}, {round(std[max_start_i, 99], 4)}"
         )
 
         print("Plotting simulation data...")

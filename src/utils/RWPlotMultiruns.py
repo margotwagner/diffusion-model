@@ -185,6 +185,23 @@ class RWPlotMultiruns(object):
         # plot std
         self.plot_std_space(mean, std, space)
 
+        # automatically find max value for y-axis
+        max_start_val = np.max(mean[:, 0])
+        max_start_i = np.argmax(mean[:, 0])
+        """
+        print(f"ARGMAX INDEX: \t {max_start_i} \t ({round(max_start_val, 4)})")
+        print(
+            f"{round(max_start_val, 4)}, {round(std[max_start_i, 0], 4)}, {round(std[max_start_i, 4], 4)}, {round(std[max_start_i, 9], 4)}, {round(std[max_start_i, 14], 4)}, {round(std[max_start_i, 19], 4)}, {round(std[max_start_i, 24], 4)}, {round(std[max_start_i, 29], 4)}, {round(std[max_start_i, 34], 4)}, {round(std[max_start_i, 39], 4)}, {round(std[max_start_i, 49], 4)}, {round(std[max_start_i, 74], 4)}, {round(std[max_start_i, 99], 4)}"
+        )
+        """
+        """
+        np.savetxt(
+            f"/Users/margotwagner/projects/diffusion-model/data/numerical-error-analysis/rw_std/n_runs_{self.n_runs}_std.csv",
+            np.array(std[max_start_i]),
+            delimiter=",",
+        )
+        """
+
         print("Beautifying plot...")
         plt.title(
             "Normalized number of particles at each time over space",

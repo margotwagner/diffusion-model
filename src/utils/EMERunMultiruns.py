@@ -17,7 +17,7 @@ class EMERunMultiruns:
         self.n_spatial_locs = n_spatial_locs
         self.n_time_pts = n_time_pts
         self.impulse_idx = impulse_idx
-        self.scaling_factor = 2
+        self.scaling_factor = 0.5
 
     def run(self, normalize=False):
 
