@@ -187,14 +187,14 @@ class RWPlotMultiruns(object):
 
         # plot std
         self.plot_std_space(mean, std, space)
-
+        norm_title = "Normalized" if not normalize else "Unnormalized"
         print("Beautifying plot...")
         plt.title(
-            "Normalized number of particles at each time over space",
+            norm_title + " number of particles in each position over time",
             fontsize=20,
         )
         plt.xlabel("time (usec)", fontsize=14)
-        plt.ylabel("normalized count", fontsize=14)
+        plt.ylabel("count", fontsize=14)
         plt.legend()
         plt.show()
 

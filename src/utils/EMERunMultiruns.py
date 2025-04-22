@@ -11,6 +11,7 @@ class EMERunMultiruns:
         n_spatial_locs,
         n_time_pts,
         impulse_idx,
+        instance = None
     ):
         self.n_runs = n_runs
         self.n_particles = n_particles
@@ -18,6 +19,7 @@ class EMERunMultiruns:
         self.n_time_pts = n_time_pts
         self.impulse_idx = impulse_idx
         self.scaling_factor = 2
+        self.instance = instance
 
     def run(self, normalize=False):
 
@@ -28,6 +30,8 @@ class EMERunMultiruns:
             impulse_idx=self.impulse_idx,
             scaling_factor=self.scaling_factor,
         )
+
+        self.instance = eigenmarkov
 
         # run eigenmarkov simulation
         n_per_eigenmode_state = eigenmarkov.run_simulation(
@@ -80,3 +84,6 @@ class EMERunMultiruns:
             )
 
         return eme_dir
+    
+    def get_instance(self):
+        return self.instance

@@ -123,10 +123,10 @@ class EMEPlotMultiruns(object):
                     alpha=0.2,
                 )
 
-    def plot_multiruns_time(self, time):
+    def plot_multiruns_time(self, time, normalize=False):
         time.reverse()
 
-        plt.figure(figsize=(10, 7))
+        plt.figure(figsize=(14, 10))
 
         # get list of colors
         colors = plt.cm.tab10_r(np.linspace(0, 1, len(time)))
@@ -134,7 +134,7 @@ class EMEPlotMultiruns(object):
         print("Preparing to plot simulation data...")
 
         # get data
-        mean, std, _ = self.get_stats(normalize=False)
+        mean, std, _ = self.get_stats(normalize=normalize)
 
         print("Plotting simulation data...")
         # plot mean
@@ -142,14 +142,14 @@ class EMEPlotMultiruns(object):
 
         # plot std
         self.plot_std_time(mean, std, time)
-
+        norm_title = "Normalized" if not normalize else "Unnormalized"
         print("Beautifying plot...")
         plt.title(
-            "Normalized number of particles in each position over time",
+            norm_title + " number of particles in each position over time",
             fontsize=20,
         )
         plt.xlabel("distance (um)", fontsize=14)
-        plt.ylabel("normalized count", fontsize=14)
+        plt.ylabel("count", fontsize=14)
         # plt.xlim([1.5, 3])
         plt.legend()
         plt.show()
@@ -189,7 +189,7 @@ class EMEPlotMultiruns(object):
             fontsize=20,
         )
         plt.xlabel("time (usec)", fontsize=20)
-        plt.ylabel("normalized count", fontsize=20)
+        plt.ylabel("count", fontsize=20)
         plt.legend(fontsize=20)
         plt.xticks(fontsize=20)
         plt.yticks(fontsize=20)

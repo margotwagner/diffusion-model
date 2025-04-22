@@ -117,6 +117,7 @@ class EigenmarkovDiffusion:
         plt.xlabel("t [µs]")
         plt.ylabel("$e^{-λt}$")
         plt.legend(bbox_to_anchor=(1, 1))
+        plt.figure(figsize=(14,10))
         plt.show()
 
     def make_eigenvector_plots(self, eigenvalues, eigenvectors):
