@@ -48,7 +48,7 @@ class RWRunMultiruns:
                 )
             else:
                 rw_dir = r"../../data/eme-validation/random-walk/{}/".format(time_stamp)
-            os.mkdir(rw_dir)
+            os.makedirs(rw_dir, exist_ok=True)
             print("Made new directory:", rw_dir)
 
         for i in range(self.n_runs):

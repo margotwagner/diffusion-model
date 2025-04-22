@@ -62,7 +62,7 @@ class EMERunMultiruns:
                 )
             else:
                 eme_dir = r"../../data/eme-validation/markov-eme/{}/".format(time_stamp)
-            os.mkdir(eme_dir)
+            os.makedirs(eme_dir, exist_ok=True)
             print("Made new directory:", eme_dir)
 
         for i in range(self.n_runs):

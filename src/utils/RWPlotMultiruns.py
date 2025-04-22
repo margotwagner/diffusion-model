@@ -165,8 +165,11 @@ class RWPlotMultiruns(object):
         plt.legend()
         plt.show()
 
-    def plot_multiruns_space(self):
-        space = [i + self.particle_start_loc for i in range(10)]
+    def plot_multiruns_space(self, space=None, normalize=False):
+        if space is None:
+            space = [i + self.particle_start_loc for i in range(10)]
+        else:
+            space = [i + self.particle_start_loc for i in space]
 
         plt.figure(figsize=(14, 10))
 
@@ -176,7 +179,7 @@ class RWPlotMultiruns(object):
         print("Preparing to plot simulation data...")
 
         # get data
-        mean, std, _ = self.get_stats(normalize=True)
+        mean, std, _ = self.get_stats(normalize=normalize)
 
         print("Plotting simulation data...")
         # plot mean

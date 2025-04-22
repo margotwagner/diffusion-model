@@ -154,15 +154,18 @@ class EMEPlotMultiruns(object):
         plt.legend()
         plt.show()
 
-    def plot_multiruns_space(self):
-        space = [self.particle_start_loc + i for i in range(10)]
+    def plot_multiruns_space(self, space=None, normalize=False):
+        if space is None:
+            space = [self.particle_start_loc + i for i in range(10)]
+        else:
+            space = [self.particle_start_loc + i for i in space]
 
         plt.figure(figsize=(10, 10))
 
         print("Preparing to plot simulation data...")
 
         # get data
-        mean, std, _ = self.get_stats(normalize=True)
+        mean, std, _ = self.get_stats(normalize=normalize)
 
         # automatically find max value for y-axis
         max_start_val = np.max(mean[:, 0])
