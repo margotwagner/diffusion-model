@@ -10,7 +10,7 @@ class RandomWalk:
         n_spatial_locs: int,  # define number of grid points along 1D line
         n_time_pts: int,  # number of time points
         particle_start_loc: int,  # start position of input impulse molecules
-        dt: Union[int, float] = 1,  # time step (usec)
+        dt: Union[int, float] = 0.1,  # time step (usec)
         line_length: Union[
             int, float
         ] = 4,  # length of line on which molecule is diffusing (um)

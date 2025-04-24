@@ -14,6 +14,7 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import solve_ivp
+import os
 
 
 class SpectralRxnDiffusion:
@@ -169,6 +170,12 @@ class SpectralRxnDiffusion:
             x (float): spatial location (um)
         """
         return np.cos((n * np.pi * x) / self.line_length)
+    
+    def get_eigenmode(self, n, t,  ):
+
+        return np.exp(
+            -((n * math.pi / self.line_length) ** 2) * self.D_ca * t
+        )
 
     def diffusion_temporal_eqtn(self, n, t_idx):
 
@@ -416,7 +423,7 @@ class SpectralRxnDiffusion:
                 species_idx * self.n_eigenmodes : (species_idx + 1) * self.n_eigenmodes,
                 :,
             ]
-
+        os.makedirs(save_dir, exist_ok=True)
         np.save(save_dir, self.T)
 
         return sol

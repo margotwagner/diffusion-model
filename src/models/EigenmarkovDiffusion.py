@@ -22,7 +22,7 @@ class EigenmarkovDiffusion:
         n_time_pts: int,  # number of time points
         impulse_idx: int,  # start position of input impulse molecules
         scaling_factor: float,  # scaling factor for mode <-> node mapping
-        dt: Union[int, float] = 1,  # time step (usec)
+        dt: Union[int, float] = 0.1,  # time step (usec)
         line_length: Union[
             int, float
         ] = 4,  # length of line on which molecule is diffusing (um)
@@ -112,12 +112,12 @@ class EigenmarkovDiffusion:
                 label="λ={:.4f}".format(λ),
             )
 
-            alpha *= 0.66  # use transparency to generate a gradient in colors
+            alpha *= 0.97  # use transparency to generate a gradient in colors
 
         plt.xlabel("t [µs]")
         plt.ylabel("$e^{-λt}$")
         plt.legend(bbox_to_anchor=(1, 1))
-        plt.figure(figsize=(14,10))
+        plt.figure(figsize=(20,10))
         plt.show()
 
     def make_eigenvector_plots(self, eigenvalues, eigenvectors):
@@ -305,6 +305,7 @@ class EigenmarkovDiffusion:
 
         eigenvalues, _ = self.get_eigenvalues_and_vectors()
         transition_probability = (eigenvalues / 2) * self.dt
+        print(transition_probability)
 
         if print_output:
             print("EIGENMODE TRANSITION PROBABILITIES")

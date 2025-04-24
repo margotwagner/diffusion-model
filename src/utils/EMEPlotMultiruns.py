@@ -160,7 +160,10 @@ class EMEPlotMultiruns(object):
         else:
             space = [self.particle_start_loc + i for i in space]
 
-        plt.figure(figsize=(10, 10))
+        plt.figure(figsize=(14, 10))
+
+        # get list of colors (ensures consistent color usage)
+        colors = plt.cm.tab10_r(np.linspace(0, 1, len(space)))
 
         print("Preparing to plot simulation data...")
 
@@ -177,23 +180,22 @@ class EMEPlotMultiruns(object):
         )
 
         print("Plotting simulation data...")
-        # plot mean
         self.plot_mean_space(mean, space)
-
-        # plot std
         self.plot_std_space(mean, std, space)
 
         print("Beautifying plot...")
+        norm_title = "Normalized" if normalize else "Unnormalized"
         plt.title(
-            "EigenMarkov Diffusion",
+            f"{norm_title} EigenMarkov Diffusion",
             fontsize=20,
         )
-        plt.xlabel("time (usec)", fontsize=20)
-        plt.ylabel("count", fontsize=20)
-        plt.legend(fontsize=20)
-        plt.xticks(fontsize=20)
-        plt.yticks(fontsize=20)
+        plt.xlabel("time (usec)", fontsize=14)
+        plt.ylabel("count", fontsize=14)
+        plt.legend(fontsize=14)
+        plt.xticks(fontsize=14)
+        plt.yticks(fontsize=14)
         plt.show()
+
 
     def plot_mean_3d(self):
         fig = plt.figure(figsize=(10, 10), dpi=125)
