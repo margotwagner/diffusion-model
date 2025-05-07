@@ -317,6 +317,46 @@ class EigenmarkovDiffusion:
             print()
 
         return transition_probability
+    
+    def truncate_particle_counts(self, spatial_nodes: np.ndarray, diagnostic: bool = True, check_total_particles: bool = True):
+        """
+        Truncate and round particle counts with diagnostic outputs.
+
+        Args:
+            spatial_nodes: np.ndarray of shape (n_nodes, n_time_pts), output from convert_to_spatial_nodes
+            diagnostic: if True, prints diagnostic information
+            check_total_particles: if True, checks if sum of particles per time point exceeds n_particles
+
+        Returns:
+            truncated_nodes: np.ndarray with counts rounded and truncated
+            residuals: np.ndarray of original - truncated
+        """
+        original_nodes = spatial_nodes.copy()
+
+        # Truncate and round
+        truncated_nodes = np.round(spatial_nodes)
+        truncated_nodes[truncated_nodes < 0] = 0
+        truncated_nodes[truncated_nodes > self.n_particles] = self.n_particles
+
+        # compute residuals
+        residuals = original_nodes - truncated_nodes
+
+        if diagnostic:
+            num_negative_clamped = np.sum(spatial_nodes < 0)
+            num_overflow_clamped = np.sum(spatial_nodes > self.n_particles)
+            print(f"Diagnostics:")
+            print(f"  Values clamped to 0: {num_negative_clamped}")
+            print(f"  Values clamped to {self.n_particles}: {num_overflow_clamped}")
+            print(f"  Mean residual: {np.mean(np.abs(residuals)):.4f}")
+            print(f"  Max residual: {np.max(np.abs(residuals)):.4f}")
+
+        if check_total_particles:
+            total_particles_per_time = np.sum(truncated_nodes, axis=0)
+            for t, total in enumerate(total_particles_per_time):
+                if total > self.n_particles:
+                    print(f"[Warning] Time step {t}: total particles = {total}, exceeds self.n_particles = {self.n_particles}")
+
+        return truncated_nodes, residuals
 
     def run_simulation(
         self,
@@ -385,6 +425,7 @@ class EigenmarkovDiffusion:
         for j in range(n_spins):
             n_per_eigenmode_state[:, 0, j] = init_cond[j]
 
+        residuals = None
         # for each time point and eigenmode
         for i in range(self.n_time_pts - 1):
             for k in range(self.n_spatial_locs):
@@ -414,6 +455,18 @@ class EigenmarkovDiffusion:
                     n_per_eigenmode_state[k, i + 1, j] = (
                         n_per_eigenmode_state[k, i, j] - n_change[j] + n_change[1 - j]
                     )
+                
+                
+                intermediate_nodes = self.convert_to_spatial_nodes(
+                        n_per_eigenmode_state=n_per_eigenmode_state
+                    )
+                
+                truncated_nodes, residuals = self.truncate_particle_counts(
+                    spatial_nodes=intermediate_nodes
+                )
+
+                print(truncated_nodes, residuals)
+                
 
                 # truncate if necessary
                 if truncation_method == "reflect":
