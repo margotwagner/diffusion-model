@@ -425,7 +425,7 @@ class EigenmarkovDiffusion:
         for j in range(n_spins):
             n_per_eigenmode_state[:, 0, j] = init_cond[j]
 
-        residuals = None
+        residuals = np.zeros((self.n_spatial_locs, self.n_time_pts))
         # for each time point and eigenmode
         for i in range(self.n_time_pts - 1):
             for k in range(self.n_spatial_locs):
@@ -457,15 +457,7 @@ class EigenmarkovDiffusion:
                     )
                 
                 
-                intermediate_nodes = self.convert_to_spatial_nodes(
-                        n_per_eigenmode_state=n_per_eigenmode_state
-                    )
-                
-                truncated_nodes, residuals = self.truncate_particle_counts(
-                    spatial_nodes=intermediate_nodes
-                )
 
-                print(truncated_nodes, residuals)
                 
 
                 # truncate if necessary
@@ -493,6 +485,17 @@ class EigenmarkovDiffusion:
                         print(
                             f"Truncation method {truncation_method} for n_spins={n_spins} is not implemented."
                         )
+            intermediate_nodes = self.convert_to_spatial_nodes(
+                    n_per_eigenmode_state=n_per_eigenmode_state
+                )
+            
+            truncated_nodes, updated = self.truncate_particle_counts(
+                spatial_nodes=intermediate_nodes
+            )
+            # zero interest unforgiveable loan
+            # an avg we want this to go to zero
+            residuals += updated
+            print(residuals)
 
         if plot_simulation:
             n_plot_columns = 2
