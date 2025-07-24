@@ -318,7 +318,7 @@ class EigenmarkovDiffusion:
 
         return transition_probability
     
-    def truncate_particle_counts(self, spatial_nodes: np.ndarray, diagnostic: bool = True, check_total_particles: bool = True):
+    def truncate_particle_counts(self, spatial_nodes: np.ndarray, diagnostic: bool = False, check_total_particles: bool = False):
         """
         Truncate and round particle counts with diagnostic outputs.
 
@@ -331,15 +331,12 @@ class EigenmarkovDiffusion:
             truncated_nodes: np.ndarray with counts rounded and truncated
             residuals: np.ndarray of original - truncated
         """
-        original_nodes = spatial_nodes.copy()
 
         # Truncate and round
         truncated_nodes = np.round(spatial_nodes)
         truncated_nodes[truncated_nodes < 0] = 0
         truncated_nodes[truncated_nodes > self.n_particles] = self.n_particles
 
-        # compute residuals
-        residuals = original_nodes - truncated_nodes
 
         if diagnostic:
             num_negative_clamped = np.sum(spatial_nodes < 0)
@@ -347,8 +344,7 @@ class EigenmarkovDiffusion:
             print(f"Diagnostics:")
             print(f"  Values clamped to 0: {num_negative_clamped}")
             print(f"  Values clamped to {self.n_particles}: {num_overflow_clamped}")
-            print(f"  Mean residual: {np.mean(np.abs(residuals)):.4f}")
-            print(f"  Max residual: {np.max(np.abs(residuals)):.4f}")
+
 
         if check_total_particles:
             total_particles_per_time = np.sum(truncated_nodes, axis=0)
@@ -356,7 +352,7 @@ class EigenmarkovDiffusion:
                 if total > self.n_particles:
                     print(f"[Warning] Time step {t}: total particles = {total}, exceeds self.n_particles = {self.n_particles}")
 
-        return truncated_nodes, residuals
+        return truncated_nodes
 
     def run_simulation(
         self,
@@ -369,6 +365,7 @@ class EigenmarkovDiffusion:
         plot_init_conditions=False,
         plot_simulation=False,
         truncation_method=None,
+        borrow=True,
     ) -> np.ndarray:
         """Markov simulation for eigenmode analysis to capture calcium diffusion
         over time
@@ -425,7 +422,15 @@ class EigenmarkovDiffusion:
         for j in range(n_spins):
             n_per_eigenmode_state[:, 0, j] = init_cond[j]
 
-        residuals = np.zeros((self.n_spatial_locs, self.n_time_pts))
+        # residual at time t
+        res = np.zeros((self.n_time_pts - 1, self.n_spatial_locs, self.n_time_pts))
+        # 0-th residual is always zero, since we start with initial conditions
+
+        # current state
+        q = np.zeros((self.n_time_pts, self.n_spatial_locs, self.n_time_pts))
+
+        w = np.zeros((self.n_time_pts, self.n_spatial_locs, self.n_time_pts))
+        # integrated error is 0 initially, since we start with initial conditions
         # for each time point and eigenmode
         for i in range(self.n_time_pts - 1):
             for k in range(self.n_spatial_locs):
@@ -485,17 +490,28 @@ class EigenmarkovDiffusion:
                         print(
                             f"Truncation method {truncation_method} for n_spins={n_spins} is not implemented."
                         )
-            intermediate_nodes = self.convert_to_spatial_nodes(
-                    n_per_eigenmode_state=n_per_eigenmode_state
+
+
+            if borrow:
+                # print("n_per_eigenmode_state shape", n_per_eigenmode_state.shape)
+                ### modes to nodes
+                n = self.convert_to_spatial_nodes(
+                        n_per_eigenmode_state=n_per_eigenmode_state
+                    )
+                
+                # print("q[i] shape", q[i].shape)
+                # print("n shape", n.shape)
+                # print("r shape", res[i].shape)
+                # computer the different between nodal solution and current quantized solution
+                res[i] = n - q[i]  # residual at time t
+
+                # update error for
+                w[i + 1] = w[i] + res[i]  # integrated error
+
+        
+                q[i + 1] = self.truncate_particle_counts(
+                    spatial_nodes=w[i]
                 )
-            
-            truncated_nodes, updated = self.truncate_particle_counts(
-                spatial_nodes=intermediate_nodes
-            )
-            # zero interest unforgiveable loan
-            # an avg we want this to go to zero
-            residuals += updated
-            print(residuals)
 
         if plot_simulation:
             n_plot_columns = 2
@@ -518,13 +534,14 @@ class EigenmarkovDiffusion:
             # fig.suptitle
             fig.tight_layout()
             plt.show()
+        
+        return q[i + 1]
 
-        return n_per_eigenmode_state
 
     def convert_to_spatial_nodes(
         self,
         n_per_eigenmode_state: np.ndarray,
-        print_output=False,  # print_eigenmodes_to_spatial_nodes=False,
+        print_output=False, 
     ) -> np.ndarray:
         """Calculate the number of particles at each node from the eigenmode
         representation.
@@ -568,5 +585,6 @@ class EigenmarkovDiffusion:
                     ).round(decimals=1)
                 )
             print()
-
+                
         return self.scaling_factor * node_vals_from_modes
+

@@ -34,7 +34,7 @@ class EMERunMultiruns:
         self.instance = eigenmarkov
 
         # run eigenmarkov simulation
-        n_per_eigenmode_state = eigenmarkov.run_simulation(
+        node_vals_from_modes = eigenmarkov.run_simulation(
             print_eigenvalues_and_vectors=False,
             print_init_conditions=False,
             print_transition_probability=False,
@@ -44,9 +44,9 @@ class EMERunMultiruns:
             plot_simulation=False,
         )
 
-        node_vals_from_modes = eigenmarkov.convert_to_spatial_nodes(
-            n_per_eigenmode_state
-        )
+        # node_vals_from_modes = eigenmarkov.convert_to_spatial_nodes(
+        #     n_per_eigenmode_state
+        # )
 
         if normalize:
             return node_vals_from_modes / self.n_particles
